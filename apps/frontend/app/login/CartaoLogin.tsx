@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useId, useState, type FormEvent } from 'react';
 import { useSWRConfig } from 'swr';
 import { enviar, ErroApi, mensagemDeErro, type UsuarioPublico } from '../../lib/api';
-import { CHAVE_USUARIO, useProvedores, useUsuario } from '../../lib/usuario';
+import { CHAVE_USUARIO, estadoProvedor, useProvedores, useUsuario, type EstadoProvedor } from '../../lib/usuario';
 import estilos from './login.module.css';
 
 type Modo = 'entrar' | 'cadastro';
@@ -20,7 +20,7 @@ export function CartaoLogin() {
   const params = useSearchParams();
   const { mutate } = useSWRConfig();
   const { usuario } = useUsuario();
-  const provedores = useProvedores();
+  const { dados: provedores, desistiu } = useProvedores();
 
   const [modo, setModo] = useState<Modo>(params.get('modo') === 'cadastro' ? 'cadastro' : 'entrar');
   const [valores, setValores] = useState({ nome: '', email: '', senha: '', confirmar: '' });
@@ -162,8 +162,8 @@ export function CartaoLogin() {
             <span />
           </div>
           <div className={estilos.provedores}>
-            <BotaoProvedor provedor="google" nome="Google" ligado={provedores?.google} />
-            <BotaoProvedor provedor="discord" nome="Discord" ligado={provedores?.discord} />
+            <BotaoProvedor provedor="google" nome="Google" estado={estadoProvedor(provedores, desistiu, 'google')} />
+            <BotaoProvedor provedor="discord" nome="Discord" estado={estadoProvedor(provedores, desistiu, 'discord')} />
           </div>
           {provedores && !provedores.google && !provedores.discord && (
             <p className={estilos.nota}>Entrar com Google e Discord fica disponível em breve.</p>
@@ -220,8 +220,16 @@ function Campo(props: {
   );
 }
 
-function BotaoProvedor({ provedor, nome, ligado }: { provedor: string; nome: string; ligado: boolean | undefined }) {
-  if (!ligado) {
+function BotaoProvedor({ provedor, nome, estado }: { provedor: string; nome: string; estado: EstadoProvedor }) {
+  if (estado === 'conectando') {
+    // O servidor pode estar acordando (até ~1 min): não é "indisponível".
+    return (
+      <button type="button" className="caixa botao" disabled aria-busy="true" aria-label={`Entrar com ${nome}: conectando ao servidor`} title="Conectando ao servidor…">
+        Conectando…
+      </button>
+    );
+  }
+  if (estado === 'indisponivel') {
     return (
       <button type="button" className="caixa botao" disabled title={`Entrar com ${nome}: indisponível no momento`}>
         {nome}
