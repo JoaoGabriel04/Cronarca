@@ -1,21 +1,20 @@
 /* Posições e medidas do frame "Login - Desktop" (1440x900). */
 
+/* Logo (selo + nome) a 6 px do palco por pixel da arte: --u px de tela, inteiro.
+   Termina em x = 594, longe do cartão (x = 820). */
 .marca {
   position: absolute;
   left: 48px;
-  top: 36px;
-  margin: 0;
-  font-family: var(--fonte-titulo), serif;
-  font-size: 44px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  color: var(--ouro-claro);
+  top: 24px;
+  width: 546px;
+  height: 192px;
+  image-rendering: pixelated;
 }
 
 .lema {
   position: absolute;
   left: 48px;
-  top: 96px;
+  top: 228px;
   margin: 0;
   font-size: 20px;
   letter-spacing: 1px;
@@ -126,4 +125,81 @@
   font-size: 17px;
   text-align: center;
   color: var(--texto-suave);
+}
+
+/* ---------- Celular (CONSULTA_CENA_CELULAR): coluna única ----------
+   Logo a 2x (182 x 64, 1/3 exato do PNG a 6x), o castelo a 3x atrás do topo
+   do cartão (Cena) e o cartão com 24 px de margem. Com o teclado aberto
+   (html[data-teclado], lib/cena/teclado) a logo cai para 1x e o castelo sai. */
+@media (max-width: 899px), (max-height: 499px) {
+  .marca {
+    position: static;
+    order: 1;
+    width: 182px;
+    height: 64px;
+    flex: none;
+  }
+  .lema {
+    display: none;
+  }
+  /* Castelo entre a logo e o cartão (a paisagem da Cena tem order 3 por padrão). */
+  :global(.cena-login .cena-celular-paisagem) {
+    order: 2;
+    margin-top: 8px;
+  }
+  .cartao,
+  .cartaoCadastro {
+    position: relative;
+    order: 3;
+    left: auto;
+    top: auto;
+    z-index: 1;
+    /* 24 px de cada lado: 16 do palco + 8 aqui. */
+    width: min(calc(100% - 16px), 420px);
+    margin: -40px 0 0;
+    padding: 20px 16px 22px;
+  }
+  .selo {
+    width: 56px;
+    height: 56px;
+  }
+  .selo img {
+    width: 32px;
+    height: 32px;
+  }
+  .titulo {
+    margin-top: 10px;
+    font-size: 28px;
+  }
+  .sub {
+    margin: 4px 0 0;
+    font-size: 15px;
+    line-height: 21px;
+  }
+  .formulario,
+  .cartaoCadastro .formulario {
+    margin-top: 20px;
+  }
+  .provedores :global(.botao) {
+    font-size: 15px;
+  }
+  .nota {
+    font-size: 14px;
+  }
+  /* "Criar nova conta" é um botão de texto: no toque, 44 px de altura. */
+  .alternar :global(.link) {
+    min-height: 44px;
+    padding: 0 4px;
+  }
+
+  :global(html[data-teclado]) .marca {
+    width: 91px;
+    height: 32px;
+  }
+  :global(html[data-teclado]) :global(.cena-celular-paisagem) {
+    display: none;
+  }
+  :global(html[data-teclado]) .cartao {
+    margin-top: 12px;
+  }
 }

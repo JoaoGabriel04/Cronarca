@@ -8,7 +8,7 @@ COMPOSE := docker compose
 MOUNT_DIRS := packages/game-core/node_modules apps/backend/node_modules \
 	apps/frontend/node_modules apps/frontend/.next
 
-.PHONY: help up down logs ps migrate seed reset-db test typecheck conferir-mapa conferir-mobile conferir-mercador gerar-frente evento-mercador shell-backend shell-db env-check
+.PHONY: help up down logs ps migrate seed reset-db test typecheck conferir-mapa conferir-mobile conferir-inicio conferir-mercador gerar-frente evento-mercador shell-backend shell-db env-check
 
 help: ## Lista os comandos
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-14s\033[0m %s\n", $$1, $$2}'
@@ -65,6 +65,11 @@ conferir-mobile: ## Celular no Chromium em 360, 390, 600 e 601 px (rolagem, alvo
 	docker run --rm --network host --user $$(id -u):$$(id -g) -e HOME=/tmp \
 		-e PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 -v $(CURDIR):/w -w /w $(PLAYWRIGHT_IMG) \
 		sh -c 'npm install --silent --no-save --no-package-lock --prefix /tmp/pw playwright@1.61.1 pngjs@7.0.0 >/dev/null && NODE_PATH=/tmp/pw/node_modules node scripts/conferir-mobile.cjs'
+
+conferir-inicio: ## Início e Login no celular (360, 390, 430, deitado), teclado, login pelo formulário, fps da cena e desktop no lugar; capturas em docs/referencia/cena; precisa de make up e make seed
+	docker run --rm --network host --user $$(id -u):$$(id -g) -e HOME=/tmp \
+		-e PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 -v $(CURDIR):/w -w /w $(PLAYWRIGHT_IMG) \
+		sh -c 'npm install --silent --no-save --no-package-lock --prefix /tmp/pw playwright@1.61.1 >/dev/null && NODE_PATH=/tmp/pw/node_modules node scripts/conferir-inicio.cjs'
 
 conferir-mercador: evento-mercador ## Negociação do Mercador no Chromium em 1440, 601, 600, 390 e 360 px: termos do servidor, botões e prazo visíveis; capturas em docs/referencia/mercador
 	docker run --rm --network host --user $$(id -u):$$(id -g) -e HOME=/tmp \

@@ -1,9 +1,11 @@
 // Animação dos sprites (Portão Animação): de 2 a 6 quadros por sprite, cada
-// um com sua duração. A fonte da verdade é data/quadros.json; aqui ficam só o
+// um com sua duração. A fonte da verdade é data/quadros.json (jogo) e
+// data/quadros_cena.json (cena do Início e do Login); aqui ficam só o
 // esquema, o catálogo e o relógio (funções puras, sem timer).
 
 import { z } from 'zod';
 import bruto from '../data/quadros.json' with { type: 'json' };
+import brutoCena from '../data/quadros_cena.json' with { type: 'json' };
 
 const esquemaSprite = z
   .strictObject({
@@ -14,7 +16,8 @@ const esquemaSprite = z
   })
   .refine((s) => s.duracoesMs.length === s.quadros && s.arquivos.length === s.quadros, 'quadros, duracoesMs e arquivos com tamanhos diferentes');
 
-export const esquemaQuadros = z.record(z.string().regex(/^[a-z]+$/), z.record(z.string().regex(/^[a-z_]+$/), esquemaSprite));
+// Nomes com dígitos (pinho0, arbusto1): variantes da cena.
+export const esquemaQuadros = z.record(z.string().regex(/^[a-z]+$/), z.record(z.string().regex(/^[a-z][a-z0-9_]*$/), esquemaSprite));
 export type DadosQuadros = z.infer<typeof esquemaQuadros>;
 
 export interface Animacao {
@@ -48,7 +51,12 @@ export function montarCatalogo(dados: DadosQuadros): ReadonlyMap<string, Animaca
 }
 
 export const QUADROS: DadosQuadros = esquemaQuadros.parse(bruto);
-export const ANIMACOES: ReadonlyMap<string, Animacao> = montarCatalogo(QUADROS);
+/** Cena do Início e do Login (grupo "cena"): não entra no pré-carregamento do jogo. */
+export const QUADROS_CENA: DadosQuadros = esquemaQuadros.parse(brutoCena);
+/** Só os sprites do jogo: o que a tela de carregamento de /jogo espera. */
+export const ANIMACOES_JOGO: ReadonlyMap<string, Animacao> = montarCatalogo(QUADROS);
+/** Catálogo para consulta (jogo + cena). */
+export const ANIMACOES: ReadonlyMap<string, Animacao> = montarCatalogo({ ...QUADROS, ...QUADROS_CENA });
 
 /**
  * Ids do jogo que têm outro nome no quadros.json (os arquivos não são
@@ -67,8 +75,11 @@ export function animacao(grupo: string, id: string): Animacao {
   return a;
 }
 
-/** Todos os quadros de todos os sprites (para o pré-carregamento). */
-export const todosOsQuadros = (catalogo: ReadonlyMap<string, Animacao> = ANIMACOES): string[] => [...catalogo.values()].flatMap((a) => a.quadros);
+/** Todos os quadros dos sprites do jogo (para o pré-carregamento de /jogo). */
+export const todosOsQuadros = (catalogo: ReadonlyMap<string, Animacao> = ANIMACOES_JOGO): string[] => [...catalogo.values()].flatMap((a) => a.quadros);
+
+/** Quadros de alguns sprites da cena (para o pré-carregamento do Início e do Login). */
+export const quadrosDaCena = (nomes: readonly string[]): string[] => nomes.flatMap((n) => animacao('cena', n).quadros);
 
 /**
  * Índice (base 0) do quadro que cobre o instante t no ciclo: o primeiro cuja

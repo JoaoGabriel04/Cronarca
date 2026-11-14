@@ -13,8 +13,8 @@
   gap: 18px;
 }
 
-/* Fogueira de 32 px a 4x: ampliação inteira, sem borrar. */
-.fogueira {
+/* Selo de 32 px a 4x: ampliação inteira, sem borrar. */
+.selo {
   width: 128px;
   height: 128px;
   image-rendering: pixelated;
@@ -22,12 +22,14 @@
 
 .titulo {
   margin: 0;
-  font-family: var(--fonte-titulo), serif;
-  font-size: 56px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  color: var(--ouro-claro);
-  text-shadow: 4px 4px 0 var(--contorno);
+  line-height: 0;
+}
+
+/* Nome de 56 x 10 a 4x (o PNG é 8x: metade exata). */
+.nome {
+  width: 224px;
+  height: 40px;
+  image-rendering: pixelated;
 }
 
 .texto {

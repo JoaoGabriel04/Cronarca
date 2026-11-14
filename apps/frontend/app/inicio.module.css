@@ -1,37 +1,28 @@
 /* Posições do frame "Inicio - Desktop" (1440x900). */
 
+/* Logo (selo + nome) de 546 x 192 no palco, centralizada. O texto de antes
+   ocupava ~140 de altura: subtítulo e ornamentos desceram 32. */
 .titulo {
   position: absolute;
   left: 0;
-  top: 60px;
+  top: 24px;
   width: 1440px;
+  height: 192px;
   margin: 0;
-  font-family: var(--fonte-titulo), serif;
-  font-size: 116px;
-  font-weight: 700;
-  line-height: normal;
-  letter-spacing: 6px;
+  line-height: 0;
   text-align: center;
 }
 
-.tituloLuz {
-  position: relative;
-  color: var(--ouro-claro);
-}
-
-/* Sombra dura deslocada 6 px, como a cópia escura do Figma. */
-.tituloSombra {
-  position: absolute;
-  left: 6px;
-  top: 6px;
-  width: 100%;
-  color: var(--contorno);
+.logo {
+  width: 546px;
+  height: 192px;
+  image-rendering: pixelated;
 }
 
 .subtitulo {
   position: absolute;
   left: 0;
-  top: 196px;
+  top: 228px;
   width: 1440px;
   margin: 0;
   font-size: 26px;
@@ -42,7 +33,7 @@
 
 .fio {
   position: absolute;
-  top: 244px;
+  top: 276px;
   width: 160px;
   height: 4px;
   background: var(--ouro);
@@ -51,7 +42,7 @@
 .losango {
   position: absolute;
   left: 704px;
-  top: 238px;
+  top: 270px;
   width: 32px;
   height: 16px;
   background: var(--ouro);
@@ -96,4 +87,68 @@
 .config img {
   width: 32px;
   height: 32px;
+}
+
+/* ---------- Celular (CONSULTA_CENA_CELULAR): coluna única ----------
+   Logo a 3x (273 x 96, metade exata do PNG a 6x), a frase, a paisagem do
+   castelo (Cena), o menu sobre o chão e a fileira de sprites. A placa do
+   desktop vira o botão de configurações no canto. */
+.iconeCelular {
+  display: none;
+}
+
+@media (max-width: 899px), (max-height: 499px) {
+  .titulo {
+    position: static;
+    order: 1;
+    width: auto;
+    height: auto;
+  }
+  .logo {
+    width: 273px;
+    height: 96px;
+  }
+  .subtitulo {
+    position: static;
+    order: 2;
+    width: auto;
+    margin: 12px 0 28px;
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+  .fio,
+  .losango {
+    display: none;
+  }
+  .menu {
+    position: relative;
+    order: 4;
+    left: auto;
+    top: auto;
+    width: min(100%, 342px);
+    height: auto;
+    margin-top: 16px;
+    padding: 16px 16px 14px;
+  }
+  .menu > :global(.botao) {
+    width: 100%;
+  }
+  .versao {
+    position: static;
+    margin-top: 2px;
+  }
+  .config {
+    left: auto;
+    top: calc(env(safe-area-inset-top) + 12px);
+    right: calc(env(safe-area-inset-right) + 12px);
+    width: 44px;
+    height: 44px;
+    z-index: 2;
+  }
+  .config img {
+    display: none;
+  }
+  .iconeCelular {
+    display: block;
+  }
 }

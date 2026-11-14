@@ -3,7 +3,7 @@
 
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ANIMACOES, QUADROS, todosOsQuadros } from '@cronarca/game-core';
+import { ANIMACOES, QUADROS, QUADROS_CENA, todosOsQuadros } from '@cronarca/game-core';
 import { describe, expect, it } from 'vitest';
 import { arquivoDoSprite, lerPng, PASTA_PUBLICA, ultimaLinhaOpaca } from './png';
 
@@ -20,8 +20,8 @@ describe('quadros.json e os arquivos', () => {
   });
 
   it('o pé (última linha opaca) é o mesmo em todos os quadros; só o impacto do lenhador e do mineiro desce 1 px', () => {
-    for (const [grupo, sprites] of Object.entries(QUADROS)) {
-      if (!['aldeao', 'aventureiro', 'construcao', 'cenario'].includes(grupo)) continue;
+    for (const [grupo, sprites] of Object.entries({ ...QUADROS, ...QUADROS_CENA })) {
+      if (!['aldeao', 'aventureiro', 'construcao', 'cenario', 'cena'].includes(grupo)) continue;
       for (const nome of Object.keys(sprites)) {
         const a = ANIMACOES.get(`${grupo}/${nome}`)!;
         const pe1 = ultimaLinhaOpaca(lerPng(a.quadros[0]!));

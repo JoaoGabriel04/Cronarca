@@ -7,7 +7,7 @@ import { TIPOS_CONSTRUCAO } from '../data/construcoes.ts';
 import { DESTINOS_IDS } from '../data/expedicoes.ts';
 import { ESCALA, TIPOS_PROP } from '../data/mapa.ts';
 import {
-  ANIMACOES, animacao, esquemaQuadros, faseDe, indiceNoTempo, montarCatalogo, quadroNoTempo, todosOsQuadros, urlDoQuadro,
+  ANIMACOES, animacao, esquemaQuadros, faseDe, indiceNoTempo, montarCatalogo, quadroNoTempo, quadrosDaCena, todosOsQuadros, urlDoQuadro,
 } from '../src/animacao.ts';
 
 describe('relógio: t -> índice do quadro', () => {
@@ -107,10 +107,30 @@ describe('quadros.json', () => {
     expect(() => animacao('aldeao', 'inexistente')).toThrow();
   });
 
-  it('47 sprites, 202 quadros (45 da entrega + cerca e flores)', () => {
-    expect(ANIMACOES.size).toBe(47);
+  it('jogo: 47 sprites, 202 quadros (45 da entrega + cerca e flores); a cena não entra no pré-carregamento do jogo', () => {
+    expect(ANIMACOES.size).toBe(47 + 14);
     expect(todosOsQuadros()).toHaveLength(202);
     expect(new Set(todosOsQuadros()).size).toBe(202);
     expect(animacao('cenario', 'cerca').quadros[1]).toBe(urlDoQuadro('cenario', 'cerca_2.png'));
+  });
+});
+
+describe('cena do Início e do Login (quadros_cena.json)', () => {
+  it('14 sprites e 58 quadros no grupo cena, nomes com dígito aceitos', () => {
+    const cena = [...ANIMACOES.values()].filter((a) => a.chave.startsWith('cena/'));
+    expect(cena).toHaveLength(14);
+    expect(cena.flatMap((a) => a.quadros)).toHaveLength(58);
+    expect(animacao('cena', 'pinho0').tamanho).toBe(48);
+    expect(animacao('cena', 'arbusto7').quadros[3]).toBe(urlDoQuadro('cena', 'arbusto7_4.png'));
+    expect(todosOsQuadros().some((q) => q.startsWith('/sprites/cena/'))).toBe(false);
+  });
+
+  it('os da cena usados hoje: castelo 4, cavaleiro 4, fogueira 6, placa 4 quadros', () => {
+    expect(quadrosDaCena(['castelo', 'cavaleiro', 'fogueira', 'placa']).map((q) => q.split('/').pop())).toEqual([
+      'castelo_1.png', 'castelo_2.png', 'castelo_3.png', 'castelo_4.png',
+      'cavaleiro_1.png', 'cavaleiro_2.png', 'cavaleiro_3.png', 'cavaleiro_4.png',
+      'fogueira_1.png', 'fogueira_2.png', 'fogueira_3.png', 'fogueira_4.png', 'fogueira_5.png', 'fogueira_6.png',
+      'placa_1.png', 'placa_2.png', 'placa_3.png', 'placa_4.png',
+    ]);
   });
 });

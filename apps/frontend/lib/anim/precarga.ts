@@ -1,5 +1,6 @@
 // Pré-carrega todos os quadros do quadros.json no início do jogo (atrás da
-// tela de carregamento), para a troca de quadro não piscar. As imagens ficam
+// tela de carregamento), para a troca de quadro não piscar. Os da cena do
+// Início e do Login (quadros_cena.json) não entram aqui: ver PreCargaCena. As imagens ficam
 // guardadas aqui para o navegador manter a decodificação.
 
 import { useEffect, useState } from 'react';
@@ -19,6 +20,16 @@ export function preCarregarQuadros(urls: readonly string[] = todosOsQuadros()): 
     }),
   ).then(() => undefined);
   return promessa;
+}
+
+/** Pré-carrega sem bloquear nada (cena do Início e do Login): só pede as imagens e as guarda. */
+export function preCarregarSemEsperar(urls: readonly string[]): void {
+  for (const url of urls) {
+    const img = new Image();
+    img.decoding = 'async';
+    img.src = url;
+    guardadas.push(img);
+  }
 }
 
 /** true quando todos os quadros já carregaram. */

@@ -1,6 +1,6 @@
 'use client';
 
-// HUD (Figma "HUD", 1440 x 72): logo, era, 6 chips de recurso com quantidade
+// HUD (Figma "HUD", 1440 x 72): selo, era, 6 chips de recurso com quantidade
 // e taxa por segundo, e os botões Construir, Ranking (Portão 15), Salvar
 // agora e Configurações. O número sobe animado (GSAP) e o chip pulsa a cada
 // ganho por clique.
@@ -12,6 +12,7 @@ import { useEffect, useRef } from 'react';
 import type { ChipRecurso } from '../../lib/casca/dados';
 import estilos from './casca.module.css';
 import { Icone } from './Icone';
+import { MARCA } from '../../lib/marca';
 
 /** Riscos de textura do fundo do HUD (posições do Figma). */
 const RISCOS = [
@@ -97,7 +98,8 @@ export function Hud({ era, chips, pulso, aoSalvar, salvando, aoConfigurar, aoRan
       {RISCOS.map(([x, y]) => (
         <span key={`${x}-${y}`} className={estilos.risco} style={{ left: x, top: y }} aria-hidden="true" />
       ))}
-      <p className={estilos.logo}>CRONARCA</p>
+      {/* Selo do relógio (portão Logo e ícone): 64 px no desktop, 32 no topo compacto e no celular (o PNG é 64: metade exata). */}
+      <img className={estilos.logo} src={MARCA.selo(64)} width={64} height={64} alt={MARCA.nome} draggable={false} />
       <div className={`caixa ${estilos.era}`}>{era}</div>
       <div className={`${estilos.recursos} ${estilos.rola}`} role="list" aria-label="Recursos">
       {chips.map((c) => (

@@ -4,6 +4,13 @@
 // palco de 1440x900. Assim todo sprite fica com pixel inteiro, nunca esticado.
 
 export const PIXEL_DO_FIGMA = 6;
+
+/**
+ * Abaixo disto o palco de 1440 x 900 não cabe inteiro (com escala mínima 3 ele
+ * tem 720 x 450 e precisa de folga): Início e Login viram coluna única.
+ * A mesma consulta está no globals.css (seção "Cena no celular").
+ */
+export const CONSULTA_CENA_CELULAR = '(max-width: 899px), (max-height: 499px)';
 export const ESCALA_MIN = 3;
 export const ESCALA_MAX = 8;
 export const LARGURA_PALCO = 1440;

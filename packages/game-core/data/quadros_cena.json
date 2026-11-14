@@ -1,0 +1,232 @@
+{
+ "cena": {
+  "arbusto1": {
+   "quadros": 4,
+   "duracoesMs": [
+    350,
+    450,
+    350,
+    450
+   ],
+   "tamanho": 32,
+   "arquivos": [
+    "arbusto1_1.png",
+    "arbusto1_2.png",
+    "arbusto1_3.png",
+    "arbusto1_4.png"
+   ]
+  },
+  "arbusto2": {
+   "quadros": 4,
+   "duracoesMs": [
+    350,
+    450,
+    350,
+    450
+   ],
+   "tamanho": 32,
+   "arquivos": [
+    "arbusto2_1.png",
+    "arbusto2_2.png",
+    "arbusto2_3.png",
+    "arbusto2_4.png"
+   ]
+  },
+  "arbusto3": {
+   "quadros": 4,
+   "duracoesMs": [
+    350,
+    450,
+    350,
+    450
+   ],
+   "tamanho": 32,
+   "arquivos": [
+    "arbusto3_1.png",
+    "arbusto3_2.png",
+    "arbusto3_3.png",
+    "arbusto3_4.png"
+   ]
+  },
+  "arbusto4": {
+   "quadros": 4,
+   "duracoesMs": [
+    350,
+    450,
+    350,
+    450
+   ],
+   "tamanho": 32,
+   "arquivos": [
+    "arbusto4_1.png",
+    "arbusto4_2.png",
+    "arbusto4_3.png",
+    "arbusto4_4.png"
+   ]
+  },
+  "arbusto5": {
+   "quadros": 4,
+   "duracoesMs": [
+    350,
+    450,
+    350,
+    450
+   ],
+   "tamanho": 32,
+   "arquivos": [
+    "arbusto5_1.png",
+    "arbusto5_2.png",
+    "arbusto5_3.png",
+    "arbusto5_4.png"
+   ]
+  },
+  "arbusto6": {
+   "quadros": 4,
+   "duracoesMs": [
+    350,
+    450,
+    350,
+    450
+   ],
+   "tamanho": 32,
+   "arquivos": [
+    "arbusto6_1.png",
+    "arbusto6_2.png",
+    "arbusto6_3.png",
+    "arbusto6_4.png"
+   ]
+  },
+  "arbusto7": {
+   "quadros": 4,
+   "duracoesMs": [
+    350,
+    450,
+    350,
+    450
+   ],
+   "tamanho": 32,
+   "arquivos": [
+    "arbusto7_1.png",
+    "arbusto7_2.png",
+    "arbusto7_3.png",
+    "arbusto7_4.png"
+   ]
+  },
+  "flores": {
+   "quadros": 4,
+   "duracoesMs": [
+    400,
+    400,
+    400,
+    400
+   ],
+   "tamanho": 16,
+   "arquivos": [
+    "flores_1.png",
+    "flores_2.png",
+    "flores_3.png",
+    "flores_4.png"
+   ]
+  },
+  "placa": {
+   "quadros": 4,
+   "duracoesMs": [
+    500,
+    500,
+    500,
+    500
+   ],
+   "tamanho": 32,
+   "arquivos": [
+    "placa_1.png",
+    "placa_2.png",
+    "placa_3.png",
+    "placa_4.png"
+   ]
+  },
+  "castelo": {
+   "quadros": 4,
+   "duracoesMs": [
+    250,
+    200,
+    250,
+    200
+   ],
+   "tamanho": 48,
+   "arquivos": [
+    "castelo_1.png",
+    "castelo_2.png",
+    "castelo_3.png",
+    "castelo_4.png"
+   ]
+  },
+  "cavaleiro": {
+   "quadros": 4,
+   "duracoesMs": [
+    250,
+    200,
+    250,
+    200
+   ],
+   "tamanho": 32,
+   "arquivos": [
+    "cavaleiro_1.png",
+    "cavaleiro_2.png",
+    "cavaleiro_3.png",
+    "cavaleiro_4.png"
+   ]
+  },
+  "fogueira": {
+   "quadros": 6,
+   "duracoesMs": [
+    110,
+    90,
+    110,
+    100,
+    110,
+    90
+   ],
+   "tamanho": 32,
+   "arquivos": [
+    "fogueira_1.png",
+    "fogueira_2.png",
+    "fogueira_3.png",
+    "fogueira_4.png",
+    "fogueira_5.png",
+    "fogueira_6.png"
+   ]
+  },
+  "pinho0": {
+   "quadros": 4,
+   "duracoesMs": [
+    300,
+    400,
+    300,
+    400
+   ],
+   "tamanho": 48,
+   "arquivos": [
+    "pinho0_1.png",
+    "pinho0_2.png",
+    "pinho0_3.png",
+    "pinho0_4.png"
+   ]
+  },
+  "pinho1": {
+   "quadros": 4,
+   "duracoesMs": [
+    300,
+    400,
+    300,
+    400
+   ],
+   "tamanho": 48,
+   "arquivos": [
+    "pinho1_1.png",
+    "pinho1_2.png",
+    "pinho1_3.png",
+    "pinho1_4.png"
+   ]
+  }
+ }
+}

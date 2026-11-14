@@ -1,7 +1,7 @@
 import { JogoAoVivo } from '../../components/jogo/JogoAoVivo';
 import { ProvedorAvisos } from '../../lib/jogo/avisos';
 
-export const metadata = { title: 'Seu reino · Cronarca' };
+export const metadata = { title: 'Seu reino' };
 
 // O jogo de verdade mostra sempre o estado do jogador, lido do servidor
 // (Portão 10). Só em desenvolvimento, com NEXT_PUBLIC_DEBUG_MAPA=1, o mapa

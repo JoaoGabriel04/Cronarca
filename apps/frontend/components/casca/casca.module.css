@@ -82,13 +82,10 @@
 .logo {
   position: relative;
   flex: none;
+  width: 64px;
+  height: 64px;
   margin: 0 8px 0 0;
-  font-family: var(--fonte-titulo), serif;
-  font-size: 30px;
-  font-weight: 700;
-  line-height: normal;
-  letter-spacing: 2px;
-  color: var(--ouro-claro);
+  image-rendering: pixelated;
 }
 
 .era {
@@ -1044,7 +1041,8 @@
     --altura-hud: 56px;
   }
   .logo {
-    font-size: 24px;
+    width: 32px;
+    height: 32px;
   }
   .era {
     height: 32px;
@@ -1095,7 +1093,8 @@
     row-gap: 10px;
   }
   .logo {
-    font-size: 24px;
+    width: 32px;
+    height: 32px;
   }
   .era {
     margin-right: 0;

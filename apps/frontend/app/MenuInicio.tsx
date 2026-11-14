@@ -1,5 +1,6 @@
 'use client';
 
+import { Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useUsuario } from '../lib/usuario';
 import estilos from './inicio.module.css';
@@ -45,6 +46,8 @@ export function MenuInicio() {
         aria-label="Configurações"
       >
         <img src="/sprites/icone-config.svg" alt="" width={32} height={32} />
+        {/* No celular a placa do desktop vira este botão no canto, com o ícone do Lucide. */}
+        <Settings className={estilos.iconeCelular} size={24} strokeWidth={2.5} aria-hidden="true" />
       </button>
     </>
   );

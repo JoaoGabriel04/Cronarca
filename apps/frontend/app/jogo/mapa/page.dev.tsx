@@ -7,7 +7,7 @@ import { PESQUISAS_IDS, type PesquisaId } from '@cronarca/game-core';
 import { MapaDePreview } from '../../../components/jogo/MapaDePreview';
 import { ProvedorAvisos } from '../../../lib/jogo/avisos';
 
-export const metadata = { title: 'Preview do mapa · Cronarca' };
+export const metadata = { title: 'Preview do mapa' };
 
 function lerPesquisas(valor: string | string[] | undefined): PesquisaId[] {
   const texto = Array.isArray(valor) ? valor[0] : valor;

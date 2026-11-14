@@ -1,13 +1,13 @@
 'use client';
 
 // Tela de carregamento do jogo (Portão 10). No estilo do Início: fundo da
-// tela, título em Alegreya SC e a fogueira animada (quadros.json).
+// tela, o selo do relógio e o nome em pixel art (portão Logo e ícone).
 // Só aparece se o carregamento passar de 300 ms (não pisca em conexão
 // rápida); passou de 10 s, ou deu erro, vira mensagem com "Tentar de novo".
 
 import { useEffect, useState } from 'react';
 import { CARREGAMENTO } from '../../lib/jogo/config';
-import { SpriteAnimado } from '../anim/SpriteAnimado';
+import { MARCA } from '../../lib/marca';
 import estilos from './carregando.module.css';
 
 export interface PropsCarregando {
@@ -38,9 +38,11 @@ export function CarregandoReino({ erro, aoTentarDeNovo }: PropsCarregando) {
   return (
     <main className={estilos.pagina} aria-busy={!falhou}>
       <div className={estilos.bloco}>
-        {/* Sprite 1x ampliado em inteiro pelo CSS (sem otimização de imagem). */}
-        <SpriteAnimado className={estilos.fogueira} sprite={{ grupo: 'cenario', id: 'fogueira' }} lado={32} />
-        <h1 className={estilos.titulo}>Cronarca</h1>
+        {/* Selo do relógio a 4x (128 px) e o nome em pixel art a 4x (224 x 40): ampliação inteira, sem borrar. */}
+        <img className={estilos.selo} src={MARCA.selo(128)} width={128} height={128} alt="" draggable={false} />
+        <h1 className={estilos.titulo}>
+          <img className={estilos.nome} src={MARCA.nome8x.src} width={224} height={40} alt={MARCA.nome} draggable={false} />
+        </h1>
         {falhou ? (
           <>
             <p className={estilos.texto} role="alert">

@@ -307,6 +307,21 @@ Era I Aldeia, II Reino, III Arcana, IV Dimensões (só a I está jogável). Obje
 
 Mercador Viajante, Bandidos na Estrada, Tempestade, Festival da Colheita, Incêndio, Cometa. Cada um com efeito curto (ex.: tempestade dá +30 de madeira) e linha na Crônica com horário.
 
+## Marca (portão Logo e ícone)
+
+Selo do relógio (selo redondo de pedra, C dourado, ponteiros no vazio da letra) e o nome "CRONARCA" em pixel art dourado. **O nome é imagem, nunca texto.** Toda ampliação é por múltiplo inteiro, com `image-rendering: pixelated` (o 16 px tem arquivo próprio, desenhado à mão). Constantes em `apps/frontend/lib/marca.ts`; arquivos em `apps/frontend/public/marca/`; fontes vetoriais em `docs/referencia/marca/`.
+
+| Onde | O quê |
+|---|---|
+| Aba do navegador | `icone-16.png` e `icone-32.png` declarados com o tamanho real; `/favicon.ico` (16 + 32) para quem pede direto |
+| iPhone / Android | `apple-touch-180.png` (opaco); manifest (`app/manifest.ts`) com `android-192.png` (opaco) e `icone-512.png`; `theme-color` `#14201c` |
+| Início e Login | `logo-completa.png` (546 x 192, a 6x) no palco 1440 x 900: 6 px do palco por pixel da arte = `--u` px de tela. Início: logo em `top: 24`, subtítulo e ornamentos 32 px abaixo de antes. Login: logo em (48, 24), lema em `top: 228` |
+| Carregamento | selo `icone-128.png` (4x) no lugar da fogueira e `nome-cronarca.png` a 4x (224 x 40) |
+| HUD | selo `icone-64.png`: 64 px no desktop, 32 no topo compacto e no celular |
+| Compartilhamento | título "%s · Cronarca", descrição curta, Open Graph/Twitter `summary` com o selo 512 |
+
+Pendências: imagem Open Graph própria (1200 x 630) e ícone "maskable" para Android.
+
 ## Sprites (component sets na página Sprites)
 
 | Set | Variantes | Canvas |
@@ -337,7 +352,9 @@ Escala e tamanhos exatos: spec seção 2.
 - Hitboxes, máscaras de acerto e o pé da sombra (L3b) usam sempre o quadro 1: os quadros têm o mesmo tamanho e o pé no mesmo ponto (o impacto do lenhador e do mineiro desce 1 px e não mexe a sombra). Os sprites não trazem sombra embutida; a sombra é a da L3b.
 - Todos os quadros são pré-carregados atrás da tela de carregamento.
 - Ids do jogo com outro nome no JSON (sem renomear arquivos): `floresta_lobos` = `floresta`, `festival_colheita` = `festival`.
-- Sem tela na v0 (ficam no catálogo, pré-carregados): recursos de 32 (o HUD usa os ícones de 16), os eventos além do Mercador, o aldeão ocioso e o cristal. As telas Início e Login seguem com os SVGs animados em CSS.
+- Sem tela na v0 (ficam no catálogo, pré-carregados): recursos de 32 (o HUD usa os ícones de 16), os eventos além do Mercador, o aldeão ocioso e o cristal.
+- **Cena do Início e do Login** (portão Início/Login no celular): `packages/game-core/data/quadros_cena.json` (grupo `cena`, 14 sprites, 58 PNGs em `public/sprites/cena/`), fora do pré-carregamento de `/jogo`. Castelo, cavaleiro, fogueira e placa usam o `SpriteAnimado` (mesmo desenho e mesmo quadro dos SVGs antigos, mesma posição; fase pelo id da instância); os quadros pedem pré-carga com o navegador ocioso. Pinheiro, arbusto, flores e cerca seguem com os dois SVGs em CSS: os quadros novos são de outro desenho (pinho de 48 px, 7 arbustos, flores de 16) e ficam no catálogo para uso futuro (pedido ao artista: pinheiro de 32 px). Estrelas e lua são parte do fundo, paradas.
+- **Início e Login no celular**: abaixo de 900 px de largura ou 500 de altura (`CONSULTA_CENA_CELULAR`), coluna única que rola na vertical, com arte em escala inteira: fundo a 2x (4x acima de 480 px de largura) com o castelo no horizonte, pinheiros cortados pelas bordas e a fileira cavaleiro, fogueira e arbusto (Início); logo compacta e castelo atrás do cartão (Login). Teclado: `interactiveWidget: 'resizes-content'` e `lib/cena/teclado.ts` (`--altura-visivel`, `html[data-teclado]`). Conferência: `make conferir-inicio`.
 - Cenário de terreno, pedras, arbustos e objetos de terreno estão na imagem do mapa (estáticos). As árvores do mapa balançam (Portão 14c): quadros e durações no `balanco` do `mapa_meta.json`, não no `quadros.json`, e parado fica o quadro de repouso (2), não o 1. Ver `CRONARCA_MAPA_GRANDE.md`, seção 3b.
 
 Pendência de arte: aldeões e aventureiros em 32 de tela sobre canvas de 32 estão corretos (1x). Em tamanho menor que isso seria preciso redesenhar em 16.
