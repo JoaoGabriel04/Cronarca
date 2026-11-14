@@ -4,7 +4,6 @@
 import { z } from 'zod';
 import { CLASSES } from '../data/aventureiros.ts';
 import { CONSTRUCOES, NIVEL_MAXIMO_CONSTRUCAO } from '../data/construcoes.ts';
-import { EVENTO_PARAMETROS } from '../data/eventos.ts';
 import { DESTINOS, DESTINOS_IDS, TAMANHO_MAXIMO_GRUPO } from '../data/expedicoes.ts';
 import { FORMULAS } from '../data/formulas.ts';
 import { PESQUISAS, PESQUISAS_IDS } from '../data/pesquisas.ts';
@@ -20,6 +19,7 @@ import {
 import { estadoInicial, sortearNome } from './inicial.ts';
 import { aplicarBonus, bp, mili, micro } from './inteiros.ts';
 import { liquidar, receber } from './liquidar.ts';
+import { descreverTroca } from './mercador.ts';
 import { destinoAberto, nivelReliquia, objetivosEra, vagasGuilda } from './regras.ts';
 import { criarSorteador, type Sorteador } from './rng.ts';
 
@@ -206,13 +206,13 @@ function aplicador(acao: Acao, agora: number, opcoes: OpcoesAcao): Aplicador {
     case 'responder_mercador':
       return (e) => {
         if (!e.mercador) return 'sem_mercador';
-        const P = EVENTO_PARAMETROS.mercador;
+        // Cobra e paga os termos gravados no evento (o que a tela mostrou), não a constante.
+        const { paga, recebe } = e.mercador;
         if (acao.aceitar) {
-          const custo = { madeira: micro(P.madeiraPaga) };
-          if (!podePagar(e, custo)) return 'recursos_insuficientes';
-          pagar(e, custo);
-          receber(e, { ouro: micro(P.ouroRecebido) });
-          registrar(e, 'Ouro', `Negócio feito com o Mercador: ${P.madeiraPaga} madeira por ${P.ouroRecebido} ouro.`, e.t);
+          if (!podePagar(e, paga)) return 'recursos_insuficientes';
+          pagar(e, paga);
+          receber(e, recebe);
+          registrar(e, 'Ouro', `Negócio feito com o Mercador: ${descreverTroca(paga)} por ${descreverTroca(recebe)}.`, e.t);
         } else {
           registrar(e, 'Evento', 'O Mercador Viajante foi dispensado.', e.t);
         }

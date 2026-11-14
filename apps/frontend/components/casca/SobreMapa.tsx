@@ -4,10 +4,11 @@
 // evento, Vila/Reino, zoom e minimapa). Figma "L9 Evento (popup)" e
 // "L8 UI sobre o mapa".
 
-import { TEXTOS_CATALOGO, type MapaJogo } from '@cronarca/game-core';
+import { NOMES_RECURSOS, TEXTOS_CATALOGO, type MapaJogo } from '@cronarca/game-core';
 import { Hammer } from 'lucide-react';
 import { gsap } from 'gsap';
 import { useEffect, useRef, useState } from 'react';
+import type { DadosMercador, ItemTroca } from '../../lib/casca/dados';
 import type { Camera, Ponto, Tamanho } from '../../lib/mapa/camera';
 import { comporArteParada } from '../mapa/desenharMapaBase';
 import type { NevoaAtiva } from '../../lib/mapa/nevoa';
@@ -18,9 +19,32 @@ import { Icone } from './Icone';
 
 export type Visao = 'vila' | 'reino';
 
+function LinhaTroca({ rotulo, itens, pagando }: { rotulo: string; itens: ItemTroca[]; pagando: boolean }) {
+  return (
+    <div className={estilos.trocaLinha}>
+      <dt className={estilos.trocaRotulo}>{rotulo}</dt>
+      <dd className={estilos.trocaItens}>
+        {itens.map((i) => (
+          <span key={i.recurso} className={`${estilos.trocaItem} ${i.falta ? estilos.trocaFalta : ''}`}>
+            <Icone nome={`icone-${i.recurso}`} tamanho={16} />
+            <span className={estilos.trocaQuantidade}>{i.quantidade}</span> {NOMES_RECURSOS[i.recurso].toLowerCase()}
+            {pagando && i.falta && <span className={estilos.trocaTem}>(você tem {i.tem})</span>}
+          </span>
+        ))}
+      </dd>
+    </div>
+  );
+}
+
+/**
+ * Popup do Mercador Viajante (L9, Vila). Mostra os termos que o servidor
+ * gravou no evento: o que se recebe, o que se paga (em vermelho se faltar),
+ * o prazo e o que acontece ao recusar. Aceitar fica desativado sem recurso
+ * (o servidor confere de novo). Desktop e celular usam este mesmo conteúdo.
+ */
 export function PopupMercador({
-  restante, enviando, aoResponder, animado = true,
-}: { restante: string; enviando: boolean; aoResponder: (aceitar: boolean) => void; animado?: boolean }) {
+  dados, enviando, aoResponder, animado = true,
+}: { dados: DadosMercador; enviando: boolean; aoResponder: (aceitar: boolean) => void; animado?: boolean }) {
   const ref = useRef<HTMLElement>(null);
   useEffect(() => {
     if (ref.current) gsap.fromTo(ref.current, { opacity: 0, y: -12 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' });
@@ -33,20 +57,32 @@ export function PopupMercador({
       <div className={estilos.popupCorpo}>
         <p className={estilos.popupRotulo}>EVENTO</p>
         <h2 id="titulo-evento" className={estilos.popupTitulo}>Mercador Viajante</h2>
-        <p className={estilos.popupTexto}>Um comboio acampou junto ao portão. Trocas favoráveis enquanto durar a visita.</p>
+        <p className={estilos.popupTexto}>Um comboio acampou junto ao portão e propõe uma troca.</p>
+        <dl className={estilos.troca} aria-label="Termos da troca">
+          <LinhaTroca rotulo="Você recebe" itens={dados.recebe} pagando={false} />
+          <LinhaTroca rotulo="Você paga" itens={dados.paga} pagando />
+        </dl>
         <div className={estilos.popupAcoes}>
-          <button type="button" className={`caixa botao botao-dourado ${estilos.botaoCasca}`} disabled={enviando} onClick={() => aoResponder(true)}>
-            Negociar
+          <button
+            type="button"
+            className={`caixa botao botao-dourado ${estilos.botaoCasca}`}
+            disabled={enviando || !dados.pode}
+            title={dados.motivo ?? undefined}
+            onClick={() => aoResponder(true)}
+          >
+            Aceitar troca
           </button>
           <button type="button" className={`caixa botao botao-claro ${estilos.botaoCasca}`} disabled={enviando} onClick={() => aoResponder(false)}>
-            Ignorar
+            Recusar
           </button>
         </div>
+        {dados.motivo && <p className={estilos.popupMotivo}>{dados.motivo}</p>}
+        <p className={estilos.popupNota}>{dados.consequencia}</p>
       </div>
-      <div>
-        <div className={`caixa ${estilos.cartao} ${estilos.popupTempo}`}>
+      <div className={estilos.popupPrazo}>
+        <div className={`caixa ${estilos.cartao} ${estilos.popupTempo}`} aria-label={`Tempo restante: ${dados.restante}`}>
           <Icone nome="icone-tempo" />
-          {restante}
+          {dados.restante}
         </div>
         <p className={estilos.popupRestantes}>restantes</p>
       </div>
@@ -54,13 +90,18 @@ export function PopupMercador({
   );
 }
 
-export function ChipEvento({ restante, aoAbrir }: { restante: string; aoAbrir: () => void }) {
+export function ChipEvento({ dados, aoAbrir }: { dados: DadosMercador; aoAbrir: () => void }) {
   return (
-    <button type="button" className={`caixa pergaminho ${estilos.chipEvento}`} onClick={aoAbrir} aria-label="Mercador Viajante: abrir na Vila">
+    <button
+      type="button"
+      className={`caixa pergaminho ${estilos.chipEvento}`}
+      onClick={aoAbrir}
+      aria-label={`Mercador Viajante: troca ${dados.resumo}, ${dados.restante} restantes. Abrir na Vila`}
+    >
       <Icone nome="icone-evento" />
       <span className={estilos.chipEventoTitulo}>Mercador Viajante</span>
-      <span className={estilos.chipEventoAcao}>Negociar</span>
-      <span className={estilos.chipEventoTempo}>{restante}</span>
+      <span className={estilos.chipEventoAcao}>{dados.resumo}</span>
+      <span className={estilos.chipEventoTempo}>{dados.restante}</span>
     </button>
   );
 }

@@ -33,3 +33,4 @@ export * from './conta.ts';
 export * from './catalogo.ts';
 export * from './animacao.ts';
 export * from './ranking.ts';
+export * from './mercador.ts';

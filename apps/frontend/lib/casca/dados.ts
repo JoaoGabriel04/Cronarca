@@ -3,7 +3,7 @@
 
 import {
   CONSTRUCOES, custoConstrucao, DESTINOS, DESTINOS_IDS, destinoAberto, duracaoExpedicaoMs, ERAS, FAIXAS_PERIGO,
-  calcularTaxas, MICRO, NIVEL_MAXIMO_CONSTRUCAO, nivelReliquia, PESQUISAS, RECURSOS, SLOT_IDS, SLOTS, somaNiveis, tetoMicro, tetos,
+  calcularTaxas, MICRO, NIVEL_MAXIMO_CONSTRUCAO, NOMES_RECURSOS, nivelReliquia, PESQUISAS, RECURSOS, SLOT_IDS, SLOTS, somaNiveis, tetoMicro, tetos,
   type DestinoId, type IconeCronica, type Recurso, type RefSprite, type SlotId, type VisaoCliente,
 } from '@cronarca/game-core';
 
@@ -166,9 +166,64 @@ export function linhasCronica(e: VisaoCliente, n: number): LinhaCronica[] {
 
 // ---------- Evento (Mercador) ----------
 
-export function mercadorAtivo(e: VisaoCliente, agora: number): { restante: string } | null {
+/** Uma linha da troca: recurso, quantidade e, no que se paga, se falta. */
+export interface ItemTroca {
+  recurso: Recurso;
+  quantidade: string;
+  /** Só no que se paga: o jogador não tem o suficiente agora. */
+  falta: boolean;
+  /** Quanto o jogador tem agora (para "você tem 62"). */
+  tem: string;
+}
+
+export interface DadosMercador {
+  restante: string;
+  /** O que o jogador recebe se aceitar. */
+  recebe: ItemTroca[];
+  /** O que o jogador paga se aceitar. */
+  paga: ItemTroca[];
+  /** Dá para aceitar agora? (o servidor confere de novo). */
+  pode: boolean;
+  /** Por que não dá ("Falta madeira: você tem 62 de 100."), ou null. */
+  motivo: string | null;
+  /** Resumo curto para o chip: "100 madeira por 15 ouro". */
+  resumo: string;
+  /** O que acontece se recusar ou o tempo acabar. */
+  consequencia: string;
+}
+
+function itensDaTroca(t: Partial<Record<Recurso, number>>, e: VisaoCliente, pagando: boolean): ItemTroca[] {
+  return RECURSOS.filter((r) => (t[r] ?? 0) > 0).map((r) => ({
+    recurso: r,
+    quantidade: formatarInteiro(t[r]!),
+    falta: pagando && e.recursos[r] < t[r]!,
+    tem: formatarInteiro(e.recursos[r]),
+  }));
+}
+
+const textoItens = (itens: ItemTroca[]) => itens.map((i) => `${i.quantidade} ${NOMES_RECURSOS[i.recurso].toLowerCase()}`).join(' e ');
+
+/**
+ * Mercador Viajante pendente: os termos vêm do evento que o servidor gravou
+ * (estado.mercador), nunca de constante do cliente. null se não há ou expirou.
+ */
+export function dadosMercador(e: VisaoCliente, agora: number): DadosMercador | null {
   if (!e.mercador || e.mercador.expiraEm <= agora) return null;
-  return { restante: formatarRestante(e.mercador.expiraEm - agora) };
+  const recebe = itensDaTroca(e.mercador.recebe, e, false);
+  const paga = itensDaTroca(e.mercador.paga, e, true);
+  const faltando = paga.filter((i) => i.falta);
+  const motivo = faltando.length === 0
+    ? null
+    : faltando.map((i) => `Falta ${NOMES_RECURSOS[i.recurso].toLowerCase()}: você tem ${i.tem} de ${i.quantidade}.`).join(' ');
+  return {
+    restante: formatarRestante(e.mercador.expiraEm - agora),
+    recebe,
+    paga,
+    pode: faltando.length === 0,
+    motivo,
+    resumo: `${textoItens(paga)} por ${textoItens(recebe)}`,
+    consequencia: 'Se recusar ou o tempo acabar, o Mercador segue viagem e nada muda.',
+  };
 }
 
 // ---------- "Salvo há" ----------

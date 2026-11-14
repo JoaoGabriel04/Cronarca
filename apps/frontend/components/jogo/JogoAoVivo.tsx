@@ -5,14 +5,14 @@
 // as telas (Portão 12) e os modais (Portão 13). Carregando: tela de carregamento.
 
 import {
-  construiveis, CONSTRUCOES, DESTINOS, linhasCatalogo, mapaDaVersao, PALAVRA_APAGAR, PESQUISAS, preverEstado, recursoDoObjeto, SLOTS,
+  construiveis, CONSTRUCOES, DESTINOS, linhasCatalogo, mapaDaVersao, NOMES_RECURSOS, PALAVRA_APAGAR, PESQUISAS, preverEstado, recursoDoObjeto, SLOTS,
   type Acao, type DestinoId, type PesquisaId, type Recurso, type SlotId,
 } from '@cronarca/game-core';
 import { gsap } from 'gsap';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  cartasConstrucoes, cartasDestinos, chipsHud, linhasCronica, mercadorAtivo, textoEra, textoSalvo, type Sincronia,
+  cartasConstrucoes, cartasDestinos, chipsHud, dadosMercador, linhasCronica, textoEra, textoSalvo, type Sincronia,
 } from '../../lib/casca/dados';
 import { dadosAscensao, dadosMelhorar, dadosPesquisa, linhasCatalogoTela, seloConstruir } from '../../lib/casca/modais';
 import { enviar, ErroApi, mensagemDeErro } from '../../lib/api';
@@ -160,7 +160,7 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
   if (!visivel || !mundo || !quadrosProntos) return <CarregandoReino erro={Boolean(jogo.erro)} aoTentarDeNovo={jogo.recarregar} />;
 
   const agora = relogio();
-  const mercador = mercadorAtivo(visivel, agora);
+  const mercador = dadosMercador(visivel, agora);
   const construcoes = cartasConstrucoes(visivel, agora);
   const destinos = cartasDestinos(visivel, agora);
   const sincronia: Sincronia = { ...jogo.sinc.sincronia(), semConexao: jogo.sinc.sincronia().semConexao || Boolean(jogo.erro) };
@@ -306,11 +306,17 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
   };
 
   const responderMercador = async (aceitar: boolean) => {
+    const pede = mercador ? mercador.paga.map((i) => NOMES_RECURSOS[i.recurso].toLowerCase()).join(' e ') : 'recurso';
     setRespondendo(true);
     const d = await jogo.sinc.enviar({ tipo: 'responder_mercador', aceitar });
     setRespondendo(false);
     setPopupAberto(false);
-    const texto = textoDoDesfecho(d);
+    // Recusa do servidor com o motivo da troca (a tela já desativa, mas o estado pode ter mudado).
+    const texto = !d.ok && d.motivo === 'recusada' && d.erro === 'recursos_insuficientes'
+      ? `Falta ${pede} para a troca com o Mercador.`
+      : !d.ok && d.motivo === 'recusada' && d.erro === 'sem_mercador'
+        ? 'O Mercador já seguiu viagem.'
+        : textoDoDesfecho(d);
     if (texto) avisar(texto);
   };
 
@@ -365,11 +371,11 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
                   return (
                     <>
                       {mercador && visao === 'vila' && (!estreito || popupAberto) && (
-                        <PopupMercador restante={mercador.restante} enviando={respondendo} aoResponder={responderMercador} animado={preferencias.animacoes} />
+                        <PopupMercador dados={mercador} enviando={respondendo} aoResponder={responderMercador} animado={preferencias.animacoes} />
                       )}
                       {mercador && (visao === 'reino' || (estreito && !popupAberto)) && (
                         <ChipEvento
-                          restante={mercador.restante}
+                          dados={mercador}
                           aoAbrir={() => {
                             setPopupAberto(true);
                             if (visao !== 'vila') trocarVisao('vila');

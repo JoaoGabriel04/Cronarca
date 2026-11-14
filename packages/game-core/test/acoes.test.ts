@@ -5,6 +5,7 @@ import type { EstadoJogo } from '../src/estado.ts';
 import { esquemaEstado, visaoDoCliente } from '../src/estado.ts';
 import { chanceExitoBp } from '../src/formulas.ts';
 import { liquidar } from '../src/liquidar.ts';
+import { abrirMercador } from '../src/mercador.ts';
 import { calcularTaxas, vagasGuilda } from '../src/regras.ts';
 import { comRecursos, fazer, novo, recusar, SEG, T0, u } from './ajuda.ts';
 
@@ -229,16 +230,24 @@ describe('expedições', () => {
 });
 
 describe('Mercador Viajante', () => {
-  it('Negociar troca 100 madeira por 15 ouro; Ignorar dispensa', () => {
+  it('Aceitar troca 100 madeira por 15 ouro; Recusar dispensa', () => {
     const e = comRecursos(novo(), { madeira: 150, ouro: 10 });
     recusar(e, { tipo: 'responder_mercador', aceitar: true }, 'sem_mercador');
-    e.mercador = { expiraEm: T0 + 120 * SEG };
+    abrirMercador(e, T0);
     const feito = fazer(e, { tipo: 'responder_mercador', aceitar: true });
     expect(feito.recursos.madeira).toBe(u(50));
     expect(feito.recursos.ouro).toBe(u(25));
     expect(feito.mercador).toBeNull();
     expect(fazer(e, { tipo: 'responder_mercador', aceitar: false }).recursos.madeira).toBe(u(150));
     recusar(comRecursos(structuredClone(e), { madeira: 99 }), { tipo: 'responder_mercador', aceitar: true }, 'recursos_insuficientes');
+  });
+
+  it('cobra e paga os termos gravados no evento (o que a tela mostrou), não a constante', () => {
+    const e = comRecursos(novo(), { madeira: 50, pedra: 200, ouro: 10, saber: 0 });
+    e.mercador = { expiraEm: T0 + 120 * SEG, paga: { pedra: u(80) }, recebe: { saber: u(7), ouro: u(3) } };
+    const feito = fazer(e, { tipo: 'responder_mercador', aceitar: true });
+    expect(feito.recursos).toMatchObject({ madeira: u(50), pedra: u(120), ouro: u(13), saber: u(7) });
+    expect(feito.cronica.at(-1)?.texto).toBe('Negócio feito com o Mercador: 80 pedra por 3 ouro e 7 saber.');
   });
 });
 

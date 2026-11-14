@@ -12,6 +12,7 @@ import { SLOT_IDS, SLOTS } from '../data/slots.ts';
 import { formatarInteiro, registrar } from './cronica.ts';
 import type { EstadoJogo, Expedicao } from './estado.ts';
 import { xpParaSubir } from './formulas.ts';
+import { abrirMercador } from './mercador.ts';
 import { sortearIntervaloEventoMs } from './inicial.ts';
 import { bp, divTeto, fracaoBp, micro } from './inteiros.ts';
 import { aldeoesMaximos, calcularTaxas, oficioDoProximoAldeao, somaNiveis, tetos } from './regras.ts';
@@ -93,8 +94,7 @@ export function aplicarEvento(e: EstadoJogo, id: EventoId, t: number) {
   const nome = NOMES_EVENTOS[id];
   switch (id) {
     case 'mercador_viajante':
-      e.mercador = { expiraEm: t + P.mercador.prazoSegundos * 1000 };
-      registrar(e, 'Evento', `${nome}: troca ${P.mercador.madeiraPaga} madeira por ${P.mercador.ouroRecebido} ouro.`, t);
+      abrirMercador(e, t);
       break;
     case 'bandidos':
       if (somaNiveis(e, 'muralha') >= P.bandidos.muralhaMinima) {

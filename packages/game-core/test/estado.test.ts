@@ -89,14 +89,23 @@ describe('migração de saves', () => {
     expect(carregado).toEqual({ ...atual, mundo: { versaoMapa: 1 } });
   });
 
-  it('esquema 3 (mundo por semente) migra para o 4 com { versaoMapa: 1 }', async () => {
+  it('esquema 4 → 5: Mercador pendente ganha os termos atuais; sem Mercador, nada muda', async () => {
+    const { carregarEstado } = await import('../src/estado.ts');
+    const { atual } = await antigo();
+    const v4 = { ...atual, versao: 4, mundo: { versaoMapa: 1 } };
+    expect(carregarEstado(JSON.parse(JSON.stringify(v4)), 4)).toEqual({ ...atual, mundo: { versaoMapa: 1 } });
+    const pendente = carregarEstado(JSON.parse(JSON.stringify({ ...v4, mercador: { expiraEm: 999 } })), 4);
+    expect(pendente.mercador).toEqual({ expiraEm: 999, paga: { madeira: 100_000_000 }, recebe: { ouro: 15_000_000 } });
+  });
+
+  it('esquema 3 (mundo por semente) migra até o atual com { versaoMapa: 1 }', async () => {
     const { carregarEstado } = await import('../src/estado.ts');
     const { atual, v3 } = await antigo();
     const carregado = carregarEstado(JSON.parse(JSON.stringify(v3)), 3);
-    expect(carregado.versao).toBe(4);
+    expect(carregado.versao).toBe(VERSAO_ESQUEMA);
     expect(carregado.mundo).toEqual({ versaoMapa: 1 });
     expect(carregado).toEqual({ ...atual, mundo: { versaoMapa: 1 } });
-    expect(carregarEstado(JSON.parse(JSON.stringify(atual)), 4)).toEqual(atual);
+    expect(carregarEstado(JSON.parse(JSON.stringify(atual)), VERSAO_ESQUEMA)).toEqual(atual);
   });
 
   it('recusa semente e versaoGerador no esquema atual', async () => {

@@ -651,13 +651,13 @@
   right: 18px;
   top: 16px;
   max-width: 840px;
-  height: 208px;
+  /* Altura pelo conteúdo: os termos da troca entram abaixo do texto. */
   z-index: 3;
   display: grid;
   grid-template-columns: 128px minmax(0, 1fr) 196px;
   gap: 32px;
   align-items: start;
-  padding: 28px 20px 0;
+  padding: 24px 20px 18px;
 }
 
 .popupImagem {
@@ -708,6 +708,68 @@
   color: #6e5a40;
 }
 
+/* Termos da troca: "Você recebe" e "Você paga", com ícone e quantidade. */
+.troca {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border: 2px solid #c8b890;
+  background: #f6efdc;
+}
+.trocaLinha {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.trocaRotulo {
+  flex: none;
+  width: 104px;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #6e5a40;
+}
+.trocaItens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+}
+.trocaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 17px;
+  color: #3a261c;
+}
+.trocaItem img {
+  align-self: center;
+}
+.trocaQuantidade {
+  font-family: var(--fonte-numero), monospace;
+  font-weight: 500;
+}
+.trocaFalta {
+  color: #a8342c;
+  font-weight: 700;
+}
+.trocaTem {
+  font-size: 14px;
+  font-weight: 400;
+}
+.popupMotivo {
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #a8342c;
+}
+.popupNota {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #6e5a40;
+}
+
 .popupAcoes {
   display: flex;
   gap: 12px;
@@ -749,15 +811,46 @@
   .popup {
     grid-template-columns: minmax(0, 1fr);
     gap: 10px;
-    height: auto;
-    padding-bottom: 18px;
+    padding: 16px 14px 14px;
+    max-height: calc(100% - 32px);
+    overflow-y: auto;
+  }
+  /* O prazo sobe para logo abaixo do título (fica visível sem rolar). */
+  .popupPrazo {
+    order: -1;
+  }
+  .trocaRotulo {
+    width: 88px;
+    font-size: 14px;
+  }
+  /* Cabe sem rolar no celular: sai a frase de ambientação; os termos, os botões e a nota ficam. */
+  .popupTexto {
+    display: none;
+  }
+  .troca {
+    margin-top: 8px;
+    padding: 8px 10px;
+  }
+  .popupAcoes {
+    margin-top: 10px;
+    gap: 8px;
+  }
+  .popupAcoes button {
+    flex: 1 1 auto;
+    padding: 0 6px;
+    white-space: nowrap;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+  }
+  .popupTitulo {
+    font-size: 24px;
   }
   .popupImagem,
   .popupRestantes {
     display: none;
   }
   .popupTempo {
-    height: 44px;
+    height: 40px;
     font-size: 20px;
   }
 }
@@ -798,8 +891,12 @@
 .chipEventoAcao {
   position: absolute;
   left: 56px;
-  top: 28px;
-  font-size: 14px;
+  right: 64px;
+  top: 30px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
   font-weight: 700;
   color: #8a2420;
 }
@@ -2215,6 +2312,12 @@
     top: 8px;
     bottom: auto;
     right: 8px;
+  }
+  /* Chip do Mercador abaixo da alternância: em 360 px os dois se cruzavam e a
+     alternância cobria o chip (o toque não chegava nele). */
+  .chipEvento {
+    top: 68px;
+    left: 8px;
   }
   /* Gaveta fechada (frame "Mapa - Mobile"): cabeçalho de uma linha só, "Destinos · subtítulo",
      para os dois primeiros destinos caberem abaixo do mapa. */

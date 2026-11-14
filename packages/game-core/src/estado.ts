@@ -10,8 +10,9 @@ import { RELIQUIAS_IDS } from '../data/reliquias.ts';
 import { SLOT_IDS, SLOTS, type SlotId } from '../data/slots.ts';
 import { FORMULAS } from '../data/formulas.ts';
 import { VERSOES_MAPA } from '../data/mapa.ts';
+import { termosDoMercador } from './mercador.ts';
 
-export const VERSAO_ESQUEMA = 4;
+export const VERSAO_ESQUEMA = 5;
 
 const inteiro = z.number().int();
 const naoNegativo = inteiro.min(0);
@@ -20,6 +21,9 @@ const instante = naoNegativo;
 const esquemaRecursos = z.strictObject(
   Object.fromEntries(RECURSOS.map((r) => [r, naoNegativo])) as Record<(typeof RECURSOS)[number], typeof naoNegativo>,
 );
+
+/** Quantidades de uma troca (micro-unidades); só os recursos envolvidos. */
+const esquemaTroca = z.partialRecord(z.enum(RECURSOS), naoNegativo);
 
 const esquemaSlot = z.strictObject({
   tipo: z.enum(TIPOS_CONSTRUCAO),
@@ -107,8 +111,8 @@ export const esquemaEstado = z
       atual: z.strictObject({ id: z.enum(PESQUISAS_IDS), fim: instante }).nullable(),
     }),
     objetivos: z.strictObject({ criptaVencida: z.boolean() }),
-    /** Mercador Viajante esperando resposta. */
-    mercador: z.strictObject({ expiraEm: instante }).nullable(),
+    /** Mercador Viajante esperando resposta. Esquema 5: os termos da troca vão no evento. */
+    mercador: z.strictObject({ expiraEm: instante, paga: esquemaTroca, recebe: esquemaTroca }).nullable(),
     reliquias: z.strictObject({
       total: naoNegativo,
       gastas: naoNegativo,
@@ -161,6 +165,12 @@ export function migrarEstado(bruto: unknown, versaoEsquema: number): { estado: u
     // A13: o mundo por semente sai; todos passam ao mapa fixo da versão 1.
     estado = { ...estado, versao: 4, mundo: { versaoMapa: 1 } };
     versao = 4;
+  }
+  if (versao === 4) {
+    // Esquema 5: um Mercador pendente ganha os termos atuais (os mesmos que a resposta cobrava).
+    const mercador = estado.mercador as { expiraEm: number } | null | undefined;
+    estado = { ...estado, versao: 5, mercador: mercador ? { ...mercador, ...termosDoMercador() } : null };
+    versao = 5;
   }
   return { estado, versao };
 }

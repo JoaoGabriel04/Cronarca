@@ -2,7 +2,7 @@ import { estadoInicial, MICRO, visaoDoCliente, type VisaoCliente } from '@cronar
 import { describe, expect, it } from 'vitest';
 import {
   cartasConstrucoes, cartasDestinos, chipsHud, faixaDePerigo, formatarInteiro, formatarRestante, formatarTaxa, linhasCronica,
-  mercadorAtivo, textoEra, textoSalvo,
+  dadosMercador, textoEra, textoSalvo,
 } from '../lib/casca/dados';
 
 const T0 = Date.UTC(2026, 5, 1, 12, 0, 0);
@@ -82,12 +82,36 @@ describe('casca: painéis', () => {
     expect(l[0]!.hora).toMatch(/^\d{2}:\d{2}$/);
   });
 
-  it('mercador: aparece enquanto não expira', () => {
+  it('mercador: aparece enquanto não expira, com o que se recebe e o que se paga', () => {
     const e = novo();
-    expect(mercadorAtivo(e, T0)).toBeNull();
-    e.mercador = { expiraEm: T0 + 134_000 };
-    expect(mercadorAtivo(e, T0)).toEqual({ restante: '02:14' });
-    expect(mercadorAtivo(e, T0 + 134_000)).toBeNull();
+    expect(dadosMercador(e, T0)).toBeNull();
+    e.mercador = { expiraEm: T0 + 134_000, paga: { madeira: 100 * MICRO }, recebe: { ouro: 15 * MICRO } };
+    e.recursos.madeira = 300 * MICRO;
+    const d = dadosMercador(e, T0)!;
+    expect(d.restante).toBe('02:14');
+    expect(d.recebe).toEqual([{ recurso: 'ouro', quantidade: '15', falta: false, tem: formatarInteiro(e.recursos.ouro) }]);
+    expect(d.paga).toEqual([{ recurso: 'madeira', quantidade: '100', falta: false, tem: '300' }]);
+    expect(d).toMatchObject({ pode: true, motivo: null, resumo: '100 madeira por 15 ouro' });
+    expect(d.consequencia).toMatch(/segue viagem e nada muda/);
+    expect(dadosMercador(e, T0 + 134_000)).toBeNull();
+  });
+
+  it('mercador: sem madeira suficiente, marca a falta e não deixa aceitar (o servidor confere de novo)', () => {
+    const e = novo();
+    e.mercador = { expiraEm: T0 + 60_000, paga: { madeira: 100 * MICRO }, recebe: { ouro: 15 * MICRO } };
+    e.recursos.madeira = 62 * MICRO;
+    const d = dadosMercador(e, T0)!;
+    expect(d.paga[0]).toMatchObject({ falta: true, tem: '62' });
+    expect(d.pode).toBe(false);
+    expect(d.motivo).toBe('Falta madeira: você tem 62 de 100.');
+  });
+
+  it('mercador: mostra os termos que o servidor gravou, quaisquer que sejam', () => {
+    const e = novo();
+    e.mercador = { expiraEm: T0 + 60_000, paga: { pedra: 80 * MICRO, ferro: 5 * MICRO }, recebe: { saber: 7 * MICRO } };
+    const d = dadosMercador(e, T0)!;
+    expect(d.paga.map((i) => i.recurso)).toEqual(['pedra', 'ferro']);
+    expect(d.resumo).toBe('80 pedra e 5 ferro por 7 saber');
   });
 });
 

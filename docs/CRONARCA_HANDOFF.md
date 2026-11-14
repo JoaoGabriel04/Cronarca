@@ -157,7 +157,7 @@ As durações do Figma (6:00, 8:30, 12:00) são ilustrativas; valem as desta tab
 
 | Evento | Efeito |
 |---|---|
-| Mercador Viajante | única escolha do jogo: Negociar (troca 100 madeira por 15 ouro, exige ter a madeira) ou Ignorar. Sem resposta em 120 s vale Ignorar; offline vale Ignorar |
+| Mercador Viajante | única escolha do jogo: **Aceitar troca** (100 madeira por 15 ouro, exige ter a madeira) ou **Recusar**. Sem resposta em 120 s vale Recusar; offline vale Recusar. Os termos vão no evento (`estado.mercador = { expiraEm, paga, recebe }`, esquema 5): o popup mostra o que se recebe, o que se paga (em vermelho se faltar, com Aceitar desativado), o prazo e a nota "Se recusar ou o tempo acabar, o Mercador segue viagem e nada muda"; a resposta cobra e paga exatamente esses termos. Para conferir: `make evento-mercador` (só dev) e `make conferir-mercador` |
 | Bandidos na Estrada | com Muralha nível 1 ou mais, repelidos sem perda; sem Muralha, perde 15% de ouro e de comida |
 | Tempestade | +30 madeira |
 | Festival da Colheita | +40 comida |

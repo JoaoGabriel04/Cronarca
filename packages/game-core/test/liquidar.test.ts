@@ -10,6 +10,7 @@ import { esquemaEstado } from '../src/estado.ts';
 import { estadoInicial } from '../src/inicial.ts';
 import { formatarInteiro } from '../src/cronica.ts';
 import { aplicarEvento, liquidar } from '../src/liquidar.ts';
+import { abrirMercador } from '../src/mercador.ts';
 import { calcularTaxas, tetos } from '../src/regras.ts';
 import { criarSorteador } from '../src/rng.ts';
 import { comRecursos, fazer, MIN, novo, SEG, T0, u } from './ajuda.ts';
@@ -144,7 +145,10 @@ describe('eventos', () => {
     expect(roubado.recursos.comida).toBe(u(85));
     const protegido = ev('bandidos', (e) => (e.slots.muralha_1.nivel = 1));
     expect(protegido.recursos.ouro).toBe(u(40));
-    expect(ev('mercador_viajante').mercador).toEqual({ expiraEm: T0 + 120 * SEG });
+    // Os termos vão no evento: a tela mostra e a resposta cobra exatamente isto.
+    const m = ev('mercador_viajante');
+    expect(m.mercador).toEqual({ expiraEm: T0 + 120 * SEG, paga: { madeira: u(100) }, recebe: { ouro: u(15) } });
+    expect(m.cronica.at(-1)?.texto).toBe('Mercador Viajante: troca 100 madeira por 15 ouro.');
     // Ganho de evento também é cortado no teto.
     expect(ev('tempestade', (e) => (e.recursos.madeira = u(290))).recursos.madeira).toBe(u(300));
   });
@@ -165,7 +169,7 @@ describe('eventos', () => {
 
   it('Mercador sem resposta em 120 s vale Ignorar', () => {
     const e = novo();
-    e.mercador = { expiraEm: T0 + 120 * SEG };
+    abrirMercador(e, T0);
     const d = liquidar(e, T0 + 121 * SEG);
     expect(d.mercador).toBeNull();
     expect(d.cronica.at(-1)?.texto).toMatch(/seguiu viagem/);
