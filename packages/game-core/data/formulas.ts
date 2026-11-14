@@ -6,8 +6,12 @@ export const FORMULAS = {
   /** Custo de construir/melhorar para o nível n: round(custoBase × fatorCusto^(n−1)). */
   construcao: { fatorCusto: 1.55, segundosBase: 30, fatorTempo: 1.4 },
 
-  /** Teto: round(base × fator^(nível−1)); Armazém para 5 recursos, Celeiro para comida. */
-  teto: { base: 300, fator: 1.5, nivelMinimo: 1 },
+  /**
+   * Teto: round(base × fator^(nível−1)); Armazém para 5 recursos, Celeiro para comida.
+   * O fator é o mesmo do custo (1,55): assim toda construção com custoBase ≤ base (300)
+   * por recurso cabe em todos os níveis, inclusive o próprio Armazém (test/capacidade).
+   */
+  teto: { base: 300, fator: 1.55, nivelMinimo: 1 },
 
   aldeoes: {
     porNivelDeCasa: 4,
@@ -21,7 +25,8 @@ export const FORMULAS = {
 
   guilda: { vagasBase: 4, vagasPorNivelDeTaverna: 1, vagasHospitalidadePorTaverna: 1 },
 
-  contratar: { ouroBase: 40, fatorOuro: 1.6, comida: 20 },
+  /** fatorOuro 1,58: a última contratação (guilda com 15 vagas) cabe no Armazém 10. */
+  contratar: { ouroBase: 40, fatorOuro: 1.58, comida: 20 },
 
   aventureiro: {
     nivelInicial: 1,

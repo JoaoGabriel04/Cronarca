@@ -48,8 +48,8 @@ describe('modais: Melhorar', () => {
     expect(efeitoNoNivel(e, 'serraria_1', 2)).toBe('+2 madeira/s');
     expect(efeitoNoNivel(e, 'scriptorium_1', 1)).toBe('+0,12 saber/s');
     expect(efeitoNoNivel(e, 'armazem_1', 1)).toBe('Guarda 300');
-    expect(efeitoNoNivel(e, 'armazem_1', 2)).toBe('Guarda 450');
-    expect(efeitoNoNivel(e, 'celeiro_1', 2)).toBe('Guarda 450 de comida');
+    expect(efeitoNoNivel(e, 'armazem_1', 2)).toBe('Guarda 465');
+    expect(efeitoNoNivel(e, 'celeiro_1', 2)).toBe('Guarda 465 de comida');
     expect(efeitoNoNivel(e, 'taverna_1', 2)).toBe('+2 vagas');
     e.pesquisas.concluidas.push('hospitalidade');
     expect(efeitoNoNivel(e, 'taverna_1', 1)).toBe('+2 vagas');

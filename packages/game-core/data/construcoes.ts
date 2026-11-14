@@ -14,6 +14,11 @@ export interface DadosConstrucao {
   nome: string;
   efeito: string;
   custoBase: Partial<Record<Recurso, number>>;
+  /**
+   * Fator de crescimento do custo só desta construção (padrão: FORMULAS.construcao.fatorCusto).
+   * Para quem tem custoBase acima do teto base (300) e não caberia no Armazém 10.
+   */
+  fatorCusto?: number;
   producao?: { recurso: Recurso; porSegundo: number };
   /**
    * Clique no mapa abre um painel em vez de coletar (handoff: o Scriptorium
@@ -55,5 +60,6 @@ export const CONSTRUCOES: Record<TipoConstrucao, DadosConstrucao> = {
     producao: { recurso: 'ouro', porSegundo: 0.04 },
   },
   taverna: { nome: 'Taverna', efeito: '+1 vaga na guilda por nível', custoBase: { madeira: 300, ouro: 60 } },
-  muralha: { nome: 'Muralha', efeito: 'defende a vila de bandidos', custoBase: { pedra: 400, ferro: 40 } },
+  // Pedra 400 > 300: com o fator 1,55 a Muralha 9 e 10 passariam do Armazém 10.
+  muralha: { nome: 'Muralha', efeito: 'defende a vila de bandidos', custoBase: { pedra: 400, ferro: 40 }, fatorCusto: 1.5 },
 };

@@ -27,7 +27,7 @@ describe('construir e melhorar', () => {
     expect(pobre.slots.forja_1.obraAte).toBeNull();
 
     const rico = novo();
-    rico.slots.armazem_1.nivel = 3; // teto 675
+    rico.slots.armazem_1.nivel = 3; // teto 721
     comRecursos(rico, { madeira: 600, pedra: 600, ferro: 300 });
     const ocupado = fazer(rico, { tipo: 'melhorar', slot: 'casa_1' });
     recusar(ocupado, { tipo: 'melhorar', slot: 'casa_1' }, 'slot_ocupado');
@@ -43,7 +43,7 @@ describe('construir e melhorar', () => {
 describe('melhorar: efeito antigo vale durante a obra', () => {
   it('a serraria segue produzindo no nível 1 até concluir o nível 2', () => {
     const e = novo();
-    e.slots.armazem_1.nivel = 2; // teto 450: a Serraria 2 (326 madeira) não cabe no teto inicial de 300
+    e.slots.armazem_1.nivel = 2; // teto 465: a Serraria 2 (326 madeira) não cabe no teto inicial de 300
     comRecursos(e, { madeira: 400, ferro: 30 });
     const d = fazer(e, { tipo: 'melhorar', slot: 'serraria_1' });
     expect(d.recursos.madeira).toBe(u(74));
@@ -84,14 +84,14 @@ describe('guilda', () => {
     expect(vagasGuilda(e)).toBe(7);
   });
 
-  it('contratar cobra 40 × 1,6^contratações, sorteia nome sem repetir e respeita as vagas', () => {
+  it('contratar cobra 40 × 1,58^contratações, sorteia nome sem repetir e respeita as vagas', () => {
     let e = comRecursos(novo(), { ouro: 300, comida: 200 });
     e = fazer(e, { tipo: 'contratar' });
     expect(e.recursos.ouro).toBe(u(260));
     expect(e.recursos.comida).toBe(u(180));
     e = fazer(e, { tipo: 'contratar' });
-    expect(e.recursos.ouro).toBe(u(196)); // 64
-    e = fazer(e, { tipo: 'contratar' }); // 102
+    expect(e.recursos.ouro).toBe(u(197)); // 63
+    e = fazer(e, { tipo: 'contratar' }); // 100
     expect(e.aventureiros).toHaveLength(4);
     expect(e.contratacoes).toBe(3);
     const nomes = e.aventureiros.map((a) => a.nome);

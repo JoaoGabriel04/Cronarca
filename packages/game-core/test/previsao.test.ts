@@ -8,7 +8,7 @@ import { comRecursos, fazer, MIN, novo, SEG, T0 } from './ajuda.ts';
 /** Um estado com produção, obra e pesquisa em andamento, sem eventos no intervalo. */
 function emAndamento() {
   const rico = novo();
-  rico.slots.armazem_1.nivel = 3; // teto 675 (o inicial, 300, não cabe a obra)
+  rico.slots.armazem_1.nivel = 3; // teto 721 (o inicial, 300, não cabe a obra)
   let e = comRecursos(rico, { madeira: 600, pedra: 600, ferro: 300, saber: 250, ouro: 100 });
   e = fazer(e, { tipo: 'melhorar', slot: 'serraria_1' });
   e = fazer(e, { tipo: 'construir', slot: 'pedreira_1' }, T0 + 5 * SEG);

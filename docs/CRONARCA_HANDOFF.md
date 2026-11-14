@@ -227,10 +227,10 @@ O dono não tem fórmulas prontas. Estas valem até a primeira rodada de testes 
 
 | Item | Fórmula |
 |---|---|
-| Custo de construir ou melhorar (nível n) | `round(custoBase × 1,55^(n−1))` |
+| Custo de construir ou melhorar (nível n) | `round(custoBase × 1,55^(n−1))`; a Muralha usa 1,50 (`fatorCusto` próprio, portão Custo x capacidade) |
 | Tempo de obra (nível n) | `30 s × 1,4^(n−1)` |
 | Produção por segundo | `base × n`, base por construção na seção "Economia v0" |
-| Teto de recurso | `round(300 × 1,5^(nível−1))`, nível do Armazém para os 5 recursos e do Celeiro para comida (mínimo nível 1) |
+| Teto de recurso | `round(300 × 1,55^(nível−1))`, nível do Armazém para os 5 recursos e do Celeiro para comida (mínimo nível 1). Mesmo fator do custo: todo `custoBase` ≤ 300 por recurso cabe em todos os níveis. Regra testada em `game-core/test/capacidade.test.ts`: nenhum gasto (construção em todo nível, contratação até lotar a guilda, pesquisa, equipamento, Mercador) passa da capacidade alcançável |
 | Aldeões máximos | `4 × soma dos níveis das casas` |
 | Consumo de comida | `0,05/s por aldeão` e `0,08/s por aventureiro` |
 | Poder do aventureiro | `5 + 4 × nível + 3 × arma + 2 × armadura` |
@@ -238,7 +238,7 @@ O dono não tem fórmulas prontas. Estas valem até a primeira rodada de testes 
 | Saque | sorteio uniforme na faixa do destino, `× (1 + 0,1 × (aventureiros − 1))` |
 | Derrota | o grupo recua sem saque e cada aventureiro tem 25% de ficar ferido por 60 s |
 | Custo de melhorar arma ou armadura (n = nível atual, 0 a 5) | `round(custoBase × (n + 1))`, bases na seção "Economia v0"; todo custo usa `round` (meio para cima) |
-| Custo de contratar | `40 × 1,6^(aventureiros contratados)` de ouro e `20` de comida |
+| Custo de contratar | `40 × 1,58^(aventureiros contratados)` de ouro e `20` de comida (era 1,6: a 14ª contratação passava do Armazém 10) |
 | Relíquias na ascensão | `3 + 2 × (ciclo − 1)` |
 | Custo de relíquia (nível n) | `custoBase × (n + 1)` |
 | Clique | `1 × (1 + 0,25 × nível de Mãos Calejadas)` do recurso do objeto, limitado por taxa |

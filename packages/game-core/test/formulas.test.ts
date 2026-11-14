@@ -19,21 +19,21 @@ describe('fórmulas v0', () => {
     expect(tempoObraMs(3)).toBe(58_800);
   });
 
-  it('teto: round(300 × 1,5^(nível−1)), mínimo nível 1', () => {
+  it('teto: round(300 × 1,55^(nível−1)), mínimo nível 1', () => {
     expect(tetoMicro(0)).toBe(u(300));
     expect(tetoMicro(1)).toBe(u(300));
-    expect(tetoMicro(2)).toBe(u(450));
-    expect(tetoMicro(10)).toBe(u(11533));
+    expect(tetoMicro(2)).toBe(u(465));
+    expect(tetoMicro(10)).toBe(u(15492));
   });
 
   it('A2: a Casa nível 10 cabe no teto do Armazém nível 10', () => {
     expect(custoConstrucao('casa', 10).madeira!).toBeLessThanOrEqual(tetoMicro(10));
   });
 
-  it('contratar: 40 × 1,6^(contratações) de ouro e 20 de comida', () => {
+  it('contratar: 40 × 1,58^(contratações) de ouro e 20 de comida', () => {
     expect(custoContratar(0)).toEqual({ ouro: u(40), comida: u(20) });
-    expect(custoContratar(1)).toEqual({ ouro: u(64), comida: u(20) });
-    expect(custoContratar(2).ouro).toBe(u(102)); // 102,4
+    expect(custoContratar(1)).toEqual({ ouro: u(63), comida: u(20) }); // 63,2
+    expect(custoContratar(2).ouro).toBe(u(100)); // 99,856
   });
 
   it('equipamento: round(base × (n + 1))', () => {
