@@ -1,0 +1,129 @@
+/* Posições e medidas do frame "Login - Desktop" (1440x900). */
+
+.marca {
+  position: absolute;
+  left: 48px;
+  top: 36px;
+  margin: 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--ouro-claro);
+}
+
+.lema {
+  position: absolute;
+  left: 48px;
+  top: 96px;
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 1px;
+  color: var(--texto-claro);
+}
+
+/* Cartão de 540 de largura em x=820, y=70. A altura segue o conteúdo. */
+.cartao {
+  position: absolute;
+  left: 820px;
+  top: 70px;
+  width: 540px;
+  padding: 28px 44px 34px; /* selo a 34 do topo externo; conteúdo de x=50 a 490 */
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Cadastro tem dois campos a mais: sobe o cartão e aperta o respiro para caber em 900. */
+.cartaoCadastro {
+  top: 40px;
+}
+
+.cartaoCadastro .formulario {
+  margin-top: 26px;
+}
+
+.selo {
+  width: 88px;
+  height: 88px;
+  align-self: center;
+  display: grid;
+  place-items: center;
+}
+
+.selo img {
+  width: 64px;
+  height: 64px;
+}
+
+.titulo {
+  margin: 16px 0 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: normal;
+  text-align: center;
+  color: #3a261c;
+}
+
+.sub {
+  /* No Figma cabe em uma linha de 440; o navegador mede o texto um pouco mais largo. */
+  margin: 5px -16px 0;
+  font-size: 17px;
+  line-height: 24px;
+  text-align: center;
+  color: var(--texto-suave);
+}
+
+.formulario {
+  margin-top: 46px;
+}
+
+.campo {
+  margin-bottom: 0;
+}
+
+.principal {
+  margin-top: 10px;
+}
+
+.ou {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 21px;
+  font-size: 16px;
+  color: var(--texto-suave);
+}
+
+.ou span {
+  flex: 1;
+  height: 2px;
+  background: #b8a078;
+}
+
+.provedores {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.provedores :global(.botao) {
+  font-size: 17px;
+}
+
+.nota {
+  margin: 10px 0 0;
+  font-size: 15px;
+  line-height: 21px;
+  text-align: center;
+  color: var(--texto-suave);
+}
+
+.alternar {
+  margin: 22px 0 0;
+  font-size: 17px;
+  text-align: center;
+  color: var(--texto-suave);
+}

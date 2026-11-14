@@ -1,0 +1,103 @@
+import { estadoInicial, MICRO, visaoDoCliente, type VisaoCliente } from '@cronarca/game-core';
+import { describe, expect, it } from 'vitest';
+import {
+  cartasConstrucoes, cartasDestinos, chipsHud, faixaDePerigo, formatarInteiro, formatarRestante, formatarTaxa, linhasCronica,
+  mercadorAtivo, textoEra, textoSalvo,
+} from '../lib/casca/dados';
+
+const T0 = Date.UTC(2026, 5, 1, 12, 0, 0);
+const novo = (): VisaoCliente => visaoDoCliente(estadoInicial({ semente: 42, agora: T0 }));
+
+describe('casca: formatação PT-BR', () => {
+  it('quantidades inteiras com ponto de milhar; taxas com sinal e vírgula', () => {
+    expect(formatarInteiro(1284 * MICRO)).toBe('1.284');
+    expect(formatarInteiro(1284.9 * MICRO)).toBe('1.284'); // o HUD mostra unidades inteiras
+    expect(formatarTaxa(12_000)).toBe('+12/s');
+    expect(formatarTaxa(120)).toBe('+0,12/s');
+    expect(formatarTaxa(-3_000)).toBe('−3/s');
+    expect(formatarTaxa(0)).toBe('+0/s');
+  });
+
+  it('tempo restante mm:ss e h:mm:ss; era em romanos', () => {
+    expect(formatarRestante(134_000)).toBe('02:14');
+    expect(formatarRestante(500)).toBe('00:01');
+    expect(formatarRestante(-5)).toBe('00:00');
+    expect(formatarRestante(3_725_000)).toBe('1:02:05');
+    expect(textoEra(1)).toBe('Era I · Aldeia');
+    expect(textoEra(2)).toBe('Era II · Reino');
+  });
+});
+
+describe('casca: HUD', () => {
+  it('um chip por recurso, na ordem dos dados, com a taxa do game-core e o aviso de cheio', () => {
+    const e = novo();
+    const chips = chipsHud(e);
+    expect(chips.map((c) => c.recurso)).toEqual(['madeira', 'pedra', 'comida', 'ferro', 'ouro', 'saber']);
+    expect(chips[0]!.taxa).toBe('+1,05/s'); // serraria nível 1 + 5% do lenhador inicial
+    e.recursos.madeira = 300 * MICRO;
+    expect(chipsHud(e)[0]!.cheio).toBe(true);
+  });
+});
+
+describe('casca: painéis', () => {
+  it('construções: só as de pé e em obra; custo do próximo nível; título N de 11', () => {
+    const e = novo();
+    const { titulo, cartas } = cartasConstrucoes(e, T0);
+    const construidas = Object.values(e.slots).filter((s) => s.nivel >= 1).length;
+    expect(titulo).toBe(`${construidas} de 11 construídas`);
+    expect(cartas.every((c) => c.nivel >= 1 && c.situacao === 'pronta')).toBe(true);
+    const serraria = cartas.find((c) => c.slot === 'serraria_1')!;
+    expect(serraria).toMatchObject({ nome: 'Serraria', nivel: 1, efeito: 'Produz 1 madeira/s', sprite: { grupo: 'construcao', id: 'serraria' } });
+    expect(serraria.custo.map((c) => c.recurso)).toEqual(['madeira', 'ferro']);
+
+    e.slots.forja_1.obraAte = T0 + 90_000;
+    const forja = cartasConstrucoes(e, T0).cartas.find((c) => c.slot === 'forja_1')!;
+    expect(forja).toMatchObject({ situacao: 'obra', restante: '01:30', custo: [] });
+  });
+
+  it('destinos: enviar, ver (em andamento) e bloqueada com a pesquisa que falta', () => {
+    const e = novo();
+    e.expedicoes.push({ id: 'x1', destino: 'floresta_lobos', grupo: ['a1'], inicio: T0, fim: T0 + 192_000 });
+    const { titulo, cartas } = cartasDestinos(e, T0);
+    expect(titulo).toBe('1 grupo em expedição');
+    const por = Object.fromEntries(cartas.map((c) => [c.destino, c]));
+    expect(por.floresta_lobos).toMatchObject({ botao: 'ver', emAndamento: true, linha: 'Em andamento · 03:12' });
+    expect(por.ruinas).toMatchObject({ botao: 'enviar', linha: 'Perigo médio · 00:55' });
+    expect(por.mina).toMatchObject({ botao: 'bloqueada', linha: 'Requer Cartografia' });
+    expect(por.cripta).toMatchObject({ botao: 'bloqueada', nevoa: true, linha: 'Requer Estradas Reais' });
+    expect(faixaDePerigo(9)).toBe('baixo');
+    expect(faixaDePerigo(48)).toBe('alto');
+  });
+
+  it('crônica: as mais recentes primeiro, com ícone e hora', () => {
+    const e = novo();
+    e.cronica = [
+      { icone: 'Check', texto: 'a', em: T0 },
+      { icone: 'Alerta', texto: 'b', em: T0 + 60_000 },
+      { icone: 'Expedicao', texto: 'c', em: T0 + 120_000 },
+    ];
+    const l = linhasCronica(e, 2);
+    expect(l.map((x) => x.texto)).toEqual(['c', 'b']);
+    expect(l[0]!.icone).toBe('icone-expedicao');
+    expect(l[0]!.hora).toMatch(/^\d{2}:\d{2}$/);
+  });
+
+  it('mercador: aparece enquanto não expira', () => {
+    const e = novo();
+    expect(mercadorAtivo(e, T0)).toBeNull();
+    e.mercador = { expiraEm: T0 + 134_000 };
+    expect(mercadorAtivo(e, T0)).toEqual({ restante: '02:14' });
+    expect(mercadorAtivo(e, T0 + 134_000)).toBeNull();
+  });
+});
+
+describe('casca: "Salvo há"', () => {
+  const s = (o: Partial<Parameters<typeof textoSalvo>[0]> = {}) => ({ confirmadoEm: 1_000, pendentes: 0, semConexao: false, ...o });
+  it('confirmado, salvando, sem conexão e conectando', () => {
+    expect(textoSalvo(s(), 13_500)).toEqual({ texto: 'Salvo há 12s', icone: 'check' });
+    expect(textoSalvo(s(), 181_000)).toEqual({ texto: 'Salvo há 3 min', icone: 'check' });
+    expect(textoSalvo(s({ pendentes: 2 }), 2_000)).toEqual({ texto: 'Salvando...', icone: 'tempo' });
+    expect(textoSalvo(s({ semConexao: true, pendentes: 1 }), 2_000)).toEqual({ texto: 'Sem conexão', icone: 'alerta' });
+    expect(textoSalvo(s({ confirmadoEm: null }), 2_000)).toEqual({ texto: 'Conectando...', icone: 'tempo' });
+  });
+});

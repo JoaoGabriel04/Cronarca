@@ -1,0 +1,2251 @@
+/* Casca da interface (Portão 11), adaptável à janela. Cores, fontes e medidas
+   dos frames "Vila - Desktop", "Mapa - Desktop" e "Vila - Mobile". Caixas
+   usam a classe global .caixa (borda com cantos recortados, realce em cima e
+   sombra embaixo).
+
+   Estrutura: raiz de 100dvh sem rolagem; HUD e abas fixos no topo; a área que
+   sobra (flex: 1, min-height: 0) leva o mapa e o painel lateral, que é o único
+   que rola. Abaixo de 1024 px de largura, mapa em cima e painel embaixo, com as
+   abas no rodapé (frame mobile). Abaixo de 800 px de altura, topo compacto. */
+
+/* ---------- Raiz ---------- */
+
+.raiz {
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--tela);
+  /* O espaço da Alegreya Sans fica estreito no navegador e as palavras grudam; o Figma mostra mais largo. */
+  word-spacing: 1px;
+}
+
+.pixel {
+  image-rendering: pixelated;
+}
+
+/* Barra de rolagem fina no estilo do jogo (só o painel e a faixa de recursos rolam). */
+.rola {
+  scrollbar-width: thin;
+  scrollbar-color: #8a6a48 transparent;
+}
+
+.rola::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.rola::-webkit-scrollbar-thumb {
+  background: #8a6a48;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.rola::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---------- HUD ---------- */
+
+.hud {
+  --altura-hud: 72px;
+  position: relative;
+  flex: none;
+  height: var(--altura-hud);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 8px 24px;
+  background: #3a2818;
+  box-shadow: inset 0 4px 0 #6e482c;
+  overflow: hidden;
+}
+
+.hud::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 8px;
+  background: linear-gradient(#2a1c12 0 4px, #1a100a 4px 8px);
+}
+
+.risco {
+  position: absolute;
+  width: 60px;
+  height: 2px;
+  background: #4a3220;
+  pointer-events: none;
+}
+
+.logo {
+  position: relative;
+  flex: none;
+  margin: 0 8px 0 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: normal;
+  letter-spacing: 2px;
+  color: var(--ouro-claro);
+}
+
+.era {
+  --borda: var(--contorno);
+  --fundo: #241a10;
+  --realce: #6e482c;
+  --sombra: #2a1c12;
+  flex: none;
+  width: 128px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  margin-right: 16px;
+  font-family: var(--fonte-texto), sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #e8dcc0;
+}
+
+/* Os 6 chips: encolhem até 112 px; se ainda não couberem, a faixa rola na horizontal. */
+.recursos {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.chip {
+  --borda: var(--contorno);
+  --fundo: #241a10;
+  --realce: #241a10;
+  --sombra: var(--contorno);
+  flex: 0 1 138px;
+  min-width: 112px;
+  height: 48px;
+}
+
+.chipIcone {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 32px;
+  height: 32px;
+}
+
+.chipValor,
+.chipTaxa {
+  position: absolute;
+  left: 42px;
+  margin: 0;
+  font-family: var(--fonte-numero), monospace;
+  font-weight: 500;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.chipValor {
+  top: 1px;
+  font-size: 17px;
+  color: #f0e8c0;
+}
+
+.chipTaxa {
+  top: 22px;
+  font-size: 12px;
+  color: #8ab050;
+}
+
+.chipTaxa.negativa {
+  color: #e07060;
+}
+
+.chip.cheio .chipValor {
+  color: var(--ouro-claro);
+}
+
+.botoesHud {
+  position: relative;
+  flex: none;
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+  padding-left: 16px;
+}
+
+.botaoHud {
+  --borda: var(--contorno);
+  --fundo: #4a3220;
+  --realce: #6e482c;
+  --sombra: #2a1c12;
+  width: 48px;
+  height: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.botaoHud img {
+  width: 32px;
+  height: 32px;
+}
+
+.botaoHud:hover:not(:disabled) {
+  filter: brightness(1.15);
+}
+
+.botaoHud:focus-visible {
+  outline: 3px solid var(--ouro-claro);
+  outline-offset: 2px;
+}
+
+/* Desativado até o portão dele (Ranking): o ícone esmaece, a caixa continua a do Figma. */
+.botaoHud:disabled {
+  cursor: not-allowed;
+}
+
+.botaoHud:disabled img {
+  opacity: 0.5;
+}
+
+/* ---------- Abas ---------- */
+
+.abas {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+}
+
+.aba {
+  --borda: var(--contorno);
+  --fundo: #4a3220;
+  --realce: #6e482c;
+  --sombra: #2a1c12;
+  flex: none;
+  width: 152px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 0 6px;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #e8dcc0;
+  cursor: pointer;
+}
+
+.aba img {
+  width: 32px;
+  height: 32px;
+}
+
+.aba.ativa {
+  --fundo: #e8dcc0;
+  --realce: #f4ecd4;
+  --sombra: #c8b890;
+  color: #3a261c;
+  cursor: default;
+}
+
+.aba:focus-visible,
+.botaoCasca:focus-visible {
+  outline: 3px solid var(--ouro-claro);
+  outline-offset: 2px;
+}
+
+.salvo {
+  margin: 0 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--fonte-texto), sans-serif;
+  font-size: 14px;
+  color: var(--texto-apagado);
+  white-space: nowrap;
+}
+
+.salvo img {
+  width: 32px;
+  height: 32px;
+}
+
+/* ---------- Área: mapa e painel ---------- */
+
+.area {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  gap: 24px;
+  padding: 0 24px 24px;
+}
+/* Caixa da área: referência da gaveta de Destinos aberta (celular), que cobre a área sem rolar com ela. */
+.areaCaixa {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  position: relative;
+}
+
+.colunaMapa {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+}
+
+.molduraMapa {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  padding: 10px;
+  background: var(--contorno);
+}
+
+/* Container das camadas L8/L9: elas se ajeitam pelo tamanho do mapa. */
+.areaMapa {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  border: 2px solid #d8a63f;
+  container-type: size;
+  container-name: mapa;
+}
+
+.lateral {
+  flex: 0 0 clamp(340px, 30vw, 420px);
+  min-height: 0;
+  display: flex;
+  container-type: inline-size;
+  container-name: painel;
+}
+
+/* Painel único: cabeçalho fixo, cartões e a Crônica, com a rolagem só dele. */
+.painel {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rolagem {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 4px;
+  padding: 0 12px 12px;
+}
+
+.cabecalho {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  padding: 12px 4px;
+  background: #e8dcc0;
+}
+
+.cabecalho h2 {
+  margin: 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: normal;
+  color: #3a261c;
+}
+
+.cabecalho p {
+  grid-column: 1;
+  margin: 0;
+  font-size: 15px;
+  color: #6e5a40;
+}
+
+.cabecalho img {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  width: 32px;
+  height: 32px;
+}
+
+.lista {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Cartão: miniatura | texto (corta com reticências) | botão. */
+.cartao {
+  --e: 4px;
+  --borda: #8a6a48;
+  --fundo: #f6efdc;
+  --realce: #f6efdc;
+  --sombra: #e4d8b8;
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  height: 96px;
+  padding: 0 6px 0 4px;
+}
+
+.cartao.destino {
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  height: 80px;
+}
+
+.miniatura {
+  --borda: #3a261c;
+  --fundo: #8ab050;
+  --realce: #8ab050;
+  --sombra: #8ab050;
+  width: 80px;
+  height: 80px;
+  overflow: hidden;
+}
+
+/* Construção de 48 a 2x (96), centrada na moldura de 80. */
+.miniatura img {
+  position: absolute;
+  left: -12px;
+  top: -12px;
+  width: 96px;
+  height: 96px;
+}
+
+.destino .miniatura {
+  --fundo: var(--contorno);
+  width: 64px;
+  height: 64px;
+}
+
+.destino .miniatura img {
+  left: -4px;
+  top: -4px;
+  width: 64px;
+  height: 64px;
+}
+
+.nevoa {
+  position: absolute;
+  inset: 0;
+  background: rgb(26 42 74 / 0.6);
+}
+
+.cartaoInfo {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.cartaoInfo > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cartaoNome {
+  margin: 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: normal;
+  color: #3a261c;
+}
+
+.destino .cartaoNome {
+  font-size: 17px;
+}
+
+.nivel {
+  margin-left: 12px;
+  font-family: var(--fonte-numero), monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: #8a2420;
+}
+
+.cartaoTexto {
+  margin: 0;
+  font-size: 14px;
+  color: #6e5a40;
+}
+
+.cartaoTexto.alerta {
+  font-weight: 700;
+  color: #8a2420;
+}
+
+.custos {
+  display: flex;
+  gap: 16px;
+  margin: 4px 0 0;
+  font-family: var(--fonte-numero), monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: #3a261c;
+}
+
+.destino .custos {
+  gap: 6px;
+}
+
+.custos span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.custos img {
+  width: 16px;
+  height: 16px;
+}
+
+/* Painel estreito (menos de 400 px): o botão desce para baixo do texto e o cartão cresce. */
+@container painel (max-width: 400px) {
+  .cartao,
+  .cartao.destino {
+    grid-template-columns: 64px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    height: auto;
+    row-gap: 6px;
+    padding: 6px 6px 8px 4px;
+  }
+  .miniatura,
+  .destino .miniatura {
+    grid-row: 1 / span 2;
+    align-self: start;
+    width: 64px;
+    height: 64px;
+  }
+  .miniatura img {
+    left: -20px;
+    top: -20px;
+  }
+  .botaoCasca.acaoCartao,
+  .destino .botaoCasca.acaoCartao {
+    grid-column: 2;
+    justify-self: start;
+    height: 34px;
+  }
+}
+
+/* Botões da casca: alturas e fontes do Figma (as globais são as das telas de entrada). */
+.botaoCasca {
+  height: 40px;
+  font-size: 16px;
+}
+
+.botaoCasca.acaoCartao {
+  width: 88px;
+  padding: 0;
+  font-size: 14px;
+}
+
+.destino .botaoCasca.acaoCartao {
+  width: 96px;
+  font-size: 15px;
+}
+
+/* ---------- Crônica (no mesmo painel) ---------- */
+
+.cronicaTitulo {
+  margin: 20px 4px 8px;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #3a261c;
+}
+
+.linhasCronica {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0 4px;
+  list-style: none;
+}
+
+.linhaCronica {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  color: #3a261c;
+}
+
+.linhaCronica img {
+  width: 32px;
+  height: 32px;
+}
+
+.linhaCronica span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.linhaCronica time {
+  font-family: var(--fonte-numero), monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: #8a6a48;
+}
+
+.semLinhas {
+  margin: 0 4px;
+  font-size: 15px;
+  color: #6e5a40;
+}
+
+/* Rodapé do painel: "Sair" (provisório até Configurações, Portão 13) e a depuração. */
+.rodapePainel {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 20px;
+  padding: 0 4px;
+}
+
+/* Telas que chegam no Portão 12. */
+.oculto {
+  display: none;
+}
+
+.telaVazia {
+  flex: 1 1 auto;
+  padding: 32px 40px;
+}
+
+.telaVazia h2 {
+  margin: 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 32px;
+  color: #3a261c;
+}
+
+.telaVazia p {
+  margin: 8px 0 0;
+  font-size: 17px;
+  color: #6e5a40;
+}
+
+/* ---------- L9: popup de evento (Vila) ---------- */
+
+.popup {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 16px;
+  max-width: 840px;
+  height: 208px;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr) 196px;
+  gap: 32px;
+  align-items: start;
+  padding: 28px 20px 0;
+}
+
+.popupImagem {
+  --borda: var(--contorno);
+  --fundo: var(--contorno);
+  --realce: var(--contorno);
+  --sombra: var(--contorno);
+  width: 128px;
+  height: 128px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.popupImagem img {
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 128px;
+  height: 128px;
+}
+
+.popupCorpo {
+  min-width: 0;
+}
+
+.popupRotulo {
+  margin: 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #8a2420;
+}
+
+.popupTitulo {
+  margin: 2px 0 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: normal;
+  color: #3a261c;
+}
+
+.popupTexto {
+  margin: 6px 0 0;
+  font-size: 16px;
+  line-height: 22px;
+  color: #6e5a40;
+}
+
+.popupAcoes {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.popupAcoes button {
+  width: auto;
+  padding: 0 22px;
+}
+
+.popupTempo {
+  height: 64px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-left: 12px;
+  font-family: var(--fonte-numero), monospace;
+  font-size: 26px;
+  font-weight: 500;
+  color: #3a261c;
+}
+
+.popupTempo img {
+  width: 32px;
+  height: 32px;
+}
+
+.popupRestantes {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 14px;
+  color: #6e5a40;
+}
+
+/* Mapa estreito: sem a imagem, o tempo vai para cima do texto. */
+@container mapa (max-width: 720px) {
+  .popup {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    height: auto;
+    padding-bottom: 18px;
+  }
+  .popupImagem,
+  .popupRestantes {
+    display: none;
+  }
+  .popupTempo {
+    height: 44px;
+    font-size: 20px;
+  }
+}
+
+/* ---------- L8: chip de evento, Vila/Reino, zoom e minimapa ---------- */
+
+.chipEvento {
+  --e: 4px;
+  position: absolute;
+  left: 18px;
+  top: 16px;
+  width: 300px;
+  height: 60px;
+  padding: 0;
+  z-index: 2;
+  cursor: pointer;
+  text-align: left;
+}
+
+.chipEvento img {
+  position: absolute;
+  left: 12px;
+  top: 10px;
+  width: 32px;
+  height: 32px;
+}
+
+.chipEventoTitulo {
+  position: absolute;
+  left: 56px;
+  top: 4px;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #3a261c;
+}
+
+.chipEventoAcao {
+  position: absolute;
+  left: 56px;
+  top: 28px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #8a2420;
+}
+
+.chipEventoTempo {
+  position: absolute;
+  right: 12px;
+  top: 26px;
+  font-family: var(--fonte-numero), monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: #3a261c;
+}
+
+.alternar {
+  position: absolute;
+  right: 18px;
+  top: 16px;
+  width: 218px;
+  height: 52px;
+  display: flex;
+  gap: 10px;
+  padding: 4px;
+  z-index: 2;
+}
+
+.alternar button {
+  height: 36px;
+  font-size: 15px;
+  padding: 0;
+}
+
+.alternar button:first-child {
+  width: 94px;
+}
+
+.alternar button:last-child {
+  width: 98px;
+}
+
+.alternar button.inativo {
+  --fundo: #4a3220;
+}
+
+.zoom {
+  position: absolute;
+  right: 18px;
+  top: 80px;
+  width: 52px;
+  height: 152px;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  padding-top: 4px;
+  z-index: 2;
+}
+
+.zoom button {
+  --fundo: #4a3220;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.zoomValor {
+  margin: 16px 0 0;
+  font-family: var(--fonte-numero), monospace;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: normal;
+  color: var(--ouro-claro);
+}
+
+.zoomRotulo {
+  margin: 1px 0 9px;
+  font-size: 12px;
+  color: var(--texto-apagado);
+}
+
+.minimapa {
+  --borda: var(--contorno);
+  --fundo: var(--contorno);
+  --realce: var(--contorno);
+  --sombra: var(--contorno);
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  width: 224px;
+  height: 168px;
+  padding: 4px;
+  z-index: 2;
+}
+
+.minimapa canvas {
+  display: block;
+  width: 208px;
+  height: 152px;
+  padding: 2px;
+  border: 2px solid #d8a63f;
+  background: var(--contorno);
+  cursor: pointer;
+  image-rendering: pixelated;
+}
+
+/* Mapa pequeno (mobile): chip só com o nome, como no frame "Vila - Mobile"; o
+   alternador desce para o canto de baixo; zoom e minimapa saem (a roda e o
+   arrastar continuam). */
+@container mapa (max-width: 600px) {
+  .chipEvento {
+    width: 150px;
+    height: 44px;
+  }
+  .chipEvento img {
+    top: 2px;
+  }
+  .chipEventoTitulo {
+    top: 8px;
+    font-size: 16px;
+  }
+  .chipEventoAcao,
+  .chipEventoTempo,
+  .minimapa,
+  .zoom {
+    display: none;
+  }
+  .alternar {
+    top: auto;
+    bottom: 12px;
+    right: 12px;
+  }
+}
+
+@container mapa (max-height: 420px) {
+  .minimapa {
+    display: none;
+  }
+}
+
+/* ---------- Telas baixas (menos de 800 px de altura): topo compacto ---------- */
+
+@media (max-height: 799px) {
+  .hud {
+    --altura-hud: 56px;
+  }
+  .logo {
+    font-size: 24px;
+  }
+  .era {
+    height: 32px;
+    font-size: 14px;
+  }
+  .chip {
+    height: 40px;
+  }
+  .chipValor {
+    top: -2px;
+    font-size: 15px;
+  }
+  .chipTaxa {
+    top: 16px;
+    font-size: 11px;
+  }
+  .botaoHud {
+    width: 40px;
+    height: 40px;
+  }
+  .abas {
+    padding: 8px 24px;
+  }
+  /* Ícone em 1x (16 px): a aba de 32 px não comporta o de 32. */
+  .aba {
+    height: 32px;
+    font-size: 16px;
+    padding-left: 8px;
+  }
+  .aba img,
+  .salvo img {
+    width: 16px;
+    height: 16px;
+  }
+  .area {
+    padding-bottom: 12px;
+  }
+}
+
+/* ---------- Largura menor que 1024 px: mapa em cima, painel embaixo (frame mobile) ---------- */
+
+@media (max-width: 1023px) {
+  /* Topo (logo, era, Configurações) e a faixa de recursos que rola na horizontal. */
+  .hud {
+    --altura-hud: auto;
+    flex-wrap: wrap;
+    padding: 10px 12px 16px;
+    row-gap: 10px;
+  }
+  .logo {
+    font-size: 24px;
+  }
+  .era {
+    margin-right: 0;
+  }
+  /* No topo estreito ficam só o Ranking e as Configurações (Construir vira o botão flutuante). */
+  .botoesHud .botaoHud:not(:last-child):not(.rankingHud) {
+    display: none;
+  }
+  .recursos {
+    order: 3;
+    flex: 1 0 100%;
+    padding-bottom: 2px;
+  }
+  .chip {
+    flex: none;
+    width: 138px;
+    height: 48px;
+  }
+  /* Abas no rodapé, com o ícone em cima do nome. */
+  .abas {
+    order: 3;
+    height: 72px;
+    padding: 8px;
+    gap: 6px;
+    background: #3a2818;
+    box-shadow: inset 0 4px 0 #1a100a, inset 0 6px 0 #6e482c;
+  }
+  .aba {
+    flex: 1 1 0;
+    width: auto;
+    height: 56px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+    font-size: 12px;
+  }
+  .aba img {
+    width: 32px;
+    height: 32px;
+  }
+  .salvo {
+    display: none;
+  }
+  .areaCaixa {
+    order: 2;
+  }
+  .area {
+    order: 2;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+  .colunaMapa {
+    flex: 0 0 45dvh;
+    min-height: 240px;
+  }
+  .lateral {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+}
+
+/* =====================================================================
+   Telas Heróis, Expedições e Eras (Portão 12). Medidas dos frames
+   "Herois - Desktop", "Expedicoes - Desktop" e "Eras - Desktop".
+   ===================================================================== */
+
+.somenteLeitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Painel grande onde fica o mapa na aba Vila. */
+.principal {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  container-type: inline-size;
+  container-name: principal;
+}
+
+.cabecalhoExtra {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: start;
+}
+
+.cabecalho > .cabecalhoExtra + img {
+  display: none;
+}
+
+.retrato {
+  --borda: #3a261c;
+  --fundo: #8ab050;
+  --realce: #8ab050;
+  --sombra: #8ab050;
+  flex: none;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.retrato img {
+  image-rendering: pixelated;
+}
+
+/* ---------- Etiquetas (Na vila, Em expedição, Ferido, Vitória, Recuou, Bloqueada, Ciclo) ---------- */
+
+.etiqueta {
+  display: inline-block;
+  flex: none;
+  padding: 2px 8px;
+  border: 2px solid #2a1c12;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 16px;
+  color: #f6efdc;
+  white-space: nowrap;
+}
+
+.etiqueta_na_vila {
+  background: #4a8a52;
+}
+
+.etiqueta_em_expedicao {
+  background: #3a62a8;
+}
+
+.etiqueta_ferido {
+  background: #8a2420;
+}
+
+.etiquetaBloqueada {
+  background: #6e5a40;
+  justify-self: start;
+}
+
+.etiquetaCiclo {
+  background: #4a3220;
+}
+
+/* ---------- Heróis ---------- */
+
+.contratar {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.contratar button {
+  width: auto;
+  padding: 0 24px;
+}
+
+.contratar .custos {
+  margin: 0;
+}
+
+.cartao.heroi {
+  grid-template-columns: 120px minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+  height: auto;
+  min-height: 196px;
+  padding: 12px 12px 12px 12px;
+}
+
+.heroiInfo {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.heroiTopo {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+}
+
+.heroiNome {
+  margin: 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: normal;
+  color: #3a261c;
+}
+
+.poder {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-family: var(--fonte-numero), monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: #3a261c;
+}
+
+.pecas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 8px 24px;
+}
+
+.peca {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: start;
+  align-items: center;
+  gap: 6px 24px;
+}
+
+.pecaTitulo {
+  grid-column: 1;
+  margin: 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #3a261c;
+}
+
+.pips {
+  grid-column: 1;
+  display: flex;
+  gap: 4px;
+}
+
+/* Pip de 16: borda de 2; cheio dourado com realce de 3 px em cima. */
+.pip {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #b8a078;
+  background: #e4d8b8;
+}
+
+.pip.pipCheio {
+  border-color: #8a6a48;
+  background: linear-gradient(#ffd060 0 3px, #d8a63f 3px);
+}
+
+.peca .custos {
+  grid-column: 1;
+  margin: 0;
+}
+
+.botaoCasca.botaoPeca {
+  grid-column: 2;
+  grid-row: 2 / span 2;
+  width: 88px;
+  padding: 0;
+  font-size: 14px;
+}
+
+/* Resumo da guilda */
+.cartao.linhaResumo {
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 16px;
+  height: 88px;
+  padding: 0 12px;
+}
+
+.linhaResumo img {
+  width: 32px;
+  height: 32px;
+}
+
+.resumoRotulo {
+  margin: 0;
+  font-size: 15px;
+  color: #6e5a40;
+}
+
+.resumoValor {
+  margin: 2px 0 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #3a261c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- Expedições ---------- */
+
+.poderGrupo {
+  margin: 4px 0 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #3a261c;
+  white-space: nowrap;
+}
+
+.grupo {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px 20px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.chipGrupo {
+  --e: 4px;
+  --borda: #8a6a48;
+  --fundo: #f6efdc;
+  --realce: #f6efdc;
+  --sombra: #e4d8b8;
+  width: 100%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px 0 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chipGrupo.selecionado {
+  --borda: #d8a63f;
+  --fundo: #fbf3d8;
+  --realce: #fbf3d8;
+}
+
+.chipGrupo:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.chipGrupo:focus-visible {
+  outline: 3px solid var(--ouro-claro);
+  outline-offset: 2px;
+}
+
+.chipGrupoTexto {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.chipGrupoTexto strong {
+  font-family: var(--fonte-titulo), serif;
+  font-size: 19px;
+  color: #3a261c;
+}
+
+.chipGrupoTexto span {
+  font-size: 14px;
+  color: #6e5a40;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chipGrupoCheck {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  align-self: start;
+  margin-top: 4px;
+}
+
+.cartao.andamento {
+  grid-template-columns: 32px minmax(0, 1fr) minmax(120px, 260px) auto;
+  gap: 12px;
+  height: 64px;
+  padding: 0 16px 0 12px;
+}
+
+.andamento img {
+  width: 32px;
+  height: 32px;
+}
+
+.andamentoTitulo {
+  margin: 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #3a261c;
+}
+
+/* Barra de progresso: borda de 2 px, trilho claro, verde com realce de 3 px. */
+.barra {
+  display: block;
+  height: 16px;
+  border: 2px solid #3a261c;
+  background: #e4d8b8;
+}
+
+.barra > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(#6aaa72 0 3px, #4a8a52 3px);
+}
+
+.andamentoTempo {
+  font-family: var(--fonte-numero), monospace;
+  font-size: 16px;
+  font-weight: 500;
+  color: #3a261c;
+}
+
+.cartao.linhaDestino {
+  grid-template-columns: 64px minmax(0, 1fr) auto auto auto;
+  gap: 16px;
+  height: auto;
+  min-height: 84px;
+  padding: 6px 12px 6px 6px;
+}
+
+.miniDestino {
+  width: 64px;
+  height: 64px;
+}
+
+.perigo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 2px 0 0;
+  font-family: var(--fonte-numero), monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: #3a261c;
+}
+
+.saque {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(70px, auto));
+  gap: 6px 16px;
+  font-family: var(--fonte-numero), monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: #3a261c;
+}
+
+.saque span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.chance {
+  display: grid;
+  gap: 2px;
+  min-width: 90px;
+}
+
+.chance span {
+  font-size: 13px;
+  color: #6e5a40;
+}
+
+.chance strong {
+  font-family: var(--fonte-titulo), serif;
+  font-size: 24px;
+  color: #6e5a40;
+}
+
+.chance strong.chance_alta {
+  color: #2f6a3a;
+}
+
+.chance strong.chance_media {
+  color: #b07a20;
+}
+
+.chance strong.chance_baixa {
+  color: #8a2420;
+}
+
+.linhaDestino.bloqueado {
+  --fundo: #e4d8b8;
+  --realce: #e4d8b8;
+  --sombra: #d4c8a8;
+  grid-template-columns: 64px minmax(0, 1fr) auto auto;
+}
+
+.bloqueado .miniDestino {
+  opacity: 0.45;
+}
+
+.bloqueado .cartaoNome {
+  color: #6e5a40;
+}
+
+.requer {
+  margin: 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #6e5a40;
+}
+
+.cadeado {
+  width: 32px;
+  height: 32px;
+}
+
+/* Veio do mapa ou do painel Destinos. */
+.linhaDestino.destacado {
+  --borda: #d8a63f;
+}
+
+/* Relatórios */
+.cartao.relatorio {
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  height: auto;
+  padding: 10px 12px;
+}
+
+.relatorio > img {
+  width: 32px;
+  height: 32px;
+}
+
+.relatorioCorpo {
+  min-width: 0;
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+}
+
+.relatorioTopo {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+  margin: 0;
+}
+
+.relatorioTopo strong {
+  font-family: var(--fonte-titulo), serif;
+  font-size: 19px;
+  color: #3a261c;
+}
+
+.relatorioTopo time {
+  font-family: var(--fonte-numero), monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: #8a6a48;
+}
+
+.relatorioTexto {
+  margin: 0;
+  font-size: 15px;
+  color: #3a261c;
+}
+
+.relatorio .custos {
+  margin: 0;
+}
+
+/* ---------- Eras ---------- */
+
+.eraTopo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  gap: 16px;
+  align-items: start;
+}
+
+.cartao.objetivo {
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 12px;
+  height: auto;
+  min-height: 50px;
+  padding: 8px 12px;
+}
+
+.caixaMarcar {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 3px solid #3a261c;
+  background: #e4d8b8;
+}
+
+.objetivoTexto {
+  margin: 0;
+  font-size: 16px;
+  color: #3a261c;
+}
+
+.objetivoBarra {
+  display: grid;
+  grid-template-columns: minmax(0, 300px) auto;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 0;
+  font-family: var(--fonte-numero), monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6e5a40;
+}
+
+.objetivoBarra .barra {
+  height: 8px;
+  border-width: 1px;
+}
+
+.objetivoBarra .barra > span {
+  background: #4a8a52;
+}
+
+.cartao.ascensao {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-content: start;
+  gap: 8px;
+  height: auto;
+  min-height: 166px;
+  padding: 12px 16px 16px;
+}
+
+.ascensao p {
+  margin: 0;
+  font-size: 15px;
+  color: #3a261c;
+}
+
+.ascensao .ascensaoDica {
+  margin-top: 20px;
+  font-size: 13px;
+  color: #8a6a48;
+}
+
+.ascensao button {
+  height: 44px;
+}
+
+.reliquiasTopo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.reliquiasTopo p {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 0 0;
+  font-size: 14px;
+  color: #6e5a40;
+}
+
+.reliquiasTopo img {
+  width: 32px;
+  height: 32px;
+}
+
+.reliquias {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cartao.reliquia {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  height: auto;
+  min-height: 188px;
+  padding: 8px 10px 10px;
+}
+
+.reliquiaTopo {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+}
+
+.reliquiaTopo img {
+  width: 32px;
+  height: 32px;
+  margin-top: 4px;
+}
+
+.reliquiaTopo > span {
+  display: grid;
+  gap: 2px;
+}
+
+.reliquiaTopo strong {
+  font-family: var(--fonte-titulo), serif;
+  font-size: 16px;
+  color: #3a261c;
+}
+
+.reliquiaTopo > span > span {
+  font-family: var(--fonte-numero), monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6e5a40;
+}
+
+.reliquiaEfeito {
+  flex: 1 1 auto;
+  margin: 12px 0;
+  font-size: 14px;
+  color: #3a261c;
+}
+
+.reliquiaRodape {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.reliquiaRodape > span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--fonte-numero), monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: #3a261c;
+}
+
+.botaoCasca.botaoComprar {
+  width: 84px;
+  height: 34px;
+  padding: 0;
+  font-size: 14px;
+}
+
+/* O caminho do tempo */
+.cartao.eraFutura {
+  --fundo: #e4d8b8;
+  --realce: #e4d8b8;
+  --sombra: #d4c8a8;
+  grid-template-columns: 112px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: start;
+  gap: 12px 16px;
+  height: auto;
+  min-height: 200px;
+  padding: 10px 12px;
+}
+
+.molduraEra {
+  --borda: #3a261c;
+  --fundo: #8a8e94;
+  --realce: #8a8e94;
+  --sombra: #8a8e94;
+  width: 112px;
+  height: 112px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.molduraEra img {
+  opacity: 0.6;
+}
+
+.eraFutura .cartaoInfo {
+  gap: 8px;
+}
+
+.eraFutura .cartaoInfo > * {
+  white-space: normal;
+}
+
+.eraTexto {
+  margin: 0;
+  font-size: 15px;
+  color: #3a261c;
+}
+
+.eraLiberacao {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--fonte-numero), monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6e5a40;
+}
+
+.eraLiberacao img {
+  width: 32px;
+  height: 32px;
+}
+
+/* ---------- Telas em janelas estreitas ---------- */
+
+@container painel (max-width: 400px) {
+  .cartao.linhaResumo,
+  .cartao.relatorio,
+  .cartao.eraFutura {
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+  .cartao.eraFutura {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+  .molduraEra {
+    width: 64px;
+    height: 64px;
+  }
+  .molduraEra img {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+@media (max-width: 1279px) {
+  .cartao.linhaDestino {
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+  }
+  .linhaDestino .saque {
+    grid-column: 2;
+  }
+  .linhaDestino .chance {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+  }
+  .linhaDestino .acaoCartao {
+    grid-column: 3;
+    justify-self: end;
+  }
+  .eraTopo {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1023px) {
+  .principal {
+    flex: 1 1 60%;
+  }
+  .principal ~ .lateral {
+    flex: 1 1 40%;
+  }
+  /* Retrato a 2x (64 px) na moldura de 72: escala inteira também no celular. */
+  .cartao.heroi {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+  .cartao.heroi .retrato {
+    width: 72px !important;
+    height: 72px !important;
+  }
+  .cartao.heroi .retrato img {
+    width: 64px;
+    height: 64px;
+  }
+  .cartao.andamento {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+  }
+  .cartao.andamento .barra {
+    grid-column: 2 / -1;
+  }
+}
+
+/* Painel principal estreito (celular): o destino vira três linhas — miniatura e
+   texto; o saque na largura toda; a chance e o botão Partir. */
+@container principal (max-width: 600px) {
+  .cartao.linhaDestino {
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    row-gap: 10px;
+    padding: 8px 10px 10px 6px;
+  }
+  .linhaDestino .cartaoInfo > * {
+    white-space: normal;
+  }
+  .linhaDestino:not(.bloqueado) .cartaoInfo {
+    grid-column: 2 / -1;
+  }
+  .linhaDestino .saque {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  }
+  .linhaDestino .chance {
+    grid-column: 1 / 3;
+    grid-row: 3;
+    justify-self: start;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .linhaDestino .botaoCasca.acaoCartao {
+    grid-column: 3;
+    grid-row: 3;
+  }
+  .linhaDestino.bloqueado .requer {
+    grid-column: 2 / -1;
+    grid-row: 2;
+  }
+  .linhaDestino.bloqueado .cadeado {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .cartao.andamento {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+  }
+  .cartao.andamento .barra {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .cartao.andamento {
+    height: auto;
+    padding: 8px 12px;
+  }
+  /* Heróis: o botão Contratar desce para uma linha própria sob o subtítulo,
+     o topo do cartão quebra e cada peça ocupa a largura toda. */
+  .cabecalho > .cabecalhoExtra {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    justify-self: start;
+    margin-top: 8px;
+  }
+  .contratar {
+    justify-items: start;
+  }
+  .heroiTopo {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+  .pecas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .peca {
+    grid-template-columns: minmax(0, 1fr) auto;
+    justify-content: stretch;
+    gap: 6px 12px;
+  }
+  .peca .custos {
+    flex-wrap: wrap;
+  }
+}
+
+/* ---------- Botão Construir (A12): HUD no desktop, flutuante no celular ---------- */
+
+/* O selo fica fora da caixa (que tem os cantos recortados por clip-path). */
+.comSelo {
+  position: relative;
+  display: inline-flex;
+}
+
+.construirHud button {
+  color: #f0d890;
+}
+
+.selo {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  border: 2px solid #2a1c12;
+  border-radius: 11px;
+  background: #a8342c;
+  font-family: var(--fonte-numero), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: #f6efdc;
+}
+
+.construirFlutuante {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .construirFlutuante {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 3;
+    display: inline-flex;
+  }
+  /* No celular o Construir não fica no HUD (lá só a engrenagem): ele flutua sobre o mapa. */
+  .botoesHud .construirHud {
+    display: none;
+  }
+  .construirFlutuante button {
+    gap: 8px;
+    width: auto;
+    height: 48px;
+    padding: 0 16px;
+    font-size: 16px;
+  }
+}
+
+/* Mapa estreito: a alternância Vila/Reino (52 px) desce para o rodapé do mapa, então o Construir
+   fica logo acima dela (depois da regra do celular, que o põe no canto de baixo). */
+@container mapa (max-width: 600px) {
+  .construirFlutuante {
+    bottom: 76px;
+  }
+}
+
+/* =====================================================================
+   Celular (Portão 14): até 600 px de largura. Frames "Vila - Mobile",
+   "Mapa - Mobile", "Mapa - Mobile (Destinos aberta)", "Herois - Mobile",
+   "Expedicoes - Mobile" e "Eras - Mobile". A área entre o HUD e as abas rola
+   inteira (uma rolagem só); só a janela do mapa tem touch-action: none.
+   ===================================================================== */
+@media (max-width: 600px) {
+  .area {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    gap: 12px;
+    padding: 12px 12px 16px;
+  }
+  /* Janela do mapa: 346 x 408 no frame de 390 (spec 4c); encolhe em telas baixas, nunca abaixo de 240. */
+  .colunaMapa {
+    flex: 0 0 auto;
+    height: clamp(240px, calc(100dvh - 330px), 408px);
+    min-height: 0;
+  }
+  /* Telas: os painéis seguem o conteúdo (sem rolagem própria) e a área rola tudo junto. */
+  .principal,
+  .principal ~ .lateral,
+  .lateral {
+    flex: 0 0 auto;
+  }
+  /* Na linha de .principal o painel ocupa a largura toda; a altura segue o conteúdo. */
+  .area .painel {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .area .rolagem {
+    overflow: visible;
+    flex: 0 0 auto;
+  }
+  /* Abas no rodapé acima da área segura (barra de gestos do iPhone). */
+  .abas {
+    height: calc(72px + env(safe-area-inset-bottom));
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+  /* Alvos de toque: nenhum botão do jogo menor que 44 x 44 px. */
+  .raiz button {
+    min-height: 44px;
+  }
+  .raiz button:not(.aba) {
+    min-width: 44px;
+  }
+}
+
+/* Vila no celular: botão Construções (largo) e a Crônica abaixo do mapa. */
+.abaixoDoMapa {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.botaoConstrucoesCelular {
+  position: relative;
+  display: block;
+}
+.botaoConstrucoesCelular > button {
+  width: 100%;
+  height: 52px;
+  font-size: 18px;
+}
+.botaoConstrucoesCelular > :last-child:not(button) {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+}
+.cronicaCelular {
+  padding: 12px 16px 14px;
+}
+
+/* Gaveta de Destinos (Reino no celular). Fechada: no fluxo, abaixo do mapa. Aberta: cobre a área. */
+.gaveta {
+  flex: 0 0 auto;
+  padding: 0 12px 12px;
+}
+.gavetaAberta {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  margin: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.alcaGaveta {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: grab;
+}
+.alcaGaveta:focus-visible {
+  outline: 3px solid var(--foco, #ffd060);
+  outline-offset: -3px;
+}
+.marcaAlca {
+  display: block;
+  width: 56px;
+  height: 6px;
+  background: #c8b890;
+  box-shadow: inset 0 -2px 0 #a08a68;
+}
+.marcaAlcaAtiva {
+  background: #a08a68;
+}
+.cabecalhoGaveta {
+  position: relative;
+}
+.fecharGaveta {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: #e8dcc0;
+}
+.listaGaveta {
+  margin-top: 8px;
+}
+.notaGaveta {
+  margin: 12px 4px 4px;
+  font-size: 14px;
+  color: #6e5a40;
+}
+
+/* Expedições no celular (Figma "Expedicoes - Mobile"): o grupo em 3 cartões
+   lado a lado, retrato em cima e o nome embaixo; o check vai para o canto. */
+@media (max-width: 600px) {
+  .grupo {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .chipGrupo {
+    position: relative;
+    height: auto;
+    min-height: 112px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 4px;
+    text-align: center;
+  }
+  .chipGrupoTexto {
+    justify-items: center;
+    gap: 2px;
+  }
+  .chipGrupoTexto strong {
+    font-size: 16px;
+  }
+  .chipGrupoTexto span {
+    font-size: 12px;
+    max-width: 100%;
+  }
+  .chipGrupoCheck {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+  }
+}
+
+/* Celular: sem a rolagem própria dos painéis, o painel não pode crescer até a
+   largura mínima do conteúdo (a grade de saque passava de 400 px e empurrava o
+   Partir para fora). O saque fica em 2 colunas, como no frame. */
+@media (max-width: 600px) {
+  .principal > *,
+  .lateral > *,
+  .area .painel,
+  .area .rolagem {
+    min-width: 0;
+  }
+  .cartao {
+    min-width: 0;
+  }
+  .linhaDestino .saque {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Celular: a alternância Vila/Reino no canto de cima à direita do mapa
+   (frame "Mapa - Mobile"); embaixo ficava o botão Construir, que saiu do mapa. */
+@media (max-width: 600px) {
+  .alternar {
+    top: 8px;
+    bottom: auto;
+    right: 8px;
+  }
+  /* Gaveta fechada (frame "Mapa - Mobile"): cabeçalho de uma linha só, "Destinos · subtítulo",
+     para os dois primeiros destinos caberem abaixo do mapa. */
+  .gaveta:not(.gavetaAberta) .cabecalhoGaveta {
+    position: static;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 0 4px 4px;
+  }
+  .gaveta:not(.gavetaAberta) .cabecalhoGaveta h2 {
+    font-size: 20px;
+  }
+  .gaveta:not(.gavetaAberta) .cabecalhoGaveta p {
+    font-size: 14px;
+  }
+  .gaveta:not(.gavetaAberta) .cabecalhoGaveta > img {
+    display: none;
+  }
+  .gaveta:not(.gavetaAberta) .listaGaveta {
+    margin-top: 4px;
+  }
+  .gaveta .alcaGaveta {
+    height: 44px;
+  }
+}
+
+/* Portão 15: no topo do celular (até 600 px) não cabem Ranking e Configurações ao lado
+   do logo e da era (quebraria a linha); fica só Configurações, como no frame mobile. */
+@media (max-width: 600px) {
+  .botoesHud .rankingHud {
+    display: none;
+  }
+}

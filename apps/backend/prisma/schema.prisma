@@ -1,0 +1,124 @@
+// Banco do Cronarca (Portão 2). A URL de conexão fica em prisma.config.ts.
+// Tabelas em snake_case; modelos com os nomes do handoff.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Provedor {
+  google
+  discord
+}
+
+model User {
+  id              String   @id @default(uuid()) @db.Uuid
+  /// Sempre em minúsculas; a normalização é feita na aplicação.
+  email           String   @unique
+  nome            String
+  /// Nulo quando a conta só entra por Google ou Discord.
+  senhaHash       String?  @map("senha_hash")
+  avatarUrl       String?  @map("avatar_url")
+  /// Preferências do jogador (não são estado de jogo). Esquema: game-core/src/preferencias.ts.
+  preferencias    Json?    @db.JsonB
+  emailVerificado Boolean  @default(false) @map("email_verificado")
+  criadoEm        DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm    DateTime @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  contasOAuth OAuthAccount[]
+  sessoes     Session[]
+  estadoJogo  GameState?
+  acoes       ActionLog[]
+  ranking     RankingEntry?
+
+  @@map("users")
+}
+
+model OAuthAccount {
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @map("user_id") @db.Uuid
+  provedor          Provedor
+  providerAccountId String   @map("provider_account_id")
+  criadoEm          DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provedor, providerAccountId])
+  @@unique([userId, provedor])
+  @@map("oauth_accounts")
+}
+
+model Session {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  /// Hash do token do cookie; o token em si nunca é guardado.
+  tokenHash String   @unique @map("token_hash")
+  criadoEm  DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
+  expiraEm  DateTime @map("expira_em") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiraEm])
+  @@map("sessions")
+}
+
+model GameState {
+  userId        String   @id @map("user_id") @db.Uuid
+  /// Contador de concorrência: sobe 1 a cada ação aplicada.
+  rev           Int      @default(0)
+  /// Instante até onde a simulação foi liquidada (relógio do servidor). Não é @updatedAt.
+  atualizadoEm  DateTime @map("atualizado_em") @db.Timestamptz(3)
+  /// Esquema definido no Portão 4; estado.versao espelha versaoEsquema.
+  estado        Json     @db.JsonB
+  versaoEsquema Int      @map("versao_esquema")
+  /// Milissegundos jogados (Portão 15): soma dos intervalos entre requisições
+  /// autenticadas de jogo de até RANKING.janelaAtividadeMs. Vai ao ranking nos marcos.
+  tempoJogado       BigInt    @default(0) @map("tempo_jogado")
+  /// Última requisição autenticada de jogo (relógio do servidor).
+  ultimaAtividadeEm DateTime? @map("ultima_atividade_em") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("game_states")
+}
+
+model ActionLog {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  idempotencyKey String   @map("idempotency_key")
+  tipo           String
+  resultado      Json     @db.JsonB
+  /// rev do GameState depois da ação; permite repetir a mesma resposta.
+  rev            Int
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId, criadoEm])
+  @@map("action_logs")
+}
+
+model RankingEntry {
+  userId       String   @id @map("user_id") @db.Uuid
+  era          Int
+  ciclo        Int
+  reliquias    Int
+  /// Milissegundos jogados, copiados de GameState.tempoJogado no último marco.
+  tempoJogado  BigInt   @default(0) @map("tempo_jogado")
+  /// Quando o jogador chegou à posição atual (era, ciclo, relíquias): desempate.
+  marcoEm      DateTime @map("marco_em") @db.Timestamptz(3)
+  atualizadoEm DateTime @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([era(sort: Desc), ciclo(sort: Desc), reliquias(sort: Desc), marcoEm(sort: Asc)], map: "ranking_ordem_idx")
+  @@map("ranking_entries")
+}

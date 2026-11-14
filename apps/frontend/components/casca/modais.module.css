@@ -1,0 +1,1073 @@
+/* Modais do Portão 13 (Figma "Modal ... - Desktop"). Cores do handoff,
+   "Componentes de interface"; medidas dos frames a 1440 x 900. */
+
+.pixel {
+  image-rendering: pixelated;
+}
+
+.fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgb(10 14 12 / 60%);
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: calc(100dvh - 32px);
+  padding: 18px 24px 24px;
+}
+
+.estreita {
+  max-width: 632px;
+}
+.media {
+  max-width: 712px;
+}
+.ascensao {
+  max-width: 752px;
+}
+.larga {
+  max-width: 872px;
+}
+.ranking {
+  max-width: 880px;
+}
+
+.cabecalho {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.titulos {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin: 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #3a261c;
+}
+
+.etiqueta {
+  padding: 2px 8px;
+  border: 2px solid #2a1c12;
+  background: #4a3220;
+  font-size: 13px;
+  line-height: 16px;
+  color: #f0d890;
+  white-space: nowrap;
+}
+
+.subtitulo {
+  margin: 4px 0 0;
+  font-size: 15px;
+  color: #6e5a40;
+}
+
+.alerta {
+  color: #a8342c;
+}
+
+.fechar {
+  --e: 4px;
+  --borda: #2a1c12;
+  --fundo: #5a2018;
+  --realce: #7a3020;
+  --sombra: #3a140e;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.fechar:hover {
+  filter: brightness(1.15);
+}
+
+.fechar:focus-visible,
+.interruptor:focus-visible {
+  outline: 3px solid var(--ouro-claro);
+  outline-offset: 2px;
+}
+
+.corpo {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: #b8a078 transparent;
+}
+
+/* Card do handoff: borda 4 px #8a6a48, fundo #f6efdc, sombra #e4d8b8. */
+.cartao {
+  --borda: #8a6a48;
+  --fundo: #f6efdc;
+  --realce: #fffaf0;
+  --sombra: #e4d8b8;
+  padding: 12px 16px;
+  color: #3a261c;
+}
+
+.rotulo {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: #6e5a40;
+}
+
+.nomeCartao {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #3a261c;
+}
+
+.texto {
+  margin: 0;
+  font-size: 15px;
+  color: #4a3a2a;
+}
+
+.custos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 20px;
+  margin: 4px 0 0;
+  font-family: var(--fonte-numero), monospace;
+  font-size: 16px;
+  font-weight: 500;
+  color: #3a261c;
+}
+
+.custos > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.falta {
+  color: #a8342c;
+}
+
+.tempo {
+  margin-left: auto;
+}
+
+.nota {
+  margin: 16px 0 0;
+  font-size: 15px;
+  color: #4a3a2a;
+}
+
+.motivo {
+  margin: 8px 0 0;
+  text-align: right;
+  font-size: 14px;
+  color: #a8342c;
+}
+
+.botoes {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.botao {
+  width: 140px;
+  height: 48px;
+  font-size: 17px;
+}
+
+.botao.principal {
+  width: 200px;
+}
+
+.seta {
+  flex: none;
+  color: #6e482c;
+}
+
+/* ---------- Melhorar e Construir ---------- */
+
+.obra {
+  display: grid;
+  grid-template-columns: 176px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.retratoObra {
+  --e: 6px;
+  --borda: #2a1c12;
+  --fundo: #8ab050;
+  --realce: #8ab050;
+  --sombra: #8ab050;
+  display: grid;
+  place-items: center;
+  width: 176px;
+  height: 176px;
+}
+
+.obraInfo {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.efeito {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  min-height: 96px;
+}
+
+.valorEfeito {
+  margin: 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #3a261c;
+}
+
+.ganho {
+  color: #3a7a3a;
+}
+
+/* ---------- Pesquisa ---------- */
+
+.saber {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 8px 0 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #3a261c;
+  white-space: nowrap;
+}
+
+.lista {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pesquisa {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 92px;
+  padding: 8px 16px 8px 8px;
+}
+
+.pesquisa_concluida {
+  --fundo: #eef0dc;
+}
+
+.pesquisa_bloqueada {
+  --fundo: #ece2c8;
+  --realce: #f4ecd4;
+}
+
+.pesquisa_bloqueada .pesquisaInfo,
+.pesquisa_bloqueada .livro img {
+  opacity: 0.65;
+}
+
+.livro {
+  --borda: #3a261c;
+  --fundo: #d8c8a0;
+  --realce: #e8dcc0;
+  --sombra: #b8a078;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+}
+
+.pesquisaInfo {
+  min-width: 0;
+}
+
+.pesquisaAcao {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+}
+
+.concluida,
+.bloqueada {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bloqueada {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #6e5a40;
+}
+
+.etiquetaVerde {
+  padding: 2px 10px;
+  border: 2px solid #2a1c12;
+  background: #4a8a52;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #f6efdc;
+}
+
+.andamento {
+  width: 196px;
+}
+
+.emAndamento {
+  margin: 0 0 6px;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #3a62a8;
+}
+
+.barra {
+  height: 12px;
+  border: 2px solid #2a1c12;
+  background: #f6efdc;
+}
+
+.barra > span {
+  display: block;
+  height: 100%;
+  background: #4a8a52;
+}
+
+.restante {
+  margin: 6px 0 0;
+  font-family: var(--fonte-numero), monospace;
+  font-size: 14px;
+  color: #4a3a2a;
+}
+
+.botao.pesquisar {
+  width: 120px;
+  height: 44px;
+  font-size: 16px;
+}
+
+/* ---------- Ascensão ---------- */
+
+.rumo {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 20px;
+  align-items: center;
+  --fundo: #ece2c8;
+  padding: 8px 16px 8px 8px;
+}
+
+.retratoEra {
+  --e: 4px;
+  --borda: #2a1c12;
+  --fundo: #8ab050;
+  --realce: #8ab050;
+  --sombra: #8ab050;
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+}
+
+.rumoInfo {
+  display: grid;
+  gap: 8px;
+}
+
+.eraRumo {
+  margin: 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #6e5a40;
+}
+
+.ciclos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin: 0;
+  font-family: var(--fonte-titulo), serif;
+  font-weight: 700;
+}
+
+.de {
+  font-size: 20px;
+  color: #6e5a40;
+}
+
+.para {
+  font-size: 28px;
+  color: #3a261c;
+}
+
+.ganhoReliquias {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 16px;
+}
+
+.colunas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.colunas .cartao {
+  padding: 14px 20px 16px;
+}
+
+.vermelho {
+  color: #8a2420;
+}
+
+.verde {
+  color: #3a7a3a;
+}
+
+.itens {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 16px;
+}
+
+/* ---------- Configurações ---------- */
+
+.secao + .secao {
+  margin-top: 12px;
+}
+
+.secao .texto {
+  margin-bottom: 6px;
+}
+
+.linhaConfig {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 40px;
+  font-size: 16px;
+}
+
+.volume {
+  flex: 1 1 auto;
+  max-width: 250px;
+  accent-color: #d8a63f;
+}
+
+/* Interruptor do Figma: 56 x 28, verde ligado com o botão claro à direita. */
+.interruptor {
+  --e: 3px;
+  --borda: #2a1c12;
+  --fundo: #c8b890;
+  --realce: #c8b890;
+  --sombra: #c8b890;
+  flex: none;
+  width: 56px;
+  height: 30px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.interruptor > span {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 24px;
+  height: 22px;
+  border: 2px solid #2a1c12;
+  background: #f6efdc;
+}
+
+.interruptor.ligado {
+  --fundo: #4a8a52;
+  --realce: #4a8a52;
+  --sombra: #4a8a52;
+}
+
+.interruptor.ligado > span {
+  left: auto;
+  right: 1px;
+}
+
+.interruptor:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.acoesLinha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.botaoPequeno {
+  width: auto;
+  min-width: 156px;
+  height: 40px;
+  padding: 0 16px;
+  font-size: 15px;
+}
+
+.dica {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #6e5a40;
+}
+
+.sair button {
+  width: auto;
+  min-width: 112px;
+  height: 40px;
+  padding: 0 16px;
+  font-size: 15px;
+}
+
+.risco {
+  --borda: #a8342c;
+  --fundo: #f8ece4;
+  --sombra: #ecd4c8;
+}
+
+.botaoRisco {
+  --borda: #2a1c12;
+  --fundo: #a8342c;
+  --realce: #c8483c;
+  --sombra: #7a2018;
+  color: #f6efdc;
+}
+
+.confirmarApagar {
+  display: grid;
+  gap: 10px;
+}
+
+.campoApagar {
+  max-width: 240px;
+  height: 40px;
+  font-family: var(--fonte-numero), monospace;
+  letter-spacing: 2px;
+}
+
+/* ---------- Estreito (celular): o painel de baixo é do Portão 14 ---------- */
+
+@media (max-width: 640px) {
+  .modal {
+    padding: 14px 14px 18px;
+  }
+  .titulo {
+    font-size: 26px;
+  }
+  .obra {
+    grid-template-columns: 1fr;
+  }
+  .retratoObra {
+    width: 112px;
+    height: 112px;
+  }
+  .retratoObra img {
+    width: 96px;
+    height: 96px;
+  }
+  .pesquisa {
+    grid-template-columns: 56px minmax(0, 1fr);
+  }
+  .livro {
+    width: 56px;
+    height: 56px;
+  }
+  .pesquisaAcao {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    justify-content: flex-end;
+  }
+  .rumo {
+    grid-template-columns: 1fr;
+  }
+  .botao,
+  .botao.principal {
+    flex: 1 1 0;
+    width: auto;
+  }
+  .linhaConfig {
+    flex-wrap: wrap;
+  }
+}
+
+/* ---------- Catálogo de construções (A12; Figma "Construir - Desktop/Mobile (Catalogo)") ---------- */
+
+.rodape {
+  flex: none;
+  margin: 16px 0 0;
+  font-size: 14px;
+  color: #6e5a40;
+}
+
+.filtros {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+/* Chip do filtro: escuro quando ativo, claro com borda quando não (Figma). */
+.filtro {
+  height: 28px;
+  padding: 0 14px;
+  border: 2px solid #8a6a48;
+  background: #f6efdc;
+  font-family: var(--fonte-texto), sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #3a261c;
+  cursor: pointer;
+}
+
+.filtro.filtroAtivo {
+  border-color: #2a1c12;
+  background: #4a3220;
+  color: #f6efdc;
+}
+
+.filtro:focus-visible,
+.linhaCatalogo:focus-visible {
+  outline: 3px solid var(--ouro-claro);
+  outline-offset: 2px;
+}
+
+.gradeCatalogo {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 10px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.linhaCatalogo {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  min-height: 76px;
+  padding: 8px 10px;
+}
+
+.focoCatalogo {
+  --borda: #d8a63f;
+  animation: realceCatalogo 0.6s ease-in-out 3 alternate;
+}
+
+@keyframes realceCatalogo {
+  to {
+    background: #fff4cc;
+  }
+}
+
+.linhaInfo {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.nomeLinha {
+  margin: 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #3a261c;
+}
+
+.custosLinha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  font-family: var(--fonte-numero), monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: #3a261c;
+}
+
+.custosLinha > span,
+.nivelLinha,
+.motivoLinha {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.nivelLinha,
+.motivoLinha {
+  margin: 0;
+  font-size: 14px;
+  color: #3a261c;
+}
+
+.motivoLinha {
+  font-size: 13px;
+}
+
+.obraLinha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.restanteLinha {
+  font-family: var(--fonte-numero), monospace;
+  font-size: 13px;
+}
+
+.barraLinha {
+  flex: 1 1 auto;
+  height: 8px;
+  border: 2px solid #8a6a48;
+  background: #e4d8b8;
+}
+
+.barraLinha > span {
+  display: block;
+  height: 100%;
+  background: #d8a63f;
+}
+
+.botaoLinha {
+  width: 92px;
+  height: 34px;
+  padding: 0;
+  font-size: 14px;
+}
+
+/* Desativado sem perder o foco (aria-disabled): o mesmo cinza do botão desativado global. */
+.botaoLinha.desativado {
+  --borda: #6e5a40;
+  --fundo: #b8a888;
+  --realce: #ccbea0;
+  --sombra: #9a8a6a;
+  color: #6e5a40;
+  cursor: not-allowed;
+  filter: none;
+}
+
+.catalogo_bloqueada img {
+  opacity: 0.6;
+}
+
+/* Folha de baixo (abaixo de 1024 px): encosta no rodapé e sobe; ocupa a largura toda. */
+@media (max-width: 1023px) {
+  .fundoFolha {
+    place-items: end stretch;
+    padding: 0;
+  }
+  .folha {
+    max-width: none;
+    max-height: calc(100dvh - 104px);
+    padding: 14px 14px 18px;
+  }
+  .gradeCatalogo {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Alça da folha (Figma "Painel inferior"): escondida no modal centralizado. */
+.alca {
+  display: none;
+  flex: none;
+  width: 56px;
+  height: 6px;
+  margin: 0 auto 10px;
+  background: #c8b890;
+  box-shadow: inset 0 -2px 0 #a08a68;
+}
+@media (max-width: 1023px) {
+  .folha .alca {
+    display: block;
+  }
+}
+
+/* Celular (Portão 14, até 600 px): todo modal é folha de baixo, na largura toda,
+   acima da área segura; botões e o X com pelo menos 44 px. */
+@media (max-width: 600px) {
+  .fundo {
+    place-items: end stretch;
+    padding: 0;
+  }
+  .modal {
+    max-width: none;
+    max-height: calc(100dvh - 56px);
+    padding: 12px 14px calc(18px + env(safe-area-inset-bottom));
+  }
+  .alca {
+    display: block;
+  }
+  .fechar {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .modal button {
+    min-height: 44px;
+  }
+}
+
+/* ---------- Ranking (Portão 15, Figma "Modal Ranking - Desktop/Mobile") ---------- */
+
+.abasRanking {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.abaRanking {
+  width: 88px;
+  height: 36px;
+  padding: 0 6px;
+  font-size: 15px;
+  letter-spacing: 0;
+}
+
+/* Colunas do frame (816 de largura): # 40, Jogador (resto), Era 80, Ciclo 80, Relíquias 100, Tempo 60. */
+.cabecalhoRanking,
+.linhaRanking {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) 80px 80px 100px 64px;
+  align-items: center;
+  column-gap: 8px;
+}
+.cabecalhoRanking {
+  height: 32px;
+  padding: 0 16px 0 12px;
+  background: #c8b890;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #4a3a2a;
+}
+.corpoRanking {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 8px;
+}
+.linhaRanking {
+  --e: 4px;
+  --borda: #8a6a48;
+  --fundo: #f6efdc;
+  --realce: #fffaf0;
+  --sombra: #e4d8b8;
+  min-height: 48px;
+  padding: 0 12px 0 8px;
+  font-size: 16px;
+  color: #3a261c;
+}
+.linhaRanking.voce {
+  --borda: #d8a63f;
+  --fundo: #fbf1d0;
+  --realce: #fffae6;
+  --sombra: #ecd9a0;
+}
+.colPosicao {
+  display: flex;
+  justify-content: center;
+  color: #6e5a40;
+}
+.colNome {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 18px;
+  font-weight: 700;
+}
+.cabecalhoRanking .colNome {
+  font-size: 14px;
+}
+.colReliquias {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.colTempo {
+  text-align: right;
+}
+.seloPosicao {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid #2a1c12;
+  font-size: 13px;
+  color: #2a1c12;
+}
+.selo_ouro {
+  background: #d8a63f;
+  box-shadow: inset 2px 2px 0 #ffd060;
+}
+.selo_prata {
+  background: #b8bcc4;
+  box-shadow: inset 2px 2px 0 #dde0e6;
+}
+.selo_bronze {
+  background: #b0683c;
+  box-shadow: inset 2px 2px 0 #d08a5a;
+}
+/* A linha do jogador fica presa no pé da rolagem quando ele está fora da lista. */
+.presaRanking {
+  position: sticky;
+  bottom: -2px;
+  padding: 0 0 2px;
+  background: #e8dcc0;
+}
+.reticencias {
+  margin: 0;
+  padding: 6px 0;
+  text-align: center;
+  color: #6e5a40;
+  letter-spacing: 2px;
+}
+.soCelular {
+  display: none;
+}
+.soCelularLinha {
+  display: none;
+}
+
+/* Celular (Figma "Modal Ranking - Mobile"): tabela simples numa caixa, linhas alternadas, "Você" no lugar do nome. */
+@media (max-width: 600px) {
+  .abasRanking {
+    gap: 8px;
+  }
+  .abaRanking {
+    flex: 1 1 0;
+    width: auto;
+  }
+  .soLargo {
+    display: none;
+  }
+  .soCelular {
+    display: inline;
+  }
+  /* Configurações: no celular o Ranking abre por aqui (o topo só comporta Configurações). */
+  .soCelularLinha {
+    display: flex;
+  }
+  .cabecalhoRanking,
+  .linhaRanking {
+    grid-template-columns: 26px minmax(0, 1fr) 32px 40px 46px 44px;
+    column-gap: 4px;
+  }
+  .tabelaRanking {
+    border: 3px solid #8a6a48;
+    background: #f6efdc;
+  }
+  .cabecalhoRanking {
+    height: 36px;
+    padding: 0 6px;
+    background: transparent;
+    border-bottom: 2px solid #c8b890;
+    font-size: 12px;
+  }
+  .cabecalhoRanking .colNome {
+    font-size: 12px;
+  }
+  .corpoRanking {
+    gap: 0;
+    padding-top: 0;
+  }
+  .linhaRanking {
+    --e: 0px;
+    min-height: 44px;
+    padding: 0 6px;
+    font-size: 14px;
+    box-shadow: none;
+    --fundo: #f6efdc;
+  }
+  .corpoRanking .linhaRanking:nth-child(odd) {
+    --fundo: #e6ecd4;
+  }
+  .colPosicao {
+    justify-content: flex-start;
+  }
+  .colNome {
+    font-family: var(--fonte-texto), sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+  }
+  .linhaRanking.voce .colNome {
+    font-family: var(--fonte-titulo), serif;
+    font-weight: 700;
+  }
+  .colTempo {
+    text-align: left;
+  }
+  .seloPosicao {
+    display: inline;
+    width: auto;
+    height: auto;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    font-size: inherit;
+    color: inherit;
+  }
+  .presaRanking {
+    padding: 0;
+    background: #f6efdc;
+  }
+  .presaRanking .linhaRanking {
+    --e: 3px;
+    --borda: #d8a63f;
+    --fundo: #fbf1d0;
+  }
+}

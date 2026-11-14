@@ -1,0 +1,78 @@
+.moldura {
+  position: relative;
+  width: 876px;
+}
+
+/* Casca: o mapa ocupa todo o pai e se redimensiona com ele. */
+.moldura.ajustavel {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Tamanho fixo em px CSS (spec do mapa, seção 1). O tamanho interno do
+   canvas acompanha a escala da tela; pixelated garante ampliação sem borrar. */
+.canvas {
+  display: block;
+  image-rendering: pixelated;
+  cursor: grab;
+  touch-action: none;
+}
+
+.arrastando {
+  cursor: grabbing;
+}
+
+.depuracao,
+.ajuda {
+  margin: 0;
+  font-family: var(--fonte-numero), monospace;
+  font-size: 13px;
+  color: var(--texto-claro);
+}
+
+.depuracao {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  padding: 4px 8px;
+  background: rgb(13 21 18 / 0.85);
+  pointer-events: none;
+}
+
+.ajuda {
+  margin-top: 8px;
+  color: var(--texto-apagado);
+}
+
+.clicavel {
+  cursor: pointer;
+}
+
+/* "+N" do clique: camada HTML por cima do canvas, do mesmo tamanho dele. */
+.efeitos {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Marcadores de slot vazio no toque: ícone "mais" de 16 px, fixo no centro do slot. */
+.marcadoresSlot {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.marcadorSlot {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  transform: translate(-50%, -50%);
+  color: #f0e8c0;
+  background: rgb(26 16 10 / 0.8);
+  border: 1px solid #f0e8c0;
+}

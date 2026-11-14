@@ -1,0 +1,44 @@
+/* Tela de carregamento: mesmo fundo, cores e fontes do Início. */
+.pagina {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--tela);
+}
+
+.bloco {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+}
+
+/* Fogueira de 32 px a 4x: ampliação inteira, sem borrar. */
+.fogueira {
+  width: 128px;
+  height: 128px;
+  image-rendering: pixelated;
+}
+
+.titulo {
+  margin: 0;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 56px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--ouro-claro);
+  text-shadow: 4px 4px 0 var(--contorno);
+}
+
+.texto {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 1px;
+  color: var(--texto-claro);
+}
+
+/* button.x: mais específico que .caixa e .botao globais (largura 100%). */
+.bloco :global(button.botao) {
+  width: auto;
+  padding: 0 24px;
+}

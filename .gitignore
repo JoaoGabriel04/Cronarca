@@ -1,0 +1,14 @@
+node_modules/
+.env
+.next/
+next-env.d.ts
+dist/
+coverage/
+*.log
+*.tsbuildinfo
+.DS_Store
+apps/backend/src/generated/
+
+# Entregas brutas de arte (já integradas ao projeto) e metadados do Windows
+entrega_*.zip
+*:Zone.Identifier

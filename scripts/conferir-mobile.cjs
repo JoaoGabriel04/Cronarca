@@ -1,0 +1,151 @@
+// Conferência do layout do celular no Chromium (Portão 14). Roda dentro da
+// imagem do Playwright (ver `make conferir-mobile`), com o app de pé e a
+// conta de desenvolvimento (`make seed`).
+//
+// Em 360, 390, 600 e 601 px de largura (844 de altura), em cada tela e modal:
+// - layout do celular até 600 px e o empilhado em 601;
+// - sem rolagem horizontal da página;
+// - até 600 px, nenhum botão visível menor que 44 x 44 px;
+// - touch-action: none só na janela do mapa (o canvas).
+// Em 390 grava as capturas ao lado dos frames do Figma (docs/referencia/figma_mobile).
+const { chromium } = require('playwright');
+const { PNG } = require('pngjs');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const APP = process.env.APP_URL || 'http://localhost:3000';
+const RAIZ = path.resolve(__dirname, '..');
+const FIGMA = path.join(RAIZ, 'docs/referencia/figma_mobile');
+const SAIDA = path.join(RAIZ, 'docs/referencia');
+const LARGURAS = [360, 390, 600, 601];
+const ALTURA = 844;
+
+const espera = (p, ms = 350) => p.waitForTimeout(ms);
+const aba = (p, nome) => p.locator('nav[aria-label="Telas do jogo"] button', { hasText: nome }).click();
+/** Alternância Vila/Reino sobre o mapa (não a aba Vila do rodapé). */
+const visao = (p, nome) => p.locator('[data-layout] button', { hasText: new RegExp(`^${nome}$`) }).first().click();
+const abrirConstrucoes = (p) => p.locator('[data-layout] button, header button').filter({ hasText: /^Construções$|^Construir$/ }).first().click();
+
+/** Telas e modais, cada um com o jeito de chegar lá e o frame do Figma para comparar. */
+const TELAS = [
+  { nome: 'reino', figma: 'reino', ir: async (p) => { await aba(p, 'Vila'); await visao(p, 'Reino'); } },
+  { nome: 'reino_gaveta_aberta', figma: 'reino_gaveta_aberta', soCelular: true, ir: async (p) => { await aba(p, 'Vila'); await visao(p, 'Reino'); await espera(p); await p.getByRole('button', { name: 'Abrir a lista de destinos' }).click(); } },
+  { nome: 'vila', figma: 'vila', ir: async (p) => { await aba(p, 'Vila'); await visao(p, 'Vila'); } },
+  { nome: 'herois', ir: (p) => aba(p, 'Heróis') },
+  { nome: 'expedicoes', figma: 'expedicoes', ir: (p) => aba(p, 'Expedições') },
+  { nome: 'eras', ir: (p) => aba(p, 'Eras') },
+  { nome: 'catalogo', ir: async (p) => { await aba(p, 'Vila'); await visao(p, 'Vila'); await abrirConstrucoes(p); } },
+  { nome: 'modal_melhorar', figma: 'modal_melhorar', ir: async (p) => { await aba(p, 'Vila'); await visao(p, 'Vila'); await abrirConstrucoes(p); await espera(p); await p.locator('[role="dialog"] li[data-estado="construida"] button').first().click(); } },
+  { nome: 'modal_configuracoes', ir: (p) => p.getByRole('button', { name: 'Configurações' }).click() },
+  { nome: 'modal_ranking', figma: 'modal_ranking', ir: async (p) => { if (p.viewportSize().width <= 600) { await p.getByRole('button', { name: 'Configurações' }).click(); await espera(p); await p.getByRole('button', { name: 'Ver ranking' }).click(); } else { await p.getByRole('button', { name: 'Ranking' }).click(); } await p.locator('[role="dialog"] [role="table"] [role="row"]').nth(1).waitFor(); } },
+];
+
+async function medir(p, largura) {
+  return p.evaluate((largura) => {
+    const doc = document.documentElement;
+    const horizontal = Math.max(doc.scrollWidth, document.body.scrollWidth) - window.innerWidth;
+    const visivel = (el) => {
+      const r = el.getBoundingClientRect();
+      const s = getComputedStyle(el);
+      return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none' && r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth;
+    };
+    // Com um diálogo aberto, só o que está nele conta (o resto fica atrás do fundo escurecido).
+    const dialogo = document.querySelector('[role="dialog"]');
+    const raiz = dialogo || document;
+    const pequenos = [...raiz.querySelectorAll('button, a[href], [role="button"]')]
+      .filter(visivel)
+      .map((el) => ({ el, r: el.getBoundingClientRect() }))
+      .filter(({ r }) => largura <= 600 && (r.width < 43.5 || r.height < 43.5))
+      .map(({ el, r }) => `${(el.getAttribute('aria-label') || el.textContent || el.tagName).trim().slice(0, 30)} ${Math.round(r.width)}x${Math.round(r.height)}`);
+    const comTouchNone = [...document.querySelectorAll('*')]
+      .filter((el) => getComputedStyle(el).touchAction === 'none')
+      .map((el) => el.tagName.toLowerCase() + (el.getAttribute('aria-label') ? `[${el.getAttribute('aria-label')}]` : ''));
+    const layout = document.querySelector('[data-layout]')?.getAttribute('data-layout');
+    // Conteúdo cortado à direita ou à esquerda: elemento visível da área (ou do modal) que passa da tela,
+    // mesmo quando um pai com overflow esconde o excesso (a rolagem da página não acusa esse caso).
+    const escopo = dialogo || document.querySelector('[data-layout]');
+    const cortados = escopo
+      ? [...escopo.querySelectorAll('*')]
+          .filter((el) => !el.closest('canvas') && el.tagName !== 'CANVAS')
+          .filter((el) => {
+            const s = getComputedStyle(el);
+            if (s.display === 'none' || s.visibility === 'hidden') return false;
+            const r = el.getBoundingClientRect();
+            return r.width > 0 && r.height > 0 && (r.right > window.innerWidth + 1 || r.left < -1);
+          })
+          .filter((el, _, todos) => !todos.some((o) => o !== el && o.contains(el)))
+          .map((el) => `${el.tagName.toLowerCase()}.${String(el.className).split(' ').pop().slice(0, 28)} ${Math.round(el.getBoundingClientRect().left)}..${Math.round(el.getBoundingClientRect().right)}`)
+      : [];
+    return { horizontal, pequenos, comTouchNone, layout, cortados };
+  }, largura);
+}
+
+/** App à esquerda, frame do Figma à direita (quando há frame). */
+function ladoALado(app, figma) {
+  const a = PNG.sync.read(app);
+  const f = figma ? PNG.sync.read(fs.readFileSync(figma)) : null;
+  const folga = 24;
+  const largura = a.width + (f ? folga + f.width : 0);
+  const altura = Math.max(a.height, f ? f.height : 0);
+  const o = new PNG({ width: largura, height: altura });
+  o.data.fill(255);
+  const copiar = (img, ox) => {
+    for (let y = 0; y < img.height; y++) img.data.copy(o.data, (y * largura + ox) * 4, y * img.width * 4, (y + 1) * img.width * 4);
+  };
+  copiar(a, 0);
+  if (f) copiar(f, a.width + folga);
+  return PNG.sync.write(o);
+}
+
+(async () => {
+  const navegador = await chromium.launch();
+  // Um login só, reaproveitado nas quatro larguras (o backend limita as tentativas de login).
+  const sessao = await navegador.newContext();
+  const login = await sessao.request.post(`${APP}/api/auth/login`, { headers: { Origin: APP }, data: { email: 'dev@cronarca.local', senha: 'cronarca' } });
+  if (!login.ok()) throw new Error(`login falhou (${login.status()}): rode \`make seed\`${login.status() === 429 ? ' ou espere o limite de tentativas' : ''}`);
+  const storageState = await sessao.storageState();
+  await sessao.close();
+  let falhas = 0;
+  for (const largura of LARGURAS) {
+    const contexto = await navegador.newContext({ viewport: { width: largura, height: ALTURA }, deviceScaleFactor: 1, hasTouch: true, isMobile: true, storageState });
+    const p = await contexto.newPage();
+    const erros = [];
+    p.on('pageerror', (e) => erros.push(String(e)));
+    await p.goto(`${APP}/jogo`, { timeout: 120_000 });
+    await p.waitForSelector('[data-pronto="sim"]', { timeout: 120_000 });
+    // O indicador do modo de desenvolvimento do Next.js não entra nas capturas.
+    await p.addStyleTag({ content: 'nextjs-portal { display: none !important; }' });
+    for (const t of TELAS) {
+      if (t.soCelular && largura > 600) continue;
+      await p.keyboard.press('Escape');
+      await espera(p, 150);
+      await t.ir(p);
+      await espera(p);
+      const m = await medir(p, largura);
+      const esperado = largura <= 600 ? 'celular' : 'normal';
+      const touchOk = m.comTouchNone.every((x) => x === 'canvas[Mapa do reino]');
+      const ok = m.horizontal <= 0 && m.layout === esperado && m.pequenos.length === 0 && touchOk && m.cortados.length === 0;
+      if (!ok) falhas++;
+      console.log(`${String(largura).padStart(3)} px  ${t.nome.padEnd(20)} layout ${m.layout}  rolagem horizontal ${m.horizontal > 0 ? `${m.horizontal} px` : 'não'}  cortado: ${m.cortados.length ? m.cortados.slice(0, 3).join('; ') : 'nada'}  alvos < 44: ${m.pequenos.length ? m.pequenos.join('; ') : 'nenhum'}  touch-action none: ${m.comTouchNone.join(', ') || 'nenhum'}  ${ok ? 'ok' : 'FALHOU'}`);
+      if (largura === 390) {
+        const app = await p.screenshot();
+        const figma = t.figma ? path.join(FIGMA, `${t.figma}.png`) : null;
+        fs.writeFileSync(path.join(SAIDA, `portao14_${t.nome}.png`), ladoALado(app, figma && fs.existsSync(figma) ? figma : null));
+      }
+    }
+    if (erros.length) {
+      falhas++;
+      console.log(`${largura} px  erros na página: ${erros.join('; ')}`);
+    }
+    await contexto.close();
+  }
+  await navegador.close();
+  if (falhas) {
+    console.error(`${falhas} verificação(ões) falharam`);
+    process.exit(1);
+  }
+  console.log('tudo ok; capturas em docs/referencia/portao14_*.png (app à esquerda, Figma à direita)');
+})().catch((erro) => {
+  console.error(erro);
+  process.exit(1);
+});

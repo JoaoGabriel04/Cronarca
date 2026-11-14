@@ -1,0 +1,798 @@
+{
+  "aldeao": {
+    "lenhador": {
+      "quadros": 4,
+      "duracoesMs": [
+        200,
+        80,
+        170,
+        150
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "lenhador_1.png",
+        "lenhador_2.png",
+        "lenhador_3.png",
+        "lenhador_4.png"
+      ]
+    },
+    "mineiro": {
+      "quadros": 4,
+      "duracoesMs": [
+        200,
+        80,
+        170,
+        150
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "mineiro_1.png",
+        "mineiro_2.png",
+        "mineiro_3.png",
+        "mineiro_4.png"
+      ]
+    },
+    "fazendeiro": {
+      "quadros": 4,
+      "duracoesMs": [
+        300,
+        150,
+        200,
+        150
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "fazendeiro_1.png",
+        "fazendeiro_2.png",
+        "fazendeiro_3.png",
+        "fazendeiro_4.png"
+      ]
+    },
+    "ferreiro": {
+      "quadros": 4,
+      "duracoesMs": [
+        200,
+        90,
+        160,
+        150
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "ferreiro_1.png",
+        "ferreiro_2.png",
+        "ferreiro_3.png",
+        "ferreiro_4.png"
+      ]
+    },
+    "sabio": {
+      "quadros": 4,
+      "duracoesMs": [
+        300,
+        200,
+        200,
+        200
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "sabio_1.png",
+        "sabio_2.png",
+        "sabio_3.png",
+        "sabio_4.png"
+      ]
+    },
+    "ocioso": {
+      "quadros": 4,
+      "duracoesMs": [
+        300,
+        150,
+        150,
+        150
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "ocioso_1.png",
+        "ocioso_2.png",
+        "ocioso_3.png",
+        "ocioso_4.png"
+      ]
+    }
+  },
+  "aventureiro": {
+    "guerreiro": {
+      "quadros": 6,
+      "duracoesMs": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "guerreiro_1.png",
+        "guerreiro_2.png",
+        "guerreiro_3.png",
+        "guerreiro_4.png",
+        "guerreiro_5.png",
+        "guerreiro_6.png"
+      ]
+    },
+    "arqueiro": {
+      "quadros": 6,
+      "duracoesMs": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "arqueiro_1.png",
+        "arqueiro_2.png",
+        "arqueiro_3.png",
+        "arqueiro_4.png",
+        "arqueiro_5.png",
+        "arqueiro_6.png"
+      ]
+    },
+    "mago": {
+      "quadros": 6,
+      "duracoesMs": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "mago_1.png",
+        "mago_2.png",
+        "mago_3.png",
+        "mago_4.png",
+        "mago_5.png",
+        "mago_6.png"
+      ]
+    },
+    "ladino": {
+      "quadros": 6,
+      "duracoesMs": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "ladino_1.png",
+        "ladino_2.png",
+        "ladino_3.png",
+        "ladino_4.png",
+        "ladino_5.png",
+        "ladino_6.png"
+      ]
+    },
+    "clerigo": {
+      "quadros": 6,
+      "duracoesMs": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "clerigo_1.png",
+        "clerigo_2.png",
+        "clerigo_3.png",
+        "clerigo_4.png",
+        "clerigo_5.png",
+        "clerigo_6.png"
+      ]
+    }
+  },
+  "construcao": {
+    "casa": {
+      "quadros": 4,
+      "duracoesMs": [
+        220,
+        220,
+        220,
+        220
+      ],
+      "tamanho": 48,
+      "arquivos": [
+        "casa_1.png",
+        "casa_2.png",
+        "casa_3.png",
+        "casa_4.png"
+      ]
+    },
+    "serraria": {
+      "quadros": 4,
+      "duracoesMs": [
+        120,
+        120,
+        120,
+        120
+      ],
+      "tamanho": 48,
+      "arquivos": [
+        "serraria_1.png",
+        "serraria_2.png",
+        "serraria_3.png",
+        "serraria_4.png"
+      ]
+    },
+    "pedreira": {
+      "quadros": 4,
+      "duracoesMs": [
+        200,
+        150,
+        200,
+        150
+      ],
+      "tamanho": 48,
+      "arquivos": [
+        "pedreira_1.png",
+        "pedreira_2.png",
+        "pedreira_3.png",
+        "pedreira_4.png"
+      ]
+    },
+    "scriptorium": {
+      "quadros": 4,
+      "duracoesMs": [
+        250,
+        200,
+        250,
+        200
+      ],
+      "tamanho": 48,
+      "arquivos": [
+        "scriptorium_1.png",
+        "scriptorium_2.png",
+        "scriptorium_3.png",
+        "scriptorium_4.png"
+      ]
+    },
+    "taverna": {
+      "quadros": 4,
+      "duracoesMs": [
+        220,
+        220,
+        220,
+        220
+      ],
+      "tamanho": 48,
+      "arquivos": [
+        "taverna_1.png",
+        "taverna_2.png",
+        "taverna_3.png",
+        "taverna_4.png"
+      ]
+    },
+    "mercado": {
+      "quadros": 4,
+      "duracoesMs": [
+        250,
+        200,
+        250,
+        200
+      ],
+      "tamanho": 48,
+      "arquivos": [
+        "mercado_1.png",
+        "mercado_2.png",
+        "mercado_3.png",
+        "mercado_4.png"
+      ]
+    },
+    "forja": {
+      "quadros": 4,
+      "duracoesMs": [
+        120,
+        100,
+        120,
+        100
+      ],
+      "tamanho": 48,
+      "arquivos": [
+        "forja_1.png",
+        "forja_2.png",
+        "forja_3.png",
+        "forja_4.png"
+      ]
+    },
+    "muralha": {
+      "quadros": 2,
+      "duracoesMs": [
+        450,
+        450
+      ],
+      "tamanho": 48,
+      "arquivos": [
+        "muralha_1.png",
+        "muralha_2.png"
+      ]
+    },
+    "armazem": {
+      "quadros": 2,
+      "duracoesMs": [
+        450,
+        450
+      ],
+      "tamanho": 48,
+      "arquivos": [
+        "armazem_1.png",
+        "armazem_2.png"
+      ]
+    },
+    "celeiro": {
+      "quadros": 2,
+      "duracoesMs": [
+        450,
+        450
+      ],
+      "tamanho": 48,
+      "arquivos": [
+        "celeiro_1.png",
+        "celeiro_2.png"
+      ]
+    }
+  },
+  "cenario": {
+    "fogueira": {
+      "quadros": 6,
+      "duracoesMs": [
+        110,
+        90,
+        110,
+        100,
+        110,
+        90
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "fogueira_1.png",
+        "fogueira_2.png",
+        "fogueira_3.png",
+        "fogueira_4.png",
+        "fogueira_5.png",
+        "fogueira_6.png"
+      ]
+    },
+    "poco": {
+      "quadros": 4,
+      "duracoesMs": [
+        250,
+        250,
+        250,
+        250
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "poco_1.png",
+        "poco_2.png",
+        "poco_3.png",
+        "poco_4.png"
+      ]
+    },
+    "cerca": {
+      "quadros": 2,
+      "duracoesMs": [
+        450,
+        450
+      ],
+      "tamanho": 16,
+      "arquivos": [
+        "cerca_1.png",
+        "cerca_2.png"
+      ]
+    },
+    "flores": {
+      "quadros": 2,
+      "duracoesMs": [
+        450,
+        450
+      ],
+      "tamanho": 16,
+      "arquivos": [
+        "flores_1.png",
+        "flores_2.png"
+      ]
+    }
+  },
+  "expedicao": {
+    "floresta": {
+      "quadros": 4,
+      "duracoesMs": [
+        300,
+        250,
+        300,
+        250
+      ],
+      "tamanho": 64,
+      "arquivos": [
+        "floresta_1.png",
+        "floresta_2.png",
+        "floresta_3.png",
+        "floresta_4.png"
+      ]
+    },
+    "ruinas": {
+      "quadros": 4,
+      "duracoesMs": [
+        300,
+        250,
+        300,
+        250
+      ],
+      "tamanho": 64,
+      "arquivos": [
+        "ruinas_1.png",
+        "ruinas_2.png",
+        "ruinas_3.png",
+        "ruinas_4.png"
+      ]
+    },
+    "mina": {
+      "quadros": 4,
+      "duracoesMs": [
+        300,
+        250,
+        300,
+        250
+      ],
+      "tamanho": 64,
+      "arquivos": [
+        "mina_1.png",
+        "mina_2.png",
+        "mina_3.png",
+        "mina_4.png"
+      ]
+    },
+    "pantano": {
+      "quadros": 4,
+      "duracoesMs": [
+        300,
+        250,
+        300,
+        250
+      ],
+      "tamanho": 64,
+      "arquivos": [
+        "pantano_1.png",
+        "pantano_2.png",
+        "pantano_3.png",
+        "pantano_4.png"
+      ]
+    },
+    "cripta": {
+      "quadros": 4,
+      "duracoesMs": [
+        300,
+        250,
+        300,
+        250
+      ],
+      "tamanho": 64,
+      "arquivos": [
+        "cripta_1.png",
+        "cripta_2.png",
+        "cripta_3.png",
+        "cripta_4.png"
+      ]
+    }
+  },
+  "evento": {
+    "mercador": {
+      "quadros": 6,
+      "duracoesMs": [
+        150,
+        150,
+        150,
+        150,
+        150,
+        150
+      ],
+      "tamanho": 64,
+      "arquivos": [
+        "mercador_1.png",
+        "mercador_2.png",
+        "mercador_3.png",
+        "mercador_4.png",
+        "mercador_5.png",
+        "mercador_6.png"
+      ]
+    },
+    "bandidos": {
+      "quadros": 6,
+      "duracoesMs": [
+        150,
+        150,
+        150,
+        150,
+        150,
+        150
+      ],
+      "tamanho": 64,
+      "arquivos": [
+        "bandidos_1.png",
+        "bandidos_2.png",
+        "bandidos_3.png",
+        "bandidos_4.png",
+        "bandidos_5.png",
+        "bandidos_6.png"
+      ]
+    },
+    "tempestade": {
+      "quadros": 6,
+      "duracoesMs": [
+        150,
+        150,
+        150,
+        150,
+        150,
+        150
+      ],
+      "tamanho": 64,
+      "arquivos": [
+        "tempestade_1.png",
+        "tempestade_2.png",
+        "tempestade_3.png",
+        "tempestade_4.png",
+        "tempestade_5.png",
+        "tempestade_6.png"
+      ]
+    },
+    "festival": {
+      "quadros": 6,
+      "duracoesMs": [
+        150,
+        150,
+        150,
+        150,
+        150,
+        150
+      ],
+      "tamanho": 64,
+      "arquivos": [
+        "festival_1.png",
+        "festival_2.png",
+        "festival_3.png",
+        "festival_4.png",
+        "festival_5.png",
+        "festival_6.png"
+      ]
+    },
+    "incendio": {
+      "quadros": 6,
+      "duracoesMs": [
+        150,
+        150,
+        150,
+        150,
+        150,
+        150
+      ],
+      "tamanho": 64,
+      "arquivos": [
+        "incendio_1.png",
+        "incendio_2.png",
+        "incendio_3.png",
+        "incendio_4.png",
+        "incendio_5.png",
+        "incendio_6.png"
+      ]
+    },
+    "cometa": {
+      "quadros": 6,
+      "duracoesMs": [
+        150,
+        150,
+        150,
+        150,
+        150,
+        150
+      ],
+      "tamanho": 64,
+      "arquivos": [
+        "cometa_1.png",
+        "cometa_2.png",
+        "cometa_3.png",
+        "cometa_4.png",
+        "cometa_5.png",
+        "cometa_6.png"
+      ]
+    }
+  },
+  "recurso": {
+    "madeira": {
+      "quadros": 4,
+      "duracoesMs": [
+        220,
+        180,
+        220,
+        180
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "madeira_1.png",
+        "madeira_2.png",
+        "madeira_3.png",
+        "madeira_4.png"
+      ]
+    },
+    "pedra": {
+      "quadros": 4,
+      "duracoesMs": [
+        220,
+        180,
+        220,
+        180
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "pedra_1.png",
+        "pedra_2.png",
+        "pedra_3.png",
+        "pedra_4.png"
+      ]
+    },
+    "comida": {
+      "quadros": 4,
+      "duracoesMs": [
+        220,
+        180,
+        220,
+        180
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "comida_1.png",
+        "comida_2.png",
+        "comida_3.png",
+        "comida_4.png"
+      ]
+    },
+    "ferro": {
+      "quadros": 4,
+      "duracoesMs": [
+        220,
+        180,
+        220,
+        180
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "ferro_1.png",
+        "ferro_2.png",
+        "ferro_3.png",
+        "ferro_4.png"
+      ]
+    },
+    "ouro": {
+      "quadros": 4,
+      "duracoesMs": [
+        220,
+        180,
+        220,
+        180
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "ouro_1.png",
+        "ouro_2.png",
+        "ouro_3.png",
+        "ouro_4.png"
+      ]
+    },
+    "saber": {
+      "quadros": 4,
+      "duracoesMs": [
+        220,
+        180,
+        220,
+        180
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "saber_1.png",
+        "saber_2.png",
+        "saber_3.png",
+        "saber_4.png"
+      ]
+    }
+  },
+  "futuro": {
+    "castelo": {
+      "quadros": 4,
+      "duracoesMs": [
+        250,
+        200,
+        250,
+        200
+      ],
+      "tamanho": 48,
+      "arquivos": [
+        "castelo_1.png",
+        "castelo_2.png",
+        "castelo_3.png",
+        "castelo_4.png"
+      ]
+    },
+    "cavaleiro": {
+      "quadros": 4,
+      "duracoesMs": [
+        250,
+        200,
+        250,
+        200
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "cavaleiro_1.png",
+        "cavaleiro_2.png",
+        "cavaleiro_3.png",
+        "cavaleiro_4.png"
+      ]
+    },
+    "torre": {
+      "quadros": 4,
+      "duracoesMs": [
+        250,
+        200,
+        250,
+        200
+      ],
+      "tamanho": 48,
+      "arquivos": [
+        "torre_1.png",
+        "torre_2.png",
+        "torre_3.png",
+        "torre_4.png"
+      ]
+    },
+    "cristal": {
+      "quadros": 4,
+      "duracoesMs": [
+        250,
+        200,
+        250,
+        200
+      ],
+      "tamanho": 32,
+      "arquivos": [
+        "cristal_1.png",
+        "cristal_2.png",
+        "cristal_3.png",
+        "cristal_4.png"
+      ]
+    },
+    "portal": {
+      "quadros": 4,
+      "duracoesMs": [
+        250,
+        200,
+        250,
+        200
+      ],
+      "tamanho": 48,
+      "arquivos": [
+        "portal_1.png",
+        "portal_2.png",
+        "portal_3.png",
+        "portal_4.png"
+      ]
+    }
+  }
+}

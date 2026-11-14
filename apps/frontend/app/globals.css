@@ -1,0 +1,307 @@
+/* Cronarca: estilos globais. Cores do handoff (seção Componentes de interface)
+   e dos frames Inicio e Login do Figma. */
+
+:root {
+  --tela: #14201c;
+  --texto-claro: #e8dcc0;
+  --texto-escuro: #3a261c;
+  --texto-suave: #6e5a40;
+  --texto-apagado: #a08a68;
+  --erro: #8a2420;
+  --ouro: #d8a63f;
+  --ouro-claro: #ffd060;
+  --contorno: #1a100a;
+
+  --u: 6px; /* px de tela por pixel de sprite; o script de escala ajusta */
+  --z: 1;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--tela);
+  color: var(--texto-claro);
+  font-family: var(--fonte-texto), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  image-rendering: pixelated;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- Cena (Início e Login) ---------- */
+
+.cena {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.cena-centro {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.cena-palco {
+  position: relative;
+  width: 1440px;
+  height: 900px;
+  zoom: var(--z);
+}
+
+.cena-fundo {
+  position: absolute;
+  inset: 0;
+  width: 1440px;
+  height: 900px;
+}
+
+.sprite {
+  position: absolute;
+  pointer-events: none;
+}
+
+.sprite img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* 2 quadros, troca a cada 450 ms. */
+.sprite .quadro-1 {
+  animation: quadro-a 900ms step-end infinite;
+}
+.sprite .quadro-2 {
+  animation: quadro-b 900ms step-end infinite;
+}
+.sprite.comeca-no-2 img {
+  animation-delay: -450ms;
+}
+
+@keyframes quadro-a {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+}
+@keyframes quadro-b {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sprite img { animation: none; }
+  .sprite .quadro-2 { opacity: 0; }
+  .sprite.comeca-no-2 .quadro-1 { opacity: 0; }
+  .sprite.comeca-no-2 .quadro-2 { opacity: 1; }
+}
+
+/* ---------- Caixas em pixel art ----------
+   Borda de --e com os cantos recortados (como no Figma), realce de 2 px em
+   cima, sombra de 2 px embaixo e, se houver, linha interna a 4 px da borda. */
+
+.caixa {
+  --e: 4px;
+  --borda: var(--contorno);
+  --fundo: #3a2818;
+  --realce: #6e482c;
+  --sombra: #2a1c12;
+  position: relative;
+  border: var(--e) solid var(--borda);
+  background: var(--fundo);
+  box-shadow: inset 0 2px 0 var(--realce), inset 0 -2px 0 var(--sombra);
+  clip-path: polygon(
+    var(--e) 0, calc(100% - var(--e)) 0, calc(100% - var(--e)) var(--e), 100% var(--e),
+    100% calc(100% - var(--e)), calc(100% - var(--e)) calc(100% - var(--e)),
+    calc(100% - var(--e)) 100%, var(--e) 100%, var(--e) calc(100% - var(--e)),
+    0 calc(100% - var(--e)), 0 var(--e), var(--e) var(--e)
+  );
+}
+
+.caixa.com-linha::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 2px solid var(--linha);
+  pointer-events: none;
+}
+
+.caixa-madeira {
+  --linha: #6e482c;
+}
+
+.pergaminho {
+  --e: 6px;
+  --borda: #3a261c;
+  --fundo: #e8dcc0;
+  --realce: #f4ecd4;
+  --sombra: #c8b890;
+  --linha: #b8a078;
+  color: var(--texto-escuro);
+}
+
+.selo {
+  --fundo: #4a3220;
+}
+
+/* ---------- Botões ---------- */
+
+.botao {
+  --borda: var(--contorno);
+  --fundo: #4a3220;
+  --realce: #6e482c;
+  --sombra: #2a1c12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 52px;
+  padding: 0 12px;
+  color: var(--texto-claro);
+  font-family: var(--fonte-titulo), serif;
+  font-size: 19px;
+  letter-spacing: 1px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.botao:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.botao:active:not(:disabled) {
+  box-shadow: inset 0 2px 0 var(--sombra), inset 0 -2px 0 var(--realce);
+}
+
+.botao:focus-visible {
+  outline: 3px solid var(--ouro-claro);
+  outline-offset: 2px;
+}
+
+.botao-dourado {
+  --borda: #2a1c12;
+  --fundo: #d8a63f;
+  --realce: #ffd060;
+  --sombra: #a07820;
+  height: 58px;
+  color: #2a1c12;
+  font-size: 22px;
+}
+
+.botao-claro {
+  --borda: #3a261c;
+  --fundo: #d8c490;
+  --realce: #ecdcb0;
+  --sombra: #b8a078;
+  color: #3a261c;
+}
+
+.botao:disabled {
+  --borda: #6e5a40;
+  --fundo: #b8a888;
+  --realce: #ccbea0;
+  --sombra: #9a8a6a;
+  color: #6e5a40;
+  cursor: not-allowed;
+}
+
+/* Botão só com ícone (engrenagem da tela inicial). */
+.botao-icone {
+  width: 80px;
+  height: 56px;
+  --fundo: #3a2818;
+}
+
+/* ---------- Campos ---------- */
+
+.campo-rotulo {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--texto-escuro);
+}
+
+.campo {
+  --borda: #8a6a48;
+  --fundo: #f6efdc;
+  --realce: #f6efdc;
+  --sombra: #e4d8b8;
+  width: 100%;
+  height: 52px;
+  padding: 0 12px;
+  color: var(--texto-escuro);
+  font-size: 17px;
+  outline: none;
+}
+
+.campo::placeholder {
+  color: var(--texto-apagado);
+}
+
+.campo:focus {
+  --borda: #d8a63f;
+}
+
+.campo[aria-invalid='true'] {
+  --borda: var(--erro);
+}
+
+.campo-erro {
+  min-height: 20px;
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--erro);
+}
+
+.aviso-erro {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-left: 4px solid var(--erro);
+  background: #f0dcc8;
+  color: var(--erro);
+  font-size: 15px;
+}
+
+.link {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--texto-escuro);
+  font-weight: 700;
+  font-size: 17px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.link:focus-visible {
+  outline: 3px solid var(--ouro);
+  outline-offset: 2px;
+}
