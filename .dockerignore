@@ -7,3 +7,5 @@
 .claude
 .agents
 docs
+# Cliente do Prisma: gerado dentro da imagem (Dockerfile.prod)
+apps/backend/src/generated

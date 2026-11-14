@@ -1,0 +1,48 @@
+# syntax=docker/dockerfile:1
+# Imagem de PRODUÇÃO do backend (Render). Contexto de build: raiz do monorepo.
+#   docker build -f apps/backend/Dockerfile.prod -t cronarca-backend .
+# A imagem de desenvolvimento (apps/backend/Dockerfile) continua para o
+# `make up`: ela não copia o código (vem do volume) e roda em modo watch.
+#
+# Variáveis em tempo de execução: DATABASE_URL, APP_URL (origem pública do
+# frontend), NODE_ENV=production (já definida aqui), PORT (o Render define) e,
+# se usados, GOOGLE_*, DISCORD_* e CLOUDINARY_*.
+FROM node:24-bookworm-slim
+
+WORKDIR /app
+
+# O motor de migração do Prisma precisa do OpenSSL, que a imagem slim não traz.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+ENV NODE_ENV=production \
+    NPM_CONFIG_UPDATE_NOTIFIER=false
+
+# Dependências primeiro (camada em cache enquanto o lockfile não muda). O
+# package.json do frontend entra só para o npm ci validar o lockfile do monorepo.
+COPY package.json package-lock.json ./
+COPY packages/game-core/package.json packages/game-core/
+COPY apps/backend/package.json apps/backend/
+COPY apps/frontend/package.json apps/frontend/
+RUN npm ci --omit=dev -w @cronarca/backend -w @cronarca/game-core --include-workspace-root --no-audit --no-fund \
+  && npm cache clean --force
+
+# Código: o game-core (TypeScript, rodado pelo tsx) e o backend; o tsconfig
+# base da raiz é estendido pelos dois (o tsx e o Prisma leem).
+COPY tsconfig.base.json ./
+COPY packages/game-core packages/game-core
+COPY apps/backend apps/backend
+
+# Cliente do Prisma (src/generated). O prisma.config.ts exige DATABASE_URL ao
+# carregar; o generate não conecta, então um valor qualquer basta no build.
+WORKDIR /app/apps/backend
+RUN DATABASE_URL=postgresql://build:build@localhost:5432/build /app/node_modules/.bin/prisma generate
+
+USER node
+EXPOSE 4000
+
+# Ao subir: aplica as migrações pendentes (idempotente) e inicia o servidor.
+# O exec deixa o tsx como processo principal, para o SIGTERM do Render
+# chegar ao servidor e ele encerrar com calma.
+CMD ["sh", "-c", "/app/node_modules/.bin/prisma migrate deploy && exec /app/node_modules/.bin/tsx src/server.ts"]
