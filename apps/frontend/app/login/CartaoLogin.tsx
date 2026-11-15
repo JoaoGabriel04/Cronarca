@@ -88,7 +88,7 @@ export function CartaoLogin() {
       aria-labelledby="titulo-login"
     >
       <div className={`caixa selo ${estilos.selo}`} aria-hidden="true">
-        <img src="/sprites/icone-saber.svg" alt="" width={64} height={64} />
+        <img src="/sprites/icone-saber.svg" alt="" width={64} height={64} draggable={false} />
       </div>
       <h1 id="titulo-login" className={estilos.titulo}>
         {cadastro ? 'Nova Crônica' : 'Entrar na Crônica'}

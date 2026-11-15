@@ -28,8 +28,8 @@ function SpriteDaCena({ nome, lado, instancia, quadro = 1 }: { nome: string; lad
   }
   return (
     <span className={`sprite-svg${quadro === 2 ? ' comeca-no-2' : ''}`} style={{ width: lado, height: lado }}>
-      <img className="quadro-1" src={`/sprites/${nome}-1.svg`} alt="" width={lado} height={lado} />
-      <img className="quadro-2" src={`/sprites/${nome}-2.svg`} alt="" width={lado} height={lado} />
+      <img className="quadro-1" src={`/sprites/${nome}-1.svg`} alt="" width={lado} height={lado} draggable={false} />
+      <img className="quadro-2" src={`/sprites/${nome}-2.svg`} alt="" width={lado} height={lado} draggable={false} />
     </span>
   );
 }
@@ -49,7 +49,7 @@ export function Cena({ dados, children }: { dados: DadosCena; children?: ReactNo
     <div className={`cena cena-${dados.id}`} style={estilo}>
       <div className="cena-centro">
         <div className="cena-palco">
-          <img className="cena-fundo" src={dados.fundo} alt="" width={1440} height={900} />
+          <img className="cena-fundo" src={dados.fundo} alt="" width={1440} height={900} draggable={false} />
           {dados.sprites.map((s, i) => {
             const lado = s.canvas * PIXEL_DO_FIGMA;
             return (
@@ -66,7 +66,7 @@ export function Cena({ dados, children }: { dados: DadosCena; children?: ReactNo
 
           {/* Só no celular: castelo sobre o mesmo fundo (a 2x ou 4x), pinheiros cortados pelas bordas. */}
           <div className="cena-celular-paisagem" style={{ height: 48 * cel.castelo }} aria-hidden="true">
-            <img className="cena-celular-fundo" src={dados.fundo} alt="" />
+            <img className="cena-celular-fundo" src={dados.fundo} alt="" draggable={false} />
             {cel.pinheiros > 0 && (
               <>
                 <span className="cena-celular-pinheiro esq">

@@ -7,7 +7,8 @@
 // - sem rolagem horizontal da página;
 // - até 600 px, nenhum botão visível menor que 44 x 44 px;
 // - touch-action: none só na janela do mapa (o canvas);
-// - até 600 px, pinça com dois dedos no mapa do Reino: abrir aproxima, fechar afasta.
+// - até 600 px, pinça com dois dedos no mapa do Reino: abrir aproxima, fechar afasta;
+// - arrastar sobre o texto do jogo não seleciona nada (campos de texto, sim).
 // Em 390 grava as capturas ao lado dos frames do Figma (docs/referencia/figma_mobile).
 const { chromium } = require('playwright');
 const { PNG } = require('pngjs');
@@ -180,6 +181,31 @@ async function pinca(p) {
         const figma = t.figma ? path.join(FIGMA, `${t.figma}.png`) : null;
         fs.writeFileSync(path.join(SAIDA, `portao14_${t.nome}.png`), ladoALado(app, figma && fs.existsSync(figma) ? figma : null));
       }
+    }
+    // Seleção: arrastar sobre o texto do jogo não seleciona nada; o menu do toque longo está desligado;
+    // campos de texto continuam selecionáveis.
+    {
+      await p.keyboard.press('Escape');
+      await aba(p, 'Heróis');
+      await espera(p);
+      const caixa = await p.locator('main h2').filter({ visible: true }).first().boundingBox();
+      await p.mouse.move(caixa.x + 2, caixa.y + caixa.height / 2);
+      await p.mouse.down();
+      await p.mouse.move(caixa.x + caixa.width - 2, caixa.y + caixa.height / 2, { steps: 6 });
+      await p.mouse.up();
+      const sel = await p.evaluate(() => {
+        const texto = window.getSelection()?.toString() ?? '';
+        window.getSelection()?.removeAllRanges();
+        const corpo = getComputedStyle(document.body);
+        const campo = document.createElement('input');
+        document.body.append(campo);
+        const noCampo = getComputedStyle(campo).userSelect;
+        campo.remove();
+        return { texto, corpo: corpo.userSelect, callout: corpo.webkitTouchCallout ?? corpo.getPropertyValue('-webkit-touch-callout'), noCampo };
+      });
+      const ok = sel.texto === '' && sel.corpo === 'none' && sel.noCampo !== 'none';
+      if (!ok) falhas++;
+      console.log(`${String(largura).padStart(3)} px  seleção              arrastar selecionou "${sel.texto}"  corpo ${sel.corpo}  campo ${sel.noCampo}  toque longo ${sel.callout || '?'}  ${ok ? 'ok' : 'FALHOU'}`);
     }
     // Pinça com dois dedos (toques reais pelo protocolo do Chrome): abrir aproxima, fechar afasta, sempre em zoom inteiro.
     if (largura <= 600) {

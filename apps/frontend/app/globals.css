@@ -26,17 +26,44 @@ html,
 body {
   margin: 0;
   height: 100%;
+  /* Puxar a tela para baixo (Android) não recarrega a página no meio do jogo. */
+  overscroll-behavior: none;
 }
 
+/* Jogo, não documento: segurar o dedo (ou arrastar o mouse) não seleciona
+   texto nem abre o menu de imagem/link do toque longo; tocar não pisca a
+   área azul do navegador. Campos de texto continuam selecionáveis. */
 body {
   background: var(--tela);
   color: var(--texto-claro);
   font-family: var(--fonte-texto), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input,
+textarea,
+[contenteditable='true'] {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+/* Toque duplo rápido num botão não dá zoom na página (iPhone); a pinça continua. */
+a,
+button,
+[role='button'],
+label {
+  touch-action: manipulation;
 }
 
 img {
   image-rendering: pixelated;
+  /* Arrastar uma imagem não cria a "cópia fantasma" (desktop). */
+  -webkit-user-drag: none;
 }
 
 button,

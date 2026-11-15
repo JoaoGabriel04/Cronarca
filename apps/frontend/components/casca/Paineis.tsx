@@ -171,7 +171,7 @@ export function Cronica({ linhas }: { linhas: LinhaCronica[] }) {
         <ol className={estilos.linhasCronica}>
           {linhas.map((l) => (
             <li key={l.chave} className={estilos.linhaCronica}>
-              <img className={estilos.pixel} src={`/icones/${l.icone}.png`} width={32} height={32} alt="" />
+              <img className={estilos.pixel} src={`/icones/${l.icone}.png`} width={32} height={32} alt="" draggable={false} />
               <span>{l.texto}</span>
               <time>{l.hora}</time>
             </li>

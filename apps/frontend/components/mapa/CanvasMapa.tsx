@@ -785,6 +785,8 @@ export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao 
         onPointerMove={aoMover}
         onPointerUp={aoSoltar}
         onPointerCancel={aoCancelar}
+        // Toque longo (Android) e botão direito não abrem o menu do navegador sobre o mapa.
+        onContextMenu={(e) => e.preventDefault()}
         onPointerLeave={() => {
           setCursor(null);
           setSobre(null);

@@ -45,7 +45,7 @@ export function MenuInicio() {
         title="Configurações (disponível em breve)"
         aria-label="Configurações"
       >
-        <img src="/sprites/icone-config.svg" alt="" width={32} height={32} />
+        <img src="/sprites/icone-config.svg" alt="" width={32} height={32} draggable={false} />
         {/* No celular a placa do desktop vira este botão no canto, com o ícone do Lucide. */}
         <Settings className={estilos.iconeCelular} size={24} strokeWidth={2.5} aria-hidden="true" />
       </button>
