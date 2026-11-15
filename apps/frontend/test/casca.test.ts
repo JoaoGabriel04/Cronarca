@@ -2,7 +2,7 @@ import { estadoInicial, MICRO, visaoDoCliente, type VisaoCliente } from '@cronar
 import { describe, expect, it } from 'vitest';
 import {
   cartasConstrucoes, cartasDestinos, chipsHud, faixaDePerigo, formatarInteiro, formatarRestante, formatarTaxa, linhasCronica,
-  dadosMercador, textoEra, textoSalvo,
+  dadosAldeoes, dadosMercador, textoEra, textoSalvo,
 } from '../lib/casca/dados';
 
 const T0 = Date.UTC(2026, 5, 1, 12, 0, 0);
@@ -123,5 +123,33 @@ describe('casca: "Salvo há"', () => {
     expect(textoSalvo(s({ pendentes: 2 }), 2_000)).toEqual({ texto: 'Salvando...', icone: 'tempo' });
     expect(textoSalvo(s({ semConexao: true, pendentes: 1 }), 2_000)).toEqual({ texto: 'Sem conexão', icone: 'alerta' });
     expect(textoSalvo(s({ confirmadoEm: null }), 2_000)).toEqual({ texto: 'Conectando...', icone: 'tempo' });
+  });
+});
+
+describe('cartão dos aldeões', () => {
+  it('conta nova: 2 de 4, próximo em 20 s, fazendeiro rende comida e o lenhador já melhora a Serraria', () => {
+    const d = dadosAldeoes(novo());
+    expect(d).toMatchObject({ total: 2, maximo: 4, situacao: 'Próximo em 20 s', alerta: false });
+    expect(d.oficios).toEqual([
+      { oficio: 'fazendeiro', nome: 'Fazendeiro', quantidade: 1, efeito: '+0,35 comida/s', parado: false },
+      { oficio: 'lenhador', nome: 'Lenhador', quantidade: 1, efeito: '+5% de madeira', parado: false },
+    ]);
+  });
+
+  it('ofício sem a construção do recurso fica parado e diz o que falta', () => {
+    const e = novo();
+    e.aldeoes.push({ oficio: 'mineiro' }, { oficio: 'mineiro' });
+    const mineiro = dadosAldeoes(e).oficios.find((o) => o.oficio === 'mineiro')!;
+    expect(mineiro).toMatchObject({ quantidade: 2, efeito: '+10% de pedra quando houver Pedreira', parado: true });
+  });
+
+  it('Casas cheias e sem comida viram alerta', () => {
+    const e = novo();
+    e.aldeoes.push({ oficio: 'mineiro' }, { oficio: 'sabio' });
+    expect(dadosAldeoes(e)).toMatchObject({ total: 4, situacao: 'Casas cheias: melhore a Casa para chegarem mais', alerta: true });
+    e.recursos.comida = 0;
+    const d = dadosAldeoes(e);
+    expect(d).toMatchObject({ situacao: 'Sem comida: ninguém chega e os ofícios param', alerta: true });
+    expect(d.oficios.find((o) => o.oficio === 'lenhador')!.efeito).toBe('+5% de madeira (parado sem comida)');
   });
 });

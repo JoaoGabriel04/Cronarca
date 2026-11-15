@@ -95,7 +95,7 @@ Portão 0 aprovado com estas decisões. Tudo que é número vai em `packages/gam
 | A3 | A Cripta **não é Era II**. Fica bloqueada até concluir a pesquisa Estradas Reais (Era I). O texto "Requer a Era II" do Figma está errado; usar "Requer Estradas Reais". A névoa da Cripta sai quando a pesquisa termina. |
 | A4 | Mina e Pântano começam **bloqueados** (pin com cadeado, sem névoa) até Cartografia. A spec foi corrigida. |
 | A5 | Celeiro **só guarda comida**. Quem produz comida são os Fazendeiros (ver Aldeões). |
-| A6 | Vila mobile (2x) é uma **exceção declarada**: aldeões e aventureiros desenhados a 32 de tela (pixel inteiro, metade da escala de mundo). Aprovado pelo dono no design. No Mapa desktop (2x) continuam escondidos. |
+| A6 | Vila mobile (2x) é uma **exceção declarada**: aldeões desenhados a 32 de tela (pixel inteiro, metade da escala de mundo). Aprovado pelo dono no design. No Mapa desktop (2x) continuam escondidos (aparecem a partir do zoom 3, como na Vila desktop). **Aventureiros parados não são desenhados no mapa** (decisão do Portão 8); só o grupo em marcha, como marcador. |
 | A7 | **Lápide = 12** (valor aprovado no Figma; o 24 da spec era antigo). Corrigido na spec. |
 | A8 | Componentes de interface pertencem ao **Portão 11**. |
 | A9 | Só Lucide React (além dos sprites). |
@@ -118,6 +118,8 @@ Portão 0 aprovado com estas decisões. Tudo que é número vai em `packages/gam
 - Ofício automático, em rodízio determinístico: Fazendeiro, Lenhador, Mineiro, Sábio, Ferreiro, e repete. Não há ação de atribuir ofício na v0.
 - Efeito: Fazendeiro produz 0,35 comida/s. Lenhador, Mineiro, Sábio e Ferreiro dão +5% cada na produção de madeira, pedra, saber e ferro, respectivamente (o Mineiro vale para pedra e o Ferreiro para ferro).
 - Consumo de comida: conforme a tabela de fórmulas.
+- Cada chegada escreve uma linha na Crônica ("Um lenhador chegou à vila.").
+- Interface: cartão **Aldeões** no topo do painel da Vila (e na Vila do celular): "N de M", como chegam, a situação (próximo em X s, Casas cheias ou sem comida) e cada ofício presente com o efeito de agora, ou o que falta para render (ex.: "+5% de pedra quando houver Pedreira").
 
 **Comida zerada.** Ninguém morre. Aldeões novos não chegam, os bônus dos ofícios param e expedições não podem partir. Construções continuam produzindo.
 
@@ -125,7 +127,7 @@ Portão 0 aprovado com estas decisões. Tudo que é número vai em `packages/gam
 
 **Obras.** Uma obra por slot, sem limite global. Nível máximo de toda construção: 10.
 
-**Ouro.** Entra por saque, pelo Mercado (passivo, 0,04/s por nível) e pelo evento Mercador Viajante. Não há ação de vender na v0.
+**Ouro.** Entra por saque, pelo Mercado (passivo, 0,04/s por nível) e pelo evento Mercador Viajante. Não há ação de vender na v0. O Mercado nível 1 **não pede ouro**: a conta nova tem só 40 de ouro, que pagam a 1ª contratação, e o Mercado é a única fonte passiva de ouro (auditoria dos aldeões, opção c2).
 
 **Pesquisas da Era I** (uma por vez):
 
@@ -262,7 +264,7 @@ Casa, Armazém, Celeiro, Serraria, Pedreira, Scriptorium, Forja, Mercado, Tavern
 | Pedreira | produz pedra | 180 madeira, 8 ferro |
 | Scriptorium | produz saber | 160 madeira, 120 pedra |
 | Forja | produz ferro | 200 pedra, 100 madeira |
-| Mercado | troca recursos por ouro | 240 madeira, 40 ouro |
+| Mercado | troca recursos por ouro | 240 madeira (nível 1, sem ouro: `custoNivel1`); do nível 2 em diante, a fórmula com 240 madeira, 40 ouro |
 | Taverna | abre vagas na guilda | 300 madeira, 60 ouro |
 | Muralha | defende a vila de bandidos | 400 pedra, 40 ferro |
 

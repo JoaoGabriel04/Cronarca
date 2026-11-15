@@ -234,3 +234,14 @@ describe('propriedade: um passo = muitos passos', () => {
     }
   }, 30_000); // pesado
 });
+
+describe('chegada de aldeões na Crônica', () => {
+  it('cada aldeão que chega escreve uma linha com o ofício, no instante da chegada', () => {
+    const e = novo();
+    const d = liquidar(e, T0 + 45 * SEG);
+    const linhas = d.cronica.filter((l) => l.icone === 'Aldeao');
+    expect(d.aldeoes.map((a) => a.oficio)).toEqual(['fazendeiro', 'lenhador', 'mineiro', 'sabio']);
+    expect(linhas.map((l) => l.texto)).toEqual(['Um mineiro chegou à vila.', 'Um sábio chegou à vila.']);
+    expect(linhas.map((l) => l.em)).toEqual([T0 + 20 * SEG, T0 + 40 * SEG]);
+  });
+});

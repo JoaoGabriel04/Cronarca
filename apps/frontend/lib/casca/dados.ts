@@ -5,6 +5,7 @@ import {
   CONSTRUCOES, custoConstrucao, DESTINOS, DESTINOS_IDS, destinoAberto, duracaoExpedicaoMs, ERAS, FAIXAS_PERIGO,
   calcularTaxas, MICRO, NIVEL_MAXIMO_CONSTRUCAO, NOMES_RECURSOS, nivelReliquia, PESQUISAS, RECURSOS, SLOT_IDS, SLOTS, somaNiveis, tetoMicro, tetos,
   type DestinoId, type IconeCronica, type Recurso, type RefSprite, type SlotId, type VisaoCliente,
+  aldeoesMaximos, FORMULAS, NOMES_OFICIOS, OFICIOS, type Oficio, type TipoConstrucao,
 } from '@cronarca/game-core';
 
 const inteiro = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
@@ -243,4 +244,65 @@ export function textoSalvo(s: Sincronia, agoraLocal: number): { texto: string; i
   if (seg < 60) return { texto: `Salvo há ${seg}s`, icone: 'check' };
   const min = Math.floor(seg / 60);
   return { texto: `Salvo há ${min} min`, icone: 'check' };
+}
+
+// ---------- Aldeões (cartão da Vila) ----------
+
+/** Recurso que o ofício melhora (+5% cada) e a construção que produz esse recurso. */
+const BONUS_DO_OFICIO: Partial<Record<Oficio, { recurso: Recurso; produtora: TipoConstrucao }>> = {
+  lenhador: { recurso: 'madeira', produtora: 'serraria' },
+  mineiro: { recurso: 'pedra', produtora: 'pedreira' },
+  sabio: { recurso: 'saber', produtora: 'scriptorium' },
+  ferreiro: { recurso: 'ferro', produtora: 'forja' },
+};
+
+export interface LinhaOficio {
+  oficio: Oficio;
+  nome: string;
+  quantidade: number;
+  /** "+0,7 comida/s", "+10% de madeira" ou o que falta para render. */
+  efeito: string;
+  /** Sem efeito agora (falta a construção ou a comida zerou). */
+  parado: boolean;
+}
+
+export interface DadosAldeoes {
+  total: number;
+  maximo: number;
+  /** "Próximo em 12 s", "Casas cheias: melhore a Casa", "Sem comida: ninguém chega". */
+  situacao: string;
+  /** Cheio ou sem comida: o texto da situação vai em destaque. */
+  alerta: boolean;
+  oficios: LinhaOficio[];
+}
+
+const nomeRecurso = (r: Recurso) => NOMES_RECURSOS[r].toLowerCase();
+
+/** Quantos aldeões, quantos cabem, quando chega o próximo e o que cada ofício faz agora. */
+export function dadosAldeoes(e: VisaoCliente): DadosAldeoes {
+  const total = e.aldeoes.length;
+  const maximo = aldeoesMaximos(e);
+  const temComida = e.recursos.comida > 0;
+  let situacao: string;
+  if (!temComida) situacao = 'Sem comida: ninguém chega e os ofícios param';
+  else if (total >= maximo) situacao = 'Casas cheias: melhore a Casa para chegarem mais';
+  else situacao = `Próximo em ${Math.max(1, Math.ceil((FORMULAS.aldeoes.segundosPorChegada * 1000 - e.progressoAldeaoMs) / 1000))} s`;
+
+  const oficios = OFICIOS.map((oficio): LinhaOficio | null => {
+    const quantidade = e.aldeoes.filter((a) => a.oficio === oficio).length;
+    if (quantidade === 0) return null;
+    const nome = NOMES_OFICIOS[oficio];
+    if (oficio === 'fazendeiro') {
+      return { oficio, nome, quantidade, efeito: `+${decimal.format(FORMULAS.aldeoes.comidaDoFazendeiro * quantidade)} comida/s`, parado: false };
+    }
+    const b = BONUS_DO_OFICIO[oficio]!;
+    const bonus = `+${Math.round(FORMULAS.aldeoes.bonusPorOficio * quantidade * 100)}% de ${nomeRecurso(b.recurso)}`;
+    if (!temComida) return { oficio, nome, quantidade, efeito: `${bonus} (parado sem comida)`, parado: true };
+    if (somaNiveis(e, b.produtora) === 0) {
+      return { oficio, nome, quantidade, efeito: `${bonus} quando houver ${CONSTRUCOES[b.produtora].nome}`, parado: true };
+    }
+    return { oficio, nome, quantidade, efeito: bonus, parado: false };
+  }).filter((l): l is LinhaOficio => l !== null);
+
+  return { total, maximo, situacao, alerta: !temComida || total >= maximo, oficios };
 }

@@ -7,7 +7,7 @@
 
 import type { DestinoId, SlotId } from '@cronarca/game-core';
 import type { ReactNode } from 'react';
-import type { CartaConstrucao, CartaDestino, LinhaCronica } from '../../lib/casca/dados';
+import type { CartaConstrucao, CartaDestino, DadosAldeoes, LinhaCronica } from '../../lib/casca/dados';
 import { SpriteAnimado } from '../anim/SpriteAnimado';
 import estilos from './casca.module.css';
 import { Icone } from './Icone';
@@ -93,19 +93,53 @@ export function CartaoDestino({ c, aoEvento }: { c: CartaDestino; aoEvento: (e: 
   );
 }
 
+/**
+ * Aldeões da vila: quantos há e cabem, quando chega o próximo e o que cada
+ * ofício faz agora. Chegam sozinhos; o jogador só influi pelas Casas e pela comida.
+ */
+export function CartaoAldeoes({ d }: { d: DadosAldeoes }) {
+  return (
+    <section className={`caixa ${estilos.cartao} ${estilos.aldeoes}`} aria-labelledby="titulo-aldeoes">
+      <h3 id="titulo-aldeoes" className={estilos.cartaoNome}>
+        <Icone nome="icone-aldeao" tamanho={16} />
+        Aldeões
+        <span className={estilos.nivel}>
+          {d.total} de {d.maximo}
+        </span>
+      </h3>
+      <p className={estilos.cartaoTexto}>Chegam sozinhos, um a cada 20 s, enquanto houver vaga nas Casas e comida.</p>
+      <p className={`${estilos.cartaoTexto} ${d.alerta ? estilos.alerta : ''}`}>{d.situacao}</p>
+      {d.oficios.length > 0 && (
+        <ul className={estilos.oficios}>
+          {d.oficios.map((o) => (
+            <li key={o.oficio} className={o.parado ? estilos.oficioParado : undefined}>
+              <span className={estilos.oficioNome}>
+                {o.nome} ×{o.quantidade}
+              </span>
+              <span>{o.efeito}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 export interface PropsPainelLateral {
   titulo: string;
   subtitulo: string;
   icone: string;
   construcoes?: CartaConstrucao[];
   destinos?: CartaDestino[];
+  /** Cartão dos aldeões, no topo (painel da Vila). */
+  aldeoes?: DadosAldeoes;
   cronica: LinhaCronica[];
   aoEvento: (e: EventoCasca) => void;
   /** No fim da rolagem: as ações de depuração (o "Sair" foi para as Configurações). */
   rodape?: ReactNode;
 }
 
-export function PainelLateral({ titulo, subtitulo, icone, construcoes, destinos, cronica, aoEvento, rodape }: PropsPainelLateral) {
+export function PainelLateral({ titulo, subtitulo, icone, construcoes, destinos, aldeoes, cronica, aoEvento, rodape }: PropsPainelLateral) {
   return (
     <section className={`caixa pergaminho com-linha ${estilos.painel}`} aria-label={titulo}>
       <div className={`${estilos.rolagem} ${estilos.rola}`}>
@@ -114,6 +148,7 @@ export function PainelLateral({ titulo, subtitulo, icone, construcoes, destinos,
           <p>{subtitulo}</p>
           <Icone nome={icone} />
         </header>
+        {aldeoes && <CartaoAldeoes d={aldeoes} />}
         <ul className={estilos.lista}>
           {construcoes?.map((c) => <CartaoConstrucao key={c.slot} c={c} aoEvento={aoEvento} />)}
           {destinos?.map((c) => <CartaoDestino key={c.destino} c={c} aoEvento={aoEvento} />)}

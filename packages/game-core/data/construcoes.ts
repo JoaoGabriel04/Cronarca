@@ -19,6 +19,11 @@ export interface DadosConstrucao {
    * Para quem tem custoBase acima do teto base (300) e não caberia no Armazém 10.
    */
   fatorCusto?: number;
+  /**
+   * Custo só do nível 1 (construir), no lugar de custoBase. O nível 2 em diante
+   * segue a fórmula com custoBase.
+   */
+  custoNivel1?: Partial<Record<Recurso, number>>;
   producao?: { recurso: Recurso; porSegundo: number };
   /**
    * Clique no mapa abre um painel em vez de coletar (handoff: o Scriptorium
@@ -55,8 +60,10 @@ export const CONSTRUCOES: Record<TipoConstrucao, DadosConstrucao> = {
     nome: 'Forja', efeito: 'produz ferro', custoBase: { pedra: 200, madeira: 100 },
     producao: { recurso: 'ferro', porSegundo: 0.15 },
   },
+  // Nível 1 sem ouro: é a única fonte passiva de ouro e a conta nova tem só os
+  // 40 de ouro que pagam a 1ª contratação (auditoria dos aldeões, opção c2).
   mercado: {
-    nome: 'Mercado', efeito: 'rende ouro', custoBase: { madeira: 240, ouro: 40 },
+    nome: 'Mercado', efeito: 'rende ouro', custoBase: { madeira: 240, ouro: 40 }, custoNivel1: { madeira: 240 },
     producao: { recurso: 'ouro', porSegundo: 0.04 },
   },
   taverna: { nome: 'Taverna', efeito: '+1 vaga na guilda por nível', custoBase: { madeira: 300, ouro: 60 } },

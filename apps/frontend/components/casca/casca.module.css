@@ -2351,3 +2351,40 @@
     display: none;
   }
 }
+
+/* ---------- Cartão dos aldeões (painel da Vila e Vila do celular) ---------- */
+.aldeoes {
+  display: block;
+  height: auto; /* o .cartao tem 96 px fixos; aqui o conteúdo cresce com os ofícios */
+  margin-bottom: 10px;
+  padding: 8px 10px 10px;
+}
+.aldeoes .cartaoNome {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.aldeoes .cartaoTexto {
+  margin-top: 4px;
+}
+.oficios {
+  display: grid;
+  gap: 2px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+  color: #3a261c;
+}
+.oficios li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 12px;
+}
+.oficioNome {
+  font-weight: 700;
+}
+.oficioParado {
+  color: #8a7a60;
+}

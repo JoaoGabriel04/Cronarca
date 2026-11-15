@@ -12,7 +12,7 @@ import { gsap } from 'gsap';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  cartasConstrucoes, cartasDestinos, chipsHud, dadosMercador, linhasCronica, textoEra, textoSalvo, type Sincronia,
+  cartasConstrucoes, cartasDestinos, chipsHud, dadosAldeoes, dadosMercador, linhasCronica, textoEra, textoSalvo, type Sincronia,
 } from '../../lib/casca/dados';
 import { dadosAscensao, dadosMelhorar, dadosPesquisa, linhasCatalogoTela, seloConstruir } from '../../lib/casca/modais';
 import { enviar, ErroApi, mensagemDeErro } from '../../lib/api';
@@ -34,7 +34,7 @@ import { Hud } from '../casca/Hud';
 import { Catalogo } from '../casca/Catalogo';
 import { ModalAscensao, ModalConfiguracoes, ModalObra, ModalPesquisa } from '../casca/Modais';
 import { ModalRanking } from '../casca/Ranking';
-import { PainelLateral, type EventoCasca } from '../casca/Paineis';
+import { CartaoAldeoes, PainelLateral, type EventoCasca } from '../casca/Paineis';
 import { TelaEras, TelaExpedicoes, TelaHerois, type AcoesTela } from '../casca/Telas';
 import { AlternarVisao, BotaoConstruirFlutuante, ChipEvento, ControleZoom, Minimapa, PopupMercador, type Visao } from '../casca/SobreMapa';
 import { CanvasMapa, type CliqueObjeto, type ControleMapa } from '../mapa/CanvasMapa';
@@ -400,6 +400,7 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
         {celular && aba === 'vila' && visao === 'vila' && (
           <div className={estilos.abaixoDoMapa}>
             <BotaoConstrucoes selo={selo} aoAbrir={() => abrirCatalogo(null)} />
+            <CartaoAldeoes d={dadosAldeoes(visivel)} />
             <CartaoCronica linhas={linhasCronica(visivel, LINHAS_CRONICA)} />
           </div>
         )}
@@ -419,6 +420,7 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
             subtitulo={visao === 'vila' ? construcoes.titulo : destinos.titulo}
             icone={visao === 'vila' ? 'icone-construir' : 'icone-expedicao'}
             construcoes={visao === 'vila' ? construcoes.cartas : undefined}
+            aldeoes={visao === 'vila' ? dadosAldeoes(visivel) : undefined}
             destinos={visao === 'reino' ? destinos.cartas : undefined}
             cronica={linhasCronica(visivel, LINHAS_CRONICA)}
             aoEvento={aoEvento}

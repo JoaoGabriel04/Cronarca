@@ -2,6 +2,7 @@
 // tudo o que aconteceu no meio. Entre dois acontecimentos as taxas são
 // constantes, então cada trecho é linear e calculado em inteiros exatos.
 // Por isso liquidar em um passo ou em muitos dá exatamente o mesmo estado.
+import { NOMES_OFICIOS } from '../data/aventureiros.ts';
 import { CONSTRUCOES } from '../data/construcoes.ts';
 import { DESTINOS } from '../data/expedicoes.ts';
 import { EVENTO_PARAMETROS, EVENTOS_IDS, NOMES_EVENTOS, type EventoId } from '../data/eventos.ts';
@@ -166,8 +167,10 @@ function processarVencimentos(e: EstadoJogo, s: Sorteador) {
   }
 
   if (e.progressoAldeaoMs >= MS_POR_ALDEAO && podeChegarAldeao(e)) {
-    e.aldeoes.push({ oficio: oficioDoProximoAldeao(e) });
+    const oficio = oficioDoProximoAldeao(e);
+    e.aldeoes.push({ oficio });
     e.progressoAldeaoMs = 0;
+    registrar(e, 'Aldeao', `Um ${NOMES_OFICIOS[oficio].toLowerCase()} chegou à vila.`, t);
   }
 }
 

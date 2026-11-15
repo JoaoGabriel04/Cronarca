@@ -21,6 +21,10 @@ function crescimento(base: number, fator: number, k: number): number {
 export function custoConstrucao(tipo: TipoConstrucao, nivelAlvo: number): Custo {
   const custo: Custo = {};
   const dados = CONSTRUCOES[tipo];
+  if (nivelAlvo === 1 && dados.custoNivel1) {
+    for (const [r, v] of Object.entries(dados.custoNivel1) as [Recurso, number][]) custo[r] = micro(v);
+    return custo;
+  }
   const fator = dados.fatorCusto ?? F.construcao.fatorCusto;
   for (const [r, base] of Object.entries(dados.custoBase) as [Recurso, number][]) {
     custo[r] = crescimento(base, fator, nivelAlvo - 1) * MICRO;

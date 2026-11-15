@@ -156,8 +156,9 @@ export function TelaHerois({ estado, agora, acoes }: { estado: VisaoCliente; ago
         <Painel titulo="Resumo da guilda" subtitulo={g.resumo.cabecalho}>
           <ul className={estilos.lista}>
             {[
-              { icone: 'icone-aventureiro', rotulo: 'Poder total', valor: String(g.resumo.poderTotal) },
-              { icone: 'icone-aldeao', rotulo: 'Vagas na guilda', valor: g.resumo.vagas },
+              { icone: 'icone-expedicao', rotulo: 'Poder total', valor: String(g.resumo.poderTotal) },
+              // Vagas são de aventureiro (o ícone de aldeão confundia com os aldeões da vila).
+              { icone: 'icone-aventureiro', rotulo: 'Vagas na guilda', valor: g.resumo.vagas },
               { icone: 'icone-comida', rotulo: 'Consumo de comida', valor: g.resumo.consumo },
               { icone: 'icone-construir', rotulo: 'Próxima vaga', valor: g.resumo.proximaVaga },
             ].map((l) => (

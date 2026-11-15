@@ -84,8 +84,11 @@ describe('catálogo na tela (A12)', () => {
     const porSlot = Object.fromEntries(linhasCatalogoTela(e, T0).map((l) => [l.slot, l]));
     expect(porSlot.forja_1).toMatchObject({ estado: 'construivel', acao: 'construir', pode: true, motivo: null, sprite: { grupo: 'construcao', id: 'forja' } });
     expect(porSlot.forja_1!.custo.every((c) => !c.falta)).toBe(true);
-    expect(porSlot.mercado_1).toMatchObject({ estado: 'sem_recursos', acao: 'construir', pode: false, motivo: 'Falta ouro' });
-    expect(porSlot.mercado_1!.custo.find((c) => c.recurso === 'ouro')!.falta).toBe(true);
+    expect(porSlot.taverna_1).toMatchObject({ estado: 'sem_recursos', acao: 'construir', pode: false, motivo: 'Falta ouro' });
+    expect(porSlot.taverna_1!.custo.find((c) => c.recurso === 'ouro')!.falta).toBe(true);
+    // c2: o Mercado nível 1 não pede ouro; sem ouro, continua construível.
+    expect(porSlot.mercado_1).toMatchObject({ estado: 'construivel', pode: true });
+    expect(porSlot.mercado_1!.custo.map((c) => c.recurso)).toEqual(['madeira']);
     expect(porSlot.muralha_1).toMatchObject({ estado: 'em_obra', acao: null, custo: [], obra: { restante: '00:32' } });
     expect(porSlot.casa_1).toMatchObject({ estado: 'construida', acao: 'melhorar', pode: true, nivel: 'Nível 3' });
     expect(porSlot.serraria_2!.nome).toBe('Serraria II');

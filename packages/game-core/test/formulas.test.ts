@@ -10,7 +10,9 @@ describe('fórmulas v0', () => {
     expect(custoConstrucao('casa', 1)).toEqual({ madeira: u(120), pedra: u(60) });
     expect(custoConstrucao('casa', 2)).toEqual({ madeira: u(186), pedra: u(93) });
     expect(custoConstrucao('casa', 10)).toEqual({ madeira: u(6197), pedra: u(3098) });
-    expect(custoConstrucao('mercado', 1)).toEqual({ madeira: u(240), ouro: u(40) });
+    // c2: o Mercado nível 1 não pede ouro; o nível 2 segue a fórmula com o custoBase (ouro 40 × 1,55).
+    expect(custoConstrucao('mercado', 1)).toEqual({ madeira: u(240) });
+    expect(custoConstrucao('mercado', 2)).toEqual({ madeira: u(372), ouro: u(62) });
   });
 
   it('tempo de obra: 30 s × 1,4^(n−1)', () => {

@@ -49,7 +49,10 @@ describe('previsão no cliente', () => {
     const e = novo({ semEventos: false });
     const evento = e.segredo.proximoEventoEm;
     const p = preverEstado(visaoDoCliente(e), evento + 10 * MIN).estado;
-    expect(p.cronica.length).toBe(visaoDoCliente(e).cronica.length);
+    // A chegada de aldeões não é secreta e também é prevista; evento, nenhum.
+    const semAldeoes = (c: { icone: string }[]) => c.filter((l) => l.icone !== 'Aldeao');
+    expect(semAldeoes(p.cronica)).toEqual(semAldeoes(visaoDoCliente(e).cronica));
+    expect(p.cronica.some((l) => l.icone === 'Aldeao')).toBe(true);
   });
 
   it('ação sem sorteio: a prevista é igual à do servidor', () => {

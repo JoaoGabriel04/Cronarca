@@ -82,7 +82,8 @@ describe('catálogo de construções', () => {
     expect(ordem).toEqual([...ordem].sort((a, b) => a - b));
     const construidas = l.filter((x) => x.estado === 'construida').map((x) => x.slot);
     expect(construidas).toEqual(SLOT_IDS.filter((id) => construidas.includes(id)));
-    expect(l.filter((x) => x.estado === 'sem_recursos').map((x) => x.slot)).toEqual(['mercado_1', 'taverna_1']);
+    // Sem ouro, a Taverna não dá; o Mercado nível 1 não pede ouro (c2) e continua construível.
+    expect(l.filter((x) => x.estado === 'sem_recursos').map((x) => x.slot)).toEqual(['taverna_1']);
     expect(l.find((x) => x.slot === 'muralha_1')!.estado).toBe('em_obra');
   });
 
