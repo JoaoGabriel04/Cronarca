@@ -16,9 +16,9 @@ describe('fórmulas v0', () => {
   });
 
   it('tempo de obra: 30 s × 1,4^(n−1)', () => {
-    expect(tempoObraMs(1)).toBe(30_000);
-    expect(tempoObraMs(2)).toBe(42_000);
-    expect(tempoObraMs(3)).toBe(58_800);
+    expect(tempoObraMs(1, 0)).toBe(30_000);
+    expect(tempoObraMs(2, 0)).toBe(42_000);
+    expect(tempoObraMs(3, 0)).toBe(58_800);
   });
 
   it('teto: round(300 × 1,55^(nível−1)), mínimo nível 1', () => {

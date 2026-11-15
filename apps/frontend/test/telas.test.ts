@@ -96,6 +96,33 @@ describe('telas: Eras', () => {
     expect(era.podeAscender).toBe(false);
   });
 
+  it('Falha (Portão 18b): nível atual, o que o próximo muda (sem a Cripta enquanto o acréscimo for 0) e o teto', () => {
+    const e = novo();
+    let f = eraAtual(e).falha;
+    expect(f).toMatchObject({ nivel: 0, rotulo: 'Falha 0', lore: 'A cada recomeço, o Relógio falha mais.', noMaximo: null });
+    expect(f.agora).toBe('Ainda sem efeito: o Relógio corre como sempre.');
+    expect(f.proximo).toEqual({
+      titulo: 'Ao ascender: Falha 0 → 1',
+      efeitos: ['Obras e pesquisas 3% mais lentas', 'Estradas Reais e Carta Real 5% mais caras'],
+    });
+    e.falha = 3;
+    f = eraAtual(e).falha;
+    expect(f.agora).toBe('Obras e pesquisas 9% mais lentas. Estradas Reais e Carta Real 15% mais caras.');
+    expect(f.proximo!.efeitos).toEqual(['Obras e pesquisas 12% mais lentas', 'Estradas Reais e Carta Real 20% mais caras']);
+    expect(f.proximo!.efeitos.join(' ')).not.toMatch(/Cripta/);
+    e.falha = 10;
+    f = eraAtual(e).falha;
+    expect(f.proximo).toBeNull();
+    expect(f.noMaximo).toMatch(/máximo/);
+  });
+
+  it('Falha no perigo e na chance da Cripta: igual enquanto o acréscimo for 0', () => {
+    const e = novo();
+    const antes = linhasDestinos(e, []).find((l) => l.destino === 'cripta')!.perigo;
+    e.falha = 10;
+    expect(linhasDestinos(e, []).find((l) => l.destino === 'cripta')!.perigo).toBe(antes);
+  });
+
   it('relíquias: disponíveis, custo do próximo nível, máximo e saldo', () => {
     const e = novo();
     e.reliquias = { total: 7, gastas: 0, niveis: { maos_calejadas: 1, linhagem_heroica: 5 } };

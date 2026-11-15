@@ -42,7 +42,7 @@ describe('catálogo de construções', () => {
     const r = aplicarAcao(e, { tipo: 'construir', slot: 'forja_1' }, T0);
     expect(r.ok).toBe(true);
     const v = visaoDoCliente(r.estado);
-    const total = tempoObraMs(1);
+    const total = tempoObraMs(1, 0);
     const meio = linhaCatalogo(v, 'forja_1', T0 + total / 2);
     expect(meio).toMatchObject({ estado: 'em_obra', nivel: 0, obra: { inicio: T0, fim: T0 + total, fracao: 0.5 } });
     // Melhoria em obra num slot já de pé também é Em obra (não Construída).
@@ -50,7 +50,7 @@ describe('catálogo de construções', () => {
     expect(m.ok).toBe(true);
     const casa = linhaCatalogo(visaoDoCliente(m.estado), 'casa_1', T0);
     expect(casa).toMatchObject({ estado: 'em_obra', nivel: 1 });
-    expect(casa.obra!.fim - casa.obra!.inicio).toBe(tempoObraMs(2));
+    expect(casa.obra!.fim - casa.obra!.inicio).toBe(tempoObraMs(2, 0));
   });
 
   it('Construída: nível atual, sem custo', () => {

@@ -1,6 +1,7 @@
 // Estado de um jogador (jsonb em GameState.estado). Esquema versionado.
 // Unidades: recursos em micro-unidades, tempo em ms desde a época Unix.
 import { z } from 'zod';
+import { FALHA } from '../data/falha.ts';
 import { CONFIG_ALDEOES_INICIAL, OFICIOS_ALDEAO, POLITICAS_ALDEOES } from '../data/aldeoes.ts';
 import { CLASSES, OFICIOS } from '../data/aventureiros.ts';
 import { DESTINOS_IDS } from '../data/expedicoes.ts';
@@ -13,7 +14,7 @@ import { FORMULAS } from '../data/formulas.ts';
 import { VERSOES_MAPA } from '../data/mapa.ts';
 import { termosDoMercador } from './mercador.ts';
 
-export const VERSAO_ESQUEMA = 6;
+export const VERSAO_ESQUEMA = 7;
 
 const inteiro = z.number().int();
 const naoNegativo = inteiro.min(0);
@@ -128,6 +129,8 @@ export const esquemaEstado = z
     objetivos: z.strictObject({ criptaVencida: z.boolean() }),
     /** Mercador Viajante esperando resposta. Esquema 5: os termos da troca vão no evento. */
     mercador: z.strictObject({ expiraEm: instante, paga: esquemaTroca, recebe: esquemaTroca }).nullable(),
+    /** Falha da era (Portão 18b, esquema 7): sobe 1 a cada Ascensão, até o máximo; persiste como as relíquias. */
+    falha: z.number().int().min(0).max(FALHA.nivelMaximo),
     reliquias: z.strictObject({
       total: naoNegativo,
       gastas: naoNegativo,
@@ -191,6 +194,11 @@ export function migrarEstado(bruto: unknown, versaoEsquema: number): { estado: u
     // Esquema 6 (Portão 17): os ofícios gravados ficam; a distribuição automática liga em Equilibrada.
     estado = { ...estado, versao: 6, aldeoesConfig: { ...CONFIG_ALDEOES_INICIAL } };
     versao = 6;
+  }
+  if (versao === 6) {
+    // Falha (Portão 18b): ninguém é afetado retroativamente; todos começam em 0 e sobem na próxima ascensão.
+    estado = { ...estado, versao: 7, falha: 0 };
+    versao = 7;
   }
   return { estado, versao };
 }

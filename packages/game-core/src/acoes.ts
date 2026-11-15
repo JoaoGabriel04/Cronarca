@@ -6,6 +6,7 @@ import { DESLOCAMENTO_ALDEAO_MS, OFICIO_OCIOSO, OFICIOS_ALDEAO, POLITICAS_ALDEOE
 import { CLASSES, OFICIOS, type Oficio } from '../data/aventureiros.ts';
 import { CONSTRUCOES, NIVEL_MAXIMO_CONSTRUCAO } from '../data/construcoes.ts';
 import { DESTINOS, DESTINOS_IDS, TAMANHO_MAXIMO_GRUPO } from '../data/expedicoes.ts';
+import { FALHA } from '../data/falha.ts';
 import { FORMULAS } from '../data/formulas.ts';
 import { PESQUISAS, PESQUISAS_IDS } from '../data/pesquisas.ts';
 import { RECURSOS, type Recurso } from '../data/recursos.ts';
@@ -15,7 +16,7 @@ import { registrar } from './cronica.ts';
 import type { EstadoJogo, ResultadoExpedicao } from './estado.ts';
 import {
   bonusSaqueBp, chanceExitoBp, custoConstrucao, custoContratar, custoEquipamento, custoReliquia,
-  duracaoExpedicaoMs, ganhoCliqueMicro, poderAventureiro, reliquiasNaAscensao, tempoObraMs, type Custo,
+  custoPesquisa, duracaoExpedicaoMs, duracaoPesquisaMs, ganhoCliqueMicro, perigoDestino, poderAventureiro, reliquiasNaAscensao, tempoObraMs, type Custo,
 } from './formulas.ts';
 import { estadoInicial, sortearNome } from './inicial.ts';
 import { aplicarBonus, bp, mili, micro } from './inteiros.ts';
@@ -107,7 +108,7 @@ function recarregar(balde: { fichas: number; em: number }, porSegundo: number, a
 
 function sortearResultado(e: EstadoJogo, destino: keyof typeof DESTINOS, grupo: string[], s: Sorteador): ResultadoExpedicao {
   const poder = grupo.reduce((soma, id) => soma + poderAventureiro(e.aventureiros.find((a) => a.id === id)!), 0);
-  const vitoria = s.chance(chanceExitoBp(poder, DESTINOS[destino].perigo));
+  const vitoria = s.chance(chanceExitoBp(poder, perigoDestino(destino, e.falha)));
   const saque: Partial<Record<Recurso, number>> = {};
   const feridos: string[] = [];
   if (vitoria) {
@@ -141,7 +142,7 @@ function aplicador(acao: Acao, agora: number, opcoes: OpcoesAcao): Aplicador {
         const custo = custoConstrucao(SLOTS[id].tipo, alvo);
         if (!podePagar(e, custo)) return 'recursos_insuficientes';
         pagar(e, custo);
-        slot.obraAte = e.t + tempoObraMs(alvo);
+        slot.obraAte = e.t + tempoObraMs(alvo, e.falha);
         const nome = CONSTRUCOES[SLOTS[id].tipo].nome;
         registrar(e, 'Construir', alvo === 1 ? `Obra iniciada: ${nome}.` : `Obra iniciada: ${nome} nível ${alvo}.`, e.t);
       };
@@ -152,11 +153,11 @@ function aplicador(acao: Acao, agora: number, opcoes: OpcoesAcao): Aplicador {
         if (e.pesquisas.atual) return 'pesquisa_em_andamento';
         if (e.pesquisas.concluidas.includes(acao.pesquisa)) return 'pesquisa_concluida';
         if (!p.requer.every((r) => e.pesquisas.concluidas.includes(r))) return 'requisito_pendente';
-        const custo: Custo = {};
-        for (const [r, v] of Object.entries(p.custo) as [Recurso, number][]) custo[r] = micro(v);
+        // Falha: Estradas Reais e Carta Real mais caras; toda pesquisa mais lenta.
+        const custo = custoPesquisa(acao.pesquisa, e.falha);
         if (!podePagar(e, custo)) return 'recursos_insuficientes';
         pagar(e, custo);
-        e.pesquisas.atual = { id: acao.pesquisa, fim: e.t + p.segundos * 1000 };
+        e.pesquisas.atual = { id: acao.pesquisa, fim: e.t + duracaoPesquisaMs(acao.pesquisa, e.falha) };
         registrar(e, 'Saber', `Pesquisa iniciada: ${p.nome}.`, e.t);
       };
 
@@ -305,6 +306,8 @@ function ascender(e: EstadoJogo, s: Sorteador): ErroAcao | EstadoJogo {
     agora: e.t,
     ciclo: e.ciclo + 1,
     reliquias: { ...e.reliquias, total: e.reliquias.total + ganho },
+    // A Falha sobe 1 a cada Ascensão, até o máximo, e passa para o ciclo seguinte.
+    falha: Math.min(FALHA.nivelMaximo, e.falha + 1),
     cronica: e.cronica,
   });
   registrar(novo, 'Ascensao', `Ascensão! O reino renasce no ciclo ${novo.ciclo} com +${ganho} relíquias.`, e.t);

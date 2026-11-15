@@ -3,7 +3,7 @@
 
 import {
   calcularTaxas, chanceExitoBp, custoContratar, custoEquipamento, custoReliquia, DESTINOS, DESTINOS_IDS, destinoAberto, duracaoExpedicaoMs,
-  ERAS, FORMULAS, MICRO, NIVEL_MAXIMO_CONSTRUCAO, NOMES_CLASSES, nivelReliquia, objetivosEra, OBJETIVOS_ERA_1, PESQUISAS,
+  ERAS, FALHA, FORMULAS, MICRO, perigoDestino, TEXTOS_FALHA, NIVEL_MAXIMO_CONSTRUCAO, NOMES_CLASSES, nivelReliquia, objetivosEra, OBJETIVOS_ERA_1, PESQUISAS,
   poderAventureiro, RELIQUIAS, RELIQUIAS_IDS, SLOT_IDS, SLOTS, TAMANHO_MAXIMO_GRUPO, vagasGuilda,
   type Classe, type DestinoId, type Recurso, type RefSprite, type ReliquiaId, type VisaoCliente,
 } from '@cronarca/game-core';
@@ -234,7 +234,8 @@ export function linhasDestinos(e: VisaoCliente, selecionados: readonly string[])
     const d = DESTINOS[id];
     const aberto = destinoAberto(e, id);
     const duracao = duracaoExpedicaoMs(id, nivelReliquia(e, 'caminhos_eternos'));
-    const bp = grupo.length ? chanceExitoBp(poder, d.perigo) : null;
+    const perigo = perigoDestino(id, e.falha);
+    const bp = grupo.length ? chanceExitoBp(poder, perigo) : null;
     const semComida = e.recursos.comida <= 0;
     return {
       destino: id,
@@ -242,7 +243,7 @@ export function linhasDestinos(e: VisaoCliente, selecionados: readonly string[])
       descricao: d.descricao,
       aberto,
       requer: aberto || !d.requer ? null : `Requer a pesquisa ${PESQUISAS[d.requer].nome}`,
-      perigo: `Perigo ${d.perigo} · ${formatarRestante(duracao).replace(/^0(\d):/, '$1:')}`,
+      perigo: `Perigo ${perigo} · ${formatarRestante(duracao).replace(/^0(\d):/, '$1:')}`,
       saque: (Object.entries(d.saque) as [Recurso, readonly [number, number]][]).map(([recurso, f]) => ({ recurso, faixa: faixa(f) })),
       chance: bp === null ? null : { texto: `${Math.round(bp / 100)}%`, nivel: bp >= 8_000 ? 'alta' : bp >= 5_000 ? 'media' : 'baixa' },
       pode: aberto && grupo.length > 0 && !semComida,
@@ -289,6 +290,44 @@ export interface Objetivo {
   progresso: { atual: number; total: number } | null;
 }
 
+// ---------- Falha (Portão 18b) ----------
+
+export interface DadosFalha {
+  nivel: number;
+  /** "Falha 2" */
+  rotulo: string;
+  lore: string;
+  /** O que a Falha de agora faz, ou que ainda não faz nada (Falha 0). */
+  agora: string;
+  /** Na próxima ascensão: "Falha 2 → 3" e o que muda; null no máximo. */
+  proximo: { titulo: string; efeitos: string[] } | null;
+  /** No máximo: o aviso de que não sobe mais. */
+  noMaximo: string | null;
+}
+
+const pct = (porNivel: number, niveis: number) => Math.round(porNivel * 100 * niveis);
+const nomesAfetadas = () => juntarNomes(FALHA.pesquisasAfetadas.map((id) => PESQUISAS[id].nome));
+
+/** Efeitos da Falha num nível, em frases curtas (a Cripta só entra quando o acréscimo dela não for 0). */
+function efeitosNoNivel(nivel: number): string[] {
+  const efeitos = [`Obras e pesquisas ${pct(FALHA.tempoPorNivel, nivel)}% mais lentas`, `${nomesAfetadas()} ${pct(FALHA.custoPesquisaPorNivel, nivel)}% mais caras`];
+  if (FALHA.perigoPorNivel > 0) efeitos.push(`${DESTINOS[FALHA.destinoAfetado].nome} de perigo ${perigoDestino(FALHA.destinoAfetado, nivel)}`);
+  return efeitos;
+}
+
+export function dadosFalha(e: VisaoCliente): DadosFalha {
+  const nivel = e.falha;
+  const noMaximo = nivel >= FALHA.nivelMaximo;
+  return {
+    nivel,
+    rotulo: `Falha ${nivel}`,
+    lore: TEXTOS_FALHA.lore,
+    agora: nivel === 0 ? 'Ainda sem efeito: o Relógio corre como sempre.' : `${efeitosNoNivel(nivel).join('. ')}.`,
+    proximo: noMaximo ? null : { titulo: `Ao ascender: Falha ${nivel} → ${nivel + 1}`, efeitos: efeitosNoNivel(nivel + 1) },
+    noMaximo: noMaximo ? TEXTOS_FALHA.noMaximo : null,
+  };
+}
+
 export function eraAtual(e: VisaoCliente) {
   const o = objetivosEra(e);
   const total = OBJETIVOS_ERA_1.aldeoesMinimos;
@@ -304,6 +343,7 @@ export function eraAtual(e: VisaoCliente) {
     texto: ERAS[e.era - 1]?.texto ?? '',
     objetivos,
     podeAscender: o.todos,
+    falha: dadosFalha(e),
   };
 }
 

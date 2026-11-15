@@ -244,12 +244,11 @@ describe('configurar_aldeoes', () => {
 });
 
 describe('save do esquema 5', () => {
-  it('migra para o 6 mantendo os ofícios, com a automática ligada na Equilibrada', () => {
+  it('migra (5 → 6 → atual) mantendo os ofícios, com a automática ligada na Equilibrada', () => {
     const atual = liquidar(novo(), T0 + 10 * MIN);
-    const { aldeoesConfig: _c, ...v5 } = { ...atual, versao: 5 };
+    const { aldeoesConfig: _c, falha: _f, ...v5 } = { ...atual, versao: 5 };
     const carregado = carregarEstado(JSON.parse(JSON.stringify(v5)), 5);
-    expect(VERSAO_ESQUEMA).toBe(6);
-    expect(carregado.versao).toBe(6);
+    expect(carregado.versao).toBe(VERSAO_ESQUEMA);
     expect(carregado.aldeoes).toEqual(atual.aldeoes);
     expect(carregado.aldeoesConfig).toEqual({ automatica: true, politica: 'equilibrada' });
   });

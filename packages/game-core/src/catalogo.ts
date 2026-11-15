@@ -48,7 +48,7 @@ export function linhaCatalogo(e: VisaoCliente, slot: SlotId, agora: number): Lin
   const base = { slot, tipo, nome: nomeDoSlot(slot), nivel: s.nivel, custo: {}, falta: [], obra: null, requer: null };
   if (s.obraAte !== null) {
     const fim = s.obraAte;
-    const inicio = fim - tempoObraMs(s.nivel + 1);
+    const inicio = fim - tempoObraMs(s.nivel + 1, e.falha);
     const fracao = Math.min(1, Math.max(0, (agora - inicio) / (fim - inicio)));
     return { ...base, estado: 'em_obra', obra: { inicio, fim, fracao } };
   }

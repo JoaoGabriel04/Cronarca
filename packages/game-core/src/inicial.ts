@@ -20,6 +20,8 @@ export interface OpcoesInicio {
   ciclo?: number;
   /** Relíquias que sobrevivem à ascensão. */
   reliquias?: EstadoJogo['reliquias'];
+  /** Falha do ciclo (Portão 18b); 0 numa conta nova. */
+  falha?: number;
   cronica?: EstadoJogo['cronica'];
 }
 
@@ -67,6 +69,7 @@ export function estadoInicial(op: OpcoesInicio): EstadoJogo {
     pesquisas: { concluidas: [], atual: null },
     objetivos: { criptaVencida: false },
     mercador: null,
+    falha: op.falha ?? 0,
     reliquias,
     cliques: { usuario: { fichas: FORMULAS.clique.porSegundoUsuario * 1000, em: op.agora }, objetos: {} },
     cronica: structuredClone(op.cronica ?? []),

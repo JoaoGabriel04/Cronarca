@@ -1,10 +1,12 @@
 // Fórmulas v0 aplicadas com aritmética exata. Os parâmetros vêm de data/formulas.ts.
 import { CONSTRUCOES, type TipoConstrucao } from '../data/construcoes.ts';
 import { DESTINOS, type DestinoId } from '../data/expedicoes.ts';
+import { FALHA } from '../data/falha.ts';
 import { FORMULAS } from '../data/formulas.ts';
+import { PESQUISAS, type PesquisaId } from '../data/pesquisas.ts';
 import type { Recurso } from '../data/recursos.ts';
 import { RELIQUIAS, type ReliquiaId } from '../data/reliquias.ts';
-import { arredondar, BP, bp, limitar, MICRO, micro, multiplicar, potencia, racional } from './inteiros.ts';
+import { aplicarBonus, arredondar, BP, bp, limitar, MICRO, micro, multiplicar, potencia, racional } from './inteiros.ts';
 
 export type Custo = Partial<Record<Recurso, number>>;
 
@@ -32,9 +34,35 @@ export function custoConstrucao(tipo: TipoConstrucao, nivelAlvo: number): Custo 
   return custo;
 }
 
-/** Tempo de obra, em ms, para chegar ao nível `nivelAlvo`. */
-export function tempoObraMs(nivelAlvo: number): number {
-  return crescimento(F.construcao.segundosBase * 1000, F.construcao.fatorTempo, nivelAlvo - 1);
+/** Acréscimo da Falha, em pontos-base, para um percentual por nível. */
+function acrescimoFalhaBp(porNivel: number, falha: number): number {
+  return bp(porNivel) * falha;
+}
+
+/** Tempo de obra, em ms, para chegar ao nível `nivelAlvo`, com a Falha (+3% por nível; Falha 0 = o de sempre). */
+export function tempoObraMs(nivelAlvo: number, falha: number): number {
+  const base = crescimento(F.construcao.segundosBase * 1000, F.construcao.fatorTempo, nivelAlvo - 1);
+  return aplicarBonus(base, acrescimoFalhaBp(FALHA.tempoPorNivel, falha));
+}
+
+/** Duração da pesquisa, em ms, com a Falha. */
+export function duracaoPesquisaMs(id: PesquisaId, falha: number): number {
+  return aplicarBonus(PESQUISAS[id].segundos * 1000, acrescimoFalhaBp(FALHA.tempoPorNivel, falha));
+}
+
+/** Custo da pesquisa, em micro; as da cadeia da Carta Real ficam +5% por nível de Falha. */
+export function custoPesquisa(id: PesquisaId, falha: number): Custo {
+  const acrescimo = FALHA.pesquisasAfetadas.includes(id) ? acrescimoFalhaBp(FALHA.custoPesquisaPorNivel, falha) : 0;
+  const custo: Custo = {};
+  for (const [r, v] of Object.entries(PESQUISAS[id].custo) as [Recurso, number][]) custo[r] = aplicarBonus(micro(v), acrescimo);
+  return custo;
+}
+
+/** Perigo do destino com a Falha (só a Cripta muda, até o máximo). */
+export function perigoDestino(destino: DestinoId, falha: number): number {
+  const base = DESTINOS[destino].perigo;
+  if (destino !== FALHA.destinoAfetado || FALHA.perigoPorNivel === 0) return base;
+  return Math.min(FALHA.perigoMaximo, base + FALHA.perigoPorNivel * falha);
 }
 
 /** Teto de armazenamento, em micro-unidades, para o nível do Armazém ou do Celeiro. */

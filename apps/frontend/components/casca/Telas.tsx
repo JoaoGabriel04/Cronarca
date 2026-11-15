@@ -6,6 +6,7 @@
 // servidor (sorteiam); melhorar equipamento e comprar relíquia são previstos.
 
 import type { Acao, DestinoId, VisaoCliente } from '@cronarca/game-core';
+import { Hourglass } from 'lucide-react';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { linhasCronica } from '../../lib/casca/dados';
 import {
@@ -336,7 +337,19 @@ export function TelaEras({ estado, acoes }: { estado: VisaoCliente; acoes: Acoes
   return (
     <>
       <div className={estilos.principal}>
-        <Painel titulo={era.titulo} subtitulo={era.texto} extra={<span className={`${estilos.etiqueta} ${estilos.etiquetaCiclo}`}>{era.ciclo}</span>}>
+        <Painel
+          titulo={era.titulo}
+          subtitulo={era.texto}
+          extra={
+            <>
+              <span className={`${estilos.etiqueta} ${estilos.etiquetaCiclo}`}>{era.ciclo}</span>
+              <span className={`${estilos.etiqueta} ${estilos.etiquetaFalha}`} title={era.falha.agora}>
+                <Hourglass size={14} strokeWidth={2.5} aria-hidden="true" />
+                {era.falha.rotulo}
+              </span>
+            </>
+          }
+        >
           <div className={estilos.eraTopo}>
             <ul className={estilos.lista}>
               {era.objetivos.map((o) => (
@@ -361,6 +374,22 @@ export function TelaEras({ estado, acoes }: { estado: VisaoCliente; acoes: Acoes
             </ul>
             <div className={`caixa ${estilos.cartao} ${estilos.ascensao}`}>
               <p>Ascender reinicia vila, aldeões e pesquisas, mas você leva as relíquias.</p>
+              <div className={estilos.falha}>
+                <p className={estilos.falhaTitulo}>
+                  <Hourglass size={16} strokeWidth={2.5} aria-hidden="true" />
+                  {era.falha.proximo?.titulo ?? era.falha.rotulo}
+                </p>
+                {era.falha.proximo ? (
+                  <ul className={estilos.falhaEfeitos}>
+                    {era.falha.proximo.efeitos.map((t) => (
+                      <li key={t}>{t}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className={estilos.falhaTexto}>{era.falha.noMaximo}</p>
+                )}
+                <p className={estilos.falhaLore}>{era.falha.lore}</p>
+              </div>
               {!era.podeAscender && <p className={estilos.ascensaoDica}>Cumpra todos os objetivos</p>}
               <button
                 type="button"

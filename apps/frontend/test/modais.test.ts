@@ -22,7 +22,7 @@ describe('modais: Melhorar', () => {
     const custo = custoConstrucao('casa', 4);
     expect(d.custo.map((c) => c.recurso)).toEqual(Object.keys(custo));
     expect(d.custo.every((c) => !c.falta)).toBe(true);
-    expect(d.tempo).toBe(formatarDuracao(tempoObraMs(4)));
+    expect(d.tempo).toBe(formatarDuracao(tempoObraMs(4, 0)));
     expect(d.nota).toBe('A casa fica ocupada durante a obra e o efeito atual continua valendo.');
   });
 
@@ -191,6 +191,18 @@ describe('modais: Ascensão', () => {
     expect(d.ganho).toMatch(/^\+\d+ relíquias? ao ascender$/);
     expect(d.reinicia).toContain('Aventureiros e equipamentos');
     expect(d.leva).toEqual(['Relíquias e seus níveis', 'Registro do ciclo']);
+  });
+
+  it('Ascensão e Pesquisa com a Falha (Portão 18b): o modal mostra o próximo nível; custo e tempo com a Falha', () => {
+    const e = novo();
+    e.falha = 2;
+    expect(dadosAscensao(e).falha.proximo!.titulo).toBe('Ao ascender: Falha 2 → 3');
+    const carta = dadosPesquisa(e, T0).cartas.find((c) => c.id === 'carta_real')!;
+    expect(carta.custo.map((c) => c.valor)).toEqual(['330', '88']); // 300 e 80, +10%
+    expect(carta.tempo).toBe(formatarDuracao(180_000 * 1.06));
+    const hospitalidade = dadosPesquisa(e, T0).cartas.find((c) => c.id === 'hospitalidade')!;
+    expect(hospitalidade.custo.map((c) => c.valor)).toEqual(['40']);
+    expect(dadosMelhorar(e, 'casa_1', T0).tempo).toBe(formatarDuracao(tempoObraMs(2, 2)));
   });
 
   it('formatarDuracao no formato do Figma', () => {

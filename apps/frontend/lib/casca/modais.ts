@@ -4,11 +4,11 @@
 
 import {
   construiveis, CONSTRUCOES, custoConstrucao, EVENTO_PARAMETROS, linhaCatalogo, linhasCatalogo, NOMES_RECURSOS, TEXTOS_CATALOGO, FORMULAS, NIVEL_MAXIMO_CONSTRUCAO, objetivosEra, PESQUISAS, PESQUISAS_IDS,
-  micro, reliquiasNaAscensao, SLOTS, somaNiveis, tempoObraMs,
+  custoPesquisa, duracaoPesquisaMs, micro, reliquiasNaAscensao, SLOTS, somaNiveis, tempoObraMs,
   type Custo, type EstadoLinhaCatalogo, type LinhaCatalogo, type PesquisaId, type Recurso, type RefSprite, type SlotId, type TipoConstrucao, type VisaoCliente,
 } from '@cronarca/game-core';
 import { excecoesDoPiso, formatarInteiro, formatarRestante, textoEra, textoGuarda } from './dados';
-import { juntarNomes } from './telas';
+import { dadosFalha, juntarNomes } from './telas';
 
 const decimal = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
 
@@ -117,7 +117,7 @@ function obra(e: VisaoCliente, slot: SlotId, agora: number): DadosObra {
     hoje: s.nivel === 0 ? null : efeitoNoNivel(e, slot, s.nivel),
     depois: efeitoNoNivel(e, slot, alvo),
     custo,
-    tempo: maximo ? '' : formatarDuracao(tempoObraMs(alvo)),
+    tempo: maximo ? '' : formatarDuracao(tempoObraMs(alvo, e.falha)),
     situacao: emObra ? 'obra' : maximo ? 'maximo' : 'pronta',
     restante: emObra ? formatarRestante(s.obraAte! - agora) : null,
     pode: motivo === null,
@@ -188,7 +188,7 @@ function paraTela(e: VisaoCliente, l: LinhaCatalogo, agora: number): LinhaCatalo
       : null,
     nivel: null,
     efeito: null,
-    tempo: vazio ? `${formatarDuracao(tempoObraMs(1))} ${T.deObra}` : null,
+    tempo: vazio ? `${formatarDuracao(tempoObraMs(1, e.falha))} ${T.deObra}` : null,
     obra: l.obra ? { restante: formatarRestante(l.obra.fim - agora), fracao: l.obra.fracao } : null,
     acao: vazio ? 'construir' : null,
     pode: l.estado === 'construivel',
@@ -237,13 +237,13 @@ export function dadosPesquisa(e: VisaoCliente, agora: number) {
   const atual = e.pesquisas.atual;
   const cartas = PESQUISAS_IDS.map((id): CartaPesquisa => {
     const p = PESQUISAS[id];
-    const custoMicro: Custo = {};
-    for (const [r, v] of Object.entries(p.custo) as [Recurso, number][]) custoMicro[r] = micro(v);
-    const custo = custoModal(e, custoMicro);
-    const base = { id, nome: p.nome, descricao: p.descricao, custo, tempo: formatarDuracao(p.segundos * 1000), progresso: null, restante: null, requer: null };
+    // Com a Falha (Portão 18b): o custo e o tempo que o servidor vai cobrar.
+    const custo = custoModal(e, custoPesquisa(id, e.falha));
+    const duracao = duracaoPesquisaMs(id, e.falha);
+    const base = { id, nome: p.nome, descricao: p.descricao, custo, tempo: formatarDuracao(duracao), progresso: null, restante: null, requer: null };
     if (e.pesquisas.concluidas.includes(id)) return { ...base, estado: 'concluida', pode: false, motivo: null };
     if (atual?.id === id) {
-      const total = p.segundos * 1000;
+      const total = duracao;
       const falta = Math.max(0, atual.fim - agora);
       return { ...base, estado: 'andamento', progresso: Math.min(1, Math.max(0, 1 - falta / total)), restante: `${formatarRestante(falta)} restantes`, pode: false, motivo: null };
     }
@@ -280,6 +280,7 @@ export function dadosAscensao(e: VisaoCliente) {
     ganho: `+${ganho} relíquia${ganho === 1 ? '' : 's'} ao ascender`,
     reinicia: ['Vila e construções', 'Aldeões', 'Pesquisas', 'Recursos', 'Aventureiros e equipamentos'],
     leva: ['Relíquias e seus níveis', 'Registro do ciclo'],
+    falha: dadosFalha(e),
     pode: objetivosEra(e).todos,
   };
 }

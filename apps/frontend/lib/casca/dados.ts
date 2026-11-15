@@ -3,7 +3,7 @@
 
 import {
   CONSTRUCOES, custoConstrucao, DESTINOS, DESTINOS_IDS, destinoAberto, duracaoExpedicaoMs, ERAS, FAIXAS_PERIGO,
-  calcularTaxas, chegaComoFazendeiro, MICRO, NIVEL_MAXIMO_CONSTRUCAO, tetosNosNiveis, NOMES_RECURSOS, nivelReliquia, PESQUISAS, RECURSOS, SLOT_IDS, SLOTS, somaNiveis, tetoMicro, tetos,
+  calcularTaxas, chegaComoFazendeiro, MICRO, NIVEL_MAXIMO_CONSTRUCAO, perigoDestino, tetosNosNiveis, NOMES_RECURSOS, nivelReliquia, PESQUISAS, RECURSOS, SLOT_IDS, SLOTS, somaNiveis, tetoMicro, tetos,
   type DestinoId, type IconeCronica, type Recurso, type RefSprite, type SlotId, type VisaoCliente,
   aldeoesMaximos, aldeaoAtivo, FORMULAS, NOME_OCIOSO, NOMES_OFICIOS, NOMES_POLITICAS, OFICIO_OCIOSO, OFICIOS, OFICIOS_ALDEAO,
   POLITICAS_PRONTAS, type Oficio, type OficioAldeao, type PoliticaAldeoes, type PoliticaPronta, type TipoConstrucao,
@@ -160,7 +160,7 @@ export function cartasDestinos(e: VisaoCliente, agora: number): { titulo: string
       return { destino: id, nome: d.nome, linha: `Requer ${PESQUISAS[d.requer!].nome}`, emAndamento: false, saque, botao: 'bloqueada', nevoa: id === 'cripta' };
     }
     const duracao = duracaoExpedicaoMs(id, nivelReliquia(e, 'caminhos_eternos'));
-    return { destino: id, nome: d.nome, linha: `Perigo ${faixaDePerigo(d.perigo)} · ${formatarRestante(duracao)}`, emAndamento: false, saque, botao: 'enviar', nevoa: false };
+    return { destino: id, nome: d.nome, linha: `Perigo ${faixaDePerigo(perigoDestino(id, e.falha))} · ${formatarRestante(duracao)}`, emAndamento: false, saque, botao: 'enviar', nevoa: false };
   });
   const n = e.expedicoes.length;
   return { titulo: n === 0 ? 'Nenhum grupo em expedição' : n === 1 ? '1 grupo em expedição' : `${n} grupos em expedição`, cartas };

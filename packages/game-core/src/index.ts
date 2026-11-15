@@ -10,6 +10,7 @@ export * from '../data/pesquisas.ts';
 export * from '../data/expedicoes.ts';
 export * from '../data/aventureiros.ts';
 export * from '../data/aldeoes.ts';
+export * from '../data/falha.ts';
 export * from '../data/eventos.ts';
 export * from '../data/reliquias.ts';
 export * from '../data/eras.ts';

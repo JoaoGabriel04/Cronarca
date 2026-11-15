@@ -5,7 +5,7 @@
 // emitem intenções; quem envia ao servidor é o JogoAoVivo.
 
 import type { PesquisaId } from '@cronarca/game-core';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Hourglass } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import type { CartaPesquisa, CustoModal, DadosObra, dadosAscensao } from '../../lib/casca/modais';
 import { Icone } from './Icone';
@@ -214,6 +214,22 @@ export function ModalAscensao({
             {dados.ganho}
           </p>
         </div>
+      </div>
+      <div className={`caixa ${estilos.cartao} ${estilos.falhaModal}`}>
+        <h3 className={`${estilos.nomeCartao} ${estilos.vermelho}`}>
+          <Hourglass size={20} strokeWidth={2.5} aria-hidden="true" />
+          {dados.falha.proximo?.titulo ?? dados.falha.rotulo}
+        </h3>
+        {dados.falha.proximo ? (
+          <ul className={estilos.itens}>
+            {dados.falha.proximo.efeitos.map((t) => (
+              <li key={t}>{t}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className={estilos.falhaLore}>{dados.falha.noMaximo}</p>
+        )}
+        <p className={estilos.falhaLore}>{dados.falha.lore}</p>
       </div>
       <div className={estilos.colunas}>
         <div className={`caixa ${estilos.cartao}`}>

@@ -5,10 +5,11 @@ import { NIVEL_MAXIMO_CONSTRUCAO, TIPOS_CONSTRUCAO } from '../data/construcoes.t
 import { ESTADO_INICIAL_CICLO } from '../data/eras.ts';
 import { EVENTO_PARAMETROS } from '../data/eventos.ts';
 import { FORMULAS } from '../data/formulas.ts';
-import { PESQUISAS } from '../data/pesquisas.ts';
+import { FALHA } from '../data/falha.ts';
+import { PESQUISAS, type PesquisaId } from '../data/pesquisas.ts';
 import type { Recurso } from '../data/recursos.ts';
 import { SLOT_IDS, SLOTS } from '../data/slots.ts';
-import { custoConstrucao, custoContratar, custoEquipamento, tetoMicro, type Custo } from '../src/formulas.ts';
+import { custoConstrucao, custoContratar, custoEquipamento, custoPesquisa, tetoMicro, type Custo } from '../src/formulas.ts';
 import { micro } from '../src/inteiros.ts';
 
 /** Capacidade máxima alcançável: Armazém (5 recursos) e Celeiro (comida) no nível máximo. */
@@ -49,10 +50,9 @@ describe('custo x capacidade do armazém', () => {
 
   it('pesquisas, equipamento e a troca do Mercador cabem', () => {
     const violacoes: string[] = [];
-    for (const [id, p] of Object.entries(PESQUISAS)) {
-      const custo: Custo = {};
-      for (const [r, v] of Object.entries(p.custo) as [Recurso, number][]) custo[r] = micro(v);
-      for (const e of excessos(custo, TETO_MAXIMO)) violacoes.push(`pesquisa ${id}: ${e}`);
+    // Pesquisas no pior caso: a Falha máxima (Portão 18b encarece Estradas Reais e Carta Real).
+    for (const id of Object.keys(PESQUISAS) as PesquisaId[]) {
+      for (const e of excessos(custoPesquisa(id, FALHA.nivelMaximo), TETO_MAXIMO)) violacoes.push(`pesquisa ${id} (Falha ${FALHA.nivelMaximo}): ${e}`);
     }
     for (const peca of ['arma', 'armadura'] as const) {
       for (let n = 0; n < FORMULAS.aventureiro.equipamentoMaximo; n++) {

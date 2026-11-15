@@ -1099,3 +1099,20 @@
 .custosLinha > .tempoLinha {
   color: #6e5a40;
 }
+
+/* ---------- Portão 18b: Falha no modal de Ascensão ---------- */
+.falhaModal {
+  margin-top: 16px;
+  padding: 14px 20px 16px;
+}
+.falhaModal .nomeCartao {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.falhaLore {
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-style: italic;
+  color: #6a5a40;
+}
