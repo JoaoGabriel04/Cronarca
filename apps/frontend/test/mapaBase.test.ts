@@ -74,5 +74,5 @@ describe('recorte do mapa_base.png', () => {
     let translucidos = 0;
     for (let i = 3; i < img.dados.length; i += 4) if (img.dados[i] !== 255) translucidos++;
     expect(translucidos).toBe(0);
-  });
+  }, 30_000); // decodifica 3072 x 2304: com a suíte inteira em paralelo passa dos 5 s padrão
 });

@@ -234,6 +234,11 @@ export function dadosPesquisa(e: VisaoCliente, agora: number) {
   };
 }
 
+/** Selo do botão Pesquisa: quantas dá para começar agora (0 com uma em andamento ou sem saber). */
+export function seloPesquisa(e: VisaoCliente): number {
+  return dadosPesquisa(e, e.t).cartas.filter((c) => c.estado === 'disponivel' && c.pode).length;
+}
+
 // ---------- Ascensão ----------
 
 /**

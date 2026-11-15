@@ -149,7 +149,7 @@ describe('cartão dos aldeões', () => {
     expect(dadosAldeoes(e)).toMatchObject({ total: 4, situacao: 'Casas cheias: melhore a Casa para chegarem mais', alerta: true });
     e.recursos.comida = 0;
     const d = dadosAldeoes(e);
-    expect(d).toMatchObject({ situacao: 'Sem comida: ninguém chega e os ofícios param', alerta: true });
+    expect(d).toMatchObject({ situacao: 'Sem comida e Casas cheias: pesquise Colheita Farta ou melhore a Casa', alerta: true });
     expect(d.oficios.find((o) => o.oficio === 'lenhador')!.efeito).toBe('+5% de madeira (parado sem comida)');
   });
 });

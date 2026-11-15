@@ -1,8 +1,8 @@
 'use client';
 
 // HUD (Figma "HUD", 1440 x 72): selo, era, 6 chips de recurso com quantidade
-// e taxa por segundo, e os botões Construir, Ranking (Portão 15), Salvar
-// agora e Configurações. O número sobe animado (GSAP) e o chip pulsa a cada
+// e taxa por segundo (o de Saber abre a Pesquisa), e os botões Construir,
+// Pesquisa, Ranking (Portão 15), Salvar agora e Configurações. O número sobe animado (GSAP) e o chip pulsa a cada
 // ganho por clique.
 
 import { TEXTOS_CATALOGO, type Recurso } from '@cronarca/game-core';
@@ -34,6 +34,9 @@ export interface PropsHud {
   /** Botão Construir (A12): abre o Catálogo; o selo conta os slots que já dá para pagar (0 esconde). */
   aoConstruir: () => void;
   selo: number;
+  /** Botão Pesquisa (e o chip de Saber): abre o modal de Pesquisa; o selo conta as que dá para começar. */
+  aoPesquisar: () => void;
+  seloPesquisa: number;
 }
 
 function Valor({ texto }: { texto: string }) {
@@ -83,8 +86,8 @@ export function SeloNumero({ n }: { n: number }) {
   );
 }
 
-export function Hud({ era, chips, pulso, aoSalvar, salvando, aoConfigurar, aoRanking, aoConstruir, selo }: PropsHud) {
-  const refs = useRef<Partial<Record<Recurso, HTMLDivElement | null>>>({});
+export function Hud({ era, chips, pulso, aoSalvar, salvando, aoConfigurar, aoRanking, aoConstruir, selo, aoPesquisar, seloPesquisa }: PropsHud) {
+  const refs = useRef<Partial<Record<Recurso, HTMLElement | null>>>({});
 
   useEffect(() => {
     if (!pulso) return;
@@ -102,22 +105,32 @@ export function Hud({ era, chips, pulso, aoSalvar, salvando, aoConfigurar, aoRan
       <img className={estilos.logo} src={MARCA.selo(64)} width={64} height={64} alt={MARCA.nome} draggable={false} />
       <div className={`caixa ${estilos.era}`}>{era}</div>
       <div className={`${estilos.recursos} ${estilos.rola}`} role="list" aria-label="Recursos">
-      {chips.map((c) => (
-        <div
-          key={c.recurso}
-          ref={(el) => {
-            refs.current[c.recurso] = el;
-          }}
-          className={`caixa ${estilos.chip} ${c.cheio ? estilos.cheio : ''}`}
-          role="listitem"
-          aria-label={`${c.recurso}: ${c.quantidade}, ${c.taxa}`}
-          title={c.cheio ? 'Armazém cheio' : undefined}
-        >
-          <Icone nome={`icone-${c.recurso}`} className={estilos.chipIcone} />
-          <Valor texto={c.quantidade} />
-          <p className={`${estilos.chipTaxa} ${c.negativa ? estilos.negativa : ''}`}>{c.taxa}</p>
-        </div>
-      ))}
+      {chips.map((c) => {
+        const conteudo = (
+          <>
+            <Icone nome={`icone-${c.recurso}`} className={estilos.chipIcone} />
+            <Valor texto={c.quantidade} />
+            <p className={`${estilos.chipTaxa} ${c.negativa ? estilos.negativa : ''}`}>{c.taxa}</p>
+          </>
+        );
+        const classe = `caixa ${estilos.chip} ${c.cheio ? estilos.cheio : ''} ${c.alerta ? estilos.chipAlerta : ''}`;
+        const dica = c.alerta ?? (c.cheio ? 'Armazém cheio' : undefined);
+        const ref = (el: HTMLElement | null) => {
+          refs.current[c.recurso] = el;
+        };
+        // Saber abre a Pesquisa (atalho além do botão).
+        return c.recurso === 'saber' ? (
+          <div key={c.recurso} role="listitem" className={estilos.chipItem}>
+            <button ref={ref} type="button" className={`${classe} ${estilos.chipBotao}`} onClick={aoPesquisar} aria-label={`Saber: ${c.quantidade}, ${c.taxa}. Abrir a Pesquisa`} title="Abrir a Pesquisa">
+              {conteudo}
+            </button>
+          </div>
+        ) : (
+          <div key={c.recurso} ref={ref} className={classe} role="listitem" aria-label={`${c.recurso}: ${c.quantidade}, ${c.taxa}${c.alerta ? `. ${c.alerta}` : ''}`} title={dica}>
+            {conteudo}
+          </div>
+        );
+      })}
       </div>
       <div className={estilos.botoesHud}>
         <span className={`${estilos.comSelo} ${estilos.construirHud}`}>
@@ -131,6 +144,18 @@ export function Hud({ era, chips, pulso, aoSalvar, salvando, aoConfigurar, aoRan
             <Hammer size={24} strokeWidth={2.5} aria-hidden="true" />
           </button>
           {selo > 0 && <SeloNumero n={selo} />}
+        </span>
+        <span className={`${estilos.comSelo} ${estilos.pesquisaHud}`}>
+          <button
+            type="button"
+            className={`caixa ${estilos.botaoHud}`}
+            onClick={aoPesquisar}
+            aria-label={seloPesquisa > 0 ? `Pesquisa (${seloPesquisa} disponíve${seloPesquisa === 1 ? 'l' : 'is'})` : 'Pesquisa'}
+            title="Pesquisa"
+          >
+            <Icone nome="icone-saber" />
+          </button>
+          {seloPesquisa > 0 && <SeloNumero n={seloPesquisa} />}
         </span>
         <button type="button" className={`caixa ${estilos.botaoHud} ${estilos.rankingHud}`} onClick={aoRanking} aria-label="Ranking" title="Ranking">
           <Icone nome="icone-ranking" />

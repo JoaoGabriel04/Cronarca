@@ -33,8 +33,13 @@ export function receber(e: EstadoJogo, ganhos: Partial<Record<Recurso, number>>)
   return entrou;
 }
 
+/**
+ * Chega aldeão sempre que houver vaga nas Casas. Com a comida em 0 ele chega
+ * como Fazendeiro (oficioDoProximoAldeao): a vila não fica presa sem comida,
+ * porque melhorar a Casa sempre traz quem produz.
+ */
 function podeChegarAldeao(e: EstadoJogo): boolean {
-  return e.recursos.comida > 0 && e.aldeoes.length < aldeoesMaximos(e);
+  return e.aldeoes.length < aldeoesMaximos(e);
 }
 
 function descreverGanhos(ganhos: Partial<Record<Recurso, number>>): string {
@@ -194,7 +199,7 @@ function proximoAcontecimento(e: EstadoJogo, alvo: number, saldoComida: number):
   }
   const comida = e.recursos.comida;
   if (comida > 0 && saldoComida < 0) considerar(e.t + divTeto(comida, -saldoComida));
-  // Comida saindo do zero religa os bônus de ofício e a chegada de aldeões.
+  // Comida saindo do zero religa os bônus de ofício e o rodízio de ofícios.
   if (comida === 0 && saldoComida > 0) considerar(e.t + 1);
   return prox;
 }

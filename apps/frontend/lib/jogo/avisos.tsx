@@ -4,6 +4,7 @@
 // provisório: os chips e etiquetas da casca chegam no Portão 11.
 
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
+import { textoDaRecusa } from './recusas';
 import type { Desfecho } from './sincronia';
 
 const DURACAO_MS = 6_000;
@@ -34,7 +35,7 @@ export function textoDoDesfecho(d: Desfecho, op: { silenciarRecusa?: boolean } =
     case 'sem_confirmacao':
       return null;
     case 'recusada':
-      return op.silenciarRecusa ? null : 'O servidor recusou a ação.';
+      return op.silenciarRecusa ? null : textoDaRecusa(d.erro);
   }
 }
 

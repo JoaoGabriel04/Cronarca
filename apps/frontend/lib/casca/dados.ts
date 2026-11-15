@@ -44,6 +44,8 @@ export interface ChipRecurso {
   taxa: string;
   negativa: boolean;
   cheio: boolean;
+  /** Comida em 0 e sem subir: destaque e a dica do que fazer. */
+  alerta: string | null;
 }
 
 export function chipsHud(e: VisaoCliente): ChipRecurso[] {
@@ -55,6 +57,10 @@ export function chipsHud(e: VisaoCliente): ChipRecurso[] {
     taxa: formatarTaxa(saldo[r]),
     negativa: saldo[r] < 0,
     cheio: e.recursos[r] >= teto[r],
+    alerta:
+      r === 'comida' && e.recursos.comida <= 0 && saldo.comida <= 0
+        ? 'Sem comida: expedições não partem. Pesquise Colheita Farta ou melhore a Casa (com a comida em 0 chegam Fazendeiros).'
+        : null,
   }));
 }
 
@@ -284,7 +290,8 @@ export function dadosAldeoes(e: VisaoCliente): DadosAldeoes {
   const maximo = aldeoesMaximos(e);
   const temComida = e.recursos.comida > 0;
   let situacao: string;
-  if (!temComida) situacao = 'Sem comida: ninguém chega e os ofícios param';
+  if (!temComida && total >= maximo) situacao = 'Sem comida e Casas cheias: pesquise Colheita Farta ou melhore a Casa';
+  else if (!temComida) situacao = `Sem comida: os ofícios param e o próximo, em ${Math.max(1, Math.ceil((FORMULAS.aldeoes.segundosPorChegada * 1000 - e.progressoAldeaoMs) / 1000))} s, chega como Fazendeiro`;
   else if (total >= maximo) situacao = 'Casas cheias: melhore a Casa para chegarem mais';
   else situacao = `Próximo em ${Math.max(1, Math.ceil((FORMULAS.aldeoes.segundosPorChegada * 1000 - e.progressoAldeaoMs) / 1000))} s`;
 

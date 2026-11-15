@@ -14,7 +14,8 @@ import { useRouter } from 'next/navigation';
 import {
   cartasConstrucoes, cartasDestinos, chipsHud, dadosAldeoes, dadosMercador, linhasCronica, textoEra, textoSalvo, type Sincronia,
 } from '../../lib/casca/dados';
-import { dadosAscensao, dadosMelhorar, dadosPesquisa, linhasCatalogoTela, seloConstruir } from '../../lib/casca/modais';
+import { dadosAscensao, dadosMelhorar, dadosPesquisa, linhasCatalogoTela, seloConstruir, seloPesquisa } from '../../lib/casca/modais';
+import { grupoSugerido, grupoValido } from '../../lib/casca/telas';
 import { enviar, ErroApi, mensagemDeErro } from '../../lib/api';
 import { textoDoDesfecho, useAvisar } from '../../lib/jogo/avisos';
 import { ProvedorConfirmacao, usePedidoConfirmacao } from '../../lib/jogo/confirmacao';
@@ -173,6 +174,11 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
     if (depuracao) console.info('[casca]', e);
     switch (e.tipo) {
       case 'enviarClicado':
+        // "Enviar" já traz o grupo: quem está na vila, do mais forte, até 3 (dá para trocar).
+        if (grupoValido(visivel, selecionados).length === 0) setSelecionados(grupoSugerido(visivel));
+        setDestaque(e.destino);
+        setAba('expedicoes');
+        return;
       case 'verClicado':
         setDestaque(e.destino);
         setAba('expedicoes');
@@ -335,6 +341,8 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
         aoRanking={() => setModal({ tipo: 'ranking' })}
         aoConstruir={() => abrirCatalogo(null)}
         selo={selo}
+        aoPesquisar={() => setModal({ tipo: 'pesquisa' })}
+        seloPesquisa={seloPesquisa(visivel)}
       />
       <Abas
         ativa={aba}

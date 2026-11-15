@@ -68,7 +68,7 @@ describe('liquidação', () => {
     expect(mais.aldeoes.map((a) => a.oficio).slice(4)).toEqual(['ferreiro', 'fazendeiro', 'lenhador', 'mineiro']);
   });
 
-  it('comida zerada: ninguém morre, os bônus de ofício param e aldeões não chegam', () => {
+  it('comida zerada: ninguém morre, os bônus de ofício param e o próximo aldeão (Fazendeiro) segue a caminho', () => {
     const e = comRecursos(novo(), { comida: 1 });
     e.aldeoes = [{ oficio: 'lenhador' }, { oficio: 'lenhador' }]; // sem fazendeiro: só consumo
     // consumo 180 milésimos/s: 1 unidade acaba em ceil(1_000_000 / 180) = 5556 ms
@@ -77,7 +77,9 @@ describe('liquidação', () => {
     expect(d.aldeoes).toHaveLength(2);
     // 5556 ms a 1100 (2 lenhadores) + 4444 ms a 1000 (sem bônus)
     expect(d.recursos.madeira).toBe(u(100) + 1100 * 5556 + 1000 * 4444);
-    expect(d.progressoAldeaoMs).toBe(5556);
+    // Com vaga, a chegada continua contando mesmo sem comida (quem chegar será Fazendeiro).
+    expect(d.progressoAldeaoMs).toBe(10_000);
+    expect(liquidar(e, T0 + 20 * SEG).aldeoes.at(-1)).toEqual({ oficio: 'fazendeiro' });
   });
 
   it('comida voltando religa os bônus e a chegada de aldeões', () => {
@@ -243,5 +245,27 @@ describe('chegada de aldeões na Crônica', () => {
     expect(d.aldeoes.map((a) => a.oficio)).toEqual(['fazendeiro', 'lenhador', 'mineiro', 'sabio']);
     expect(linhas.map((l) => l.texto)).toEqual(['Um mineiro chegou à vila.', 'Um sábio chegou à vila.']);
     expect(linhas.map((l) => l.em)).toEqual([T0 + 20 * SEG, T0 + 40 * SEG]);
+  });
+});
+
+describe('fome não trava a vila', () => {
+  it('com a comida em 0 e vaga nas Casas, o aldeão chega como Fazendeiro e a comida volta a subir', () => {
+    const e = novo();
+    // Casa 1 cheia (4 aldeões) e 2 aventureiros: saldo de −0,01/s, comida parada em 0.
+    e.aldeoes = [{ oficio: 'fazendeiro' }, { oficio: 'lenhador' }, { oficio: 'mineiro' }, { oficio: 'sabio' }];
+    e.aventureiros.push({ ...e.aventureiros[0]!, id: 'a99', nome: 'Violante' });
+    e.recursos.comida = 0;
+    e.slots.casa_1.nivel = 2; // melhorou a Casa: 4 vagas novas
+    const d = liquidar(e, T0 + 25 * SEG);
+    expect(d.aldeoes.at(-1)).toEqual({ oficio: 'fazendeiro' });
+    expect(d.cronica.at(-1)?.texto).toBe('Um fazendeiro chegou à vila.');
+    expect(d.recursos.comida).toBeGreaterThan(0);
+  });
+
+  it('com comida, o rodízio segue igual', () => {
+    const e = novo();
+    e.aldeoes = [{ oficio: 'fazendeiro' }, { oficio: 'lenhador' }, { oficio: 'mineiro' }, { oficio: 'sabio' }];
+    e.slots.casa_1.nivel = 2;
+    expect(liquidar(e, T0 + 21 * SEG).aldeoes.at(-1)).toEqual({ oficio: 'ferreiro' });
   });
 });

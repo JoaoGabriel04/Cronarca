@@ -121,7 +121,11 @@ Portão 0 aprovado com estas decisões. Tudo que é número vai em `packages/gam
 - Cada chegada escreve uma linha na Crônica ("Um lenhador chegou à vila.").
 - Interface: cartão **Aldeões** no topo do painel da Vila (e na Vila do celular): "N de M", como chegam, a situação (próximo em X s, Casas cheias ou sem comida) e cada ofício presente com o efeito de agora, ou o que falta para render (ex.: "+5% de pedra quando houver Pedreira").
 
-**Comida zerada.** Ninguém morre. Aldeões novos não chegam, os bônus dos ofícios param e expedições não podem partir. Construções continuam produzindo.
+**Comida zerada.** Ninguém morre. Os bônus dos ofícios param e expedições não podem partir. Construções continuam produzindo. **Com vaga nas Casas, o próximo aldeão chega como Fazendeiro** (o rodízio volta quando a comida sobe): a vila não fica presa sem comida, porque melhorar a Casa sempre traz quem produz. A tela avisa em texto: chip de comida em alerta, aviso na aba Expedições ("Sem comida: … Pesquise Colheita Farta ou melhore a Casa") e, no Contratar, o saldo de comida de agora e o de depois (em vermelho se ficar negativo).
+
+**Pesquisa.** Abre pelo botão Pesquisa no HUD (desktop e topo do celular, com selo das que dá para começar), pelo chip de Saber e pelo Scriptorium no mapa.
+
+**Expedição.** O botão "Enviar" já traz o grupo (quem está na vila, do mais forte, até 3); pela aba direto o grupo começa vazio. O motivo de não partir aparece em texto acima dos destinos; o retrato ferido mostra quanto falta; a recusa do servidor diz o motivo (`lib/jogo/recusas.ts`).
 
 **Teto** vale para os 6 recursos. Produção que passaria do teto é descartada. O recurso que chega de saque ou evento também é cortado no teto.
 

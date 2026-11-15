@@ -52,7 +52,9 @@ export function vagasGuilda(e: VisaoCliente): number {
   return g.vagasBase + g.vagasPorNivelDeTaverna * somaNiveis(e, 'taverna') + hospitalidade;
 }
 
+/** Rodízio de ofícios; com a comida em 0, quem chega é Fazendeiro (tira a vila da fome). */
 export function oficioDoProximoAldeao(e: VisaoCliente): Oficio {
+  if (e.recursos.comida <= 0) return 'fazendeiro';
   return RODIZIO_OFICIOS[e.aldeoes.length % RODIZIO_OFICIOS.length]!;
 }
 

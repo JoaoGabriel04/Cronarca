@@ -9,7 +9,7 @@ import type { Acao, DestinoId, VisaoCliente } from '@cronarca/game-core';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { linhasCronica } from '../../lib/casca/dados';
 import {
-  caminhoDoTempo, cartasHerois, chipsGrupo, emAndamento, eraAtual, guilda, linhasDestinos, relatorios, reliquias,
+  avisoExpedicao, caminhoDoTempo, cartasHerois, chipsGrupo, emAndamento, eraAtual, guilda, linhasDestinos, relatorios, reliquias,
   type CartaHeroi, type Peca,
 } from '../../lib/casca/telas';
 import { SpriteAnimado } from '../anim/SpriteAnimado';
@@ -142,6 +142,7 @@ export function TelaHerois({ estado, agora, acoes }: { estado: VisaoCliente; ago
                 {acoes.enviando ? 'Contratando...' : 'Contratar aventureiro'}
               </button>
               <Custos itens={g.contratar.custo} />
+              <p className={`${estilos.efeitoComida} ${g.contratar.comida.alerta ? estilos.efeitoComidaAlerta : ''}`}>{g.contratar.comida.texto}</p>
             </div>
           }
         >
@@ -185,7 +186,8 @@ export function TelaExpedicoes({
 }: {
   estado: VisaoCliente; agora: number; acoes: AcoesTela; selecionados: string[]; aoSelecionar: (ids: string[]) => void; destaque: DestinoId | null;
 }) {
-  const { chips, poder } = chipsGrupo(estado, selecionados);
+  const { chips, poder } = chipsGrupo(estado, selecionados, agora);
+  const aviso = avisoExpedicao(estado, selecionados, agora);
   const andamento = emAndamento(estado, agora);
   const destinos = linhasDestinos(estado, selecionados);
   const rel = relatorios(estado);
@@ -201,7 +203,7 @@ export function TelaExpedicoes({
   return (
     <>
       <div className={estilos.principal}>
-        <Painel titulo="Grupo" subtitulo="até 3 aventureiros" extra={<p className={estilos.poderGrupo}>Poder do grupo: {poder}</p>}>
+        <Painel titulo="Grupo" subtitulo="toque para escolher, até 3" extra={<p className={estilos.poderGrupo}>Poder do grupo: {poder}</p>}>
           <ul className={estilos.grupo} aria-label="Escolha o grupo">
             {chips.map((c) => (
               <li key={c.id}>
@@ -223,6 +225,11 @@ export function TelaExpedicoes({
               </li>
             ))}
           </ul>
+          {aviso && (
+            <p className={`${estilos.avisoExpedicao} ${aviso.alerta ? estilos.avisoExpedicaoAlerta : ''}`} role="status">
+              {aviso.texto}
+            </p>
+          )}
           <ul className={estilos.lista}>
             {andamento.map((a) => (
               <li key={a.id} className={`caixa ${estilos.cartao} ${estilos.andamento}`}>

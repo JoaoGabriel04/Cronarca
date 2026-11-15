@@ -2388,3 +2388,68 @@
 .oficioParado {
   color: #8a7a60;
 }
+
+/* ---------- Pesquisa no HUD e chips de recurso ---------- */
+
+/* Comida em 0 e sem subir: borda vermelha (a dica diz o que fazer). */
+.chipAlerta {
+  --borda: #c0392b;
+  --realce: #4a1a14;
+}
+
+/* O chip de Saber é um botão (abre a Pesquisa), com o mesmo desenho dos outros. */
+.chipItem {
+  display: contents;
+}
+.chipBotao {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.chipBotao:hover {
+  filter: brightness(1.15);
+}
+.chipBotao:focus-visible {
+  outline: 3px solid var(--ouro-claro);
+  outline-offset: 2px;
+}
+
+/* Abaixo de 1024 px o topo esconde os botões do HUD menos as Configurações;
+   a Pesquisa fica (no celular é o caminho para ela fora do Scriptorium). */
+@media (max-width: 1023px) {
+  /* Mais específica que a regra ".botoesHud .botaoHud:not(:last-child):not(.rankingHud)", que esconde os outros. */
+  .botoesHud .pesquisaHud > .botaoHud.botaoHud:not(.rankingHud) {
+    display: grid;
+  }
+}
+
+/* Efeito na comida embaixo do Contratar (aba Heróis). */
+.efeitoComida {
+  margin: 6px 0 0;
+  max-width: 320px;
+  font-size: 13px;
+  line-height: 18px;
+  color: #6e5a40;
+}
+.efeitoComidaAlerta {
+  color: #a8342c;
+  font-weight: 700;
+}
+
+/* Por que a expedição não parte (visível também sem mouse). */
+.avisoExpedicao {
+  margin: 0 0 10px;
+  padding: 8px 12px;
+  border: 2px solid #c8b890;
+  background: #f6efdc;
+  font-size: 15px;
+  line-height: 21px;
+  color: #4a3a2a;
+}
+.avisoExpedicaoAlerta {
+  border-color: #c0392b;
+  color: #a8342c;
+  font-weight: 700;
+}

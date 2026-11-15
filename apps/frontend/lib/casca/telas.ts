@@ -2,7 +2,7 @@
 // das regras do game-core; nada de número fixo aqui. Funções puras.
 
 import {
-  chanceExitoBp, custoContratar, custoEquipamento, custoReliquia, DESTINOS, DESTINOS_IDS, destinoAberto, duracaoExpedicaoMs,
+  calcularTaxas, chanceExitoBp, custoContratar, custoEquipamento, custoReliquia, DESTINOS, DESTINOS_IDS, destinoAberto, duracaoExpedicaoMs,
   ERAS, FORMULAS, MICRO, NIVEL_MAXIMO_CONSTRUCAO, NOMES_CLASSES, nivelReliquia, objetivosEra, OBJETIVOS_ERA_1, PESQUISAS,
   poderAventureiro, RELIQUIAS, RELIQUIAS_IDS, SLOT_IDS, SLOTS, TAMANHO_MAXIMO_GRUPO, vagasGuilda,
   type Classe, type DestinoId, type Recurso, type RefSprite, type ReliquiaId, type VisaoCliente,
@@ -78,8 +78,25 @@ export function cartasHerois(e: VisaoCliente, agora: number): CartaHeroi[] {
 export interface Guilda {
   vagas: string;
   subtitulo: string;
-  contratar: { custo: { recurso: Recurso; valor: string }[]; pode: boolean; motivo: string | null };
+  contratar: {
+    custo: { recurso: Recurso; valor: string }[];
+    pode: boolean;
+    motivo: string | null;
+    /** Efeito na comida antes de contratar: "Saldo de comida: +0,07/s → −0,01/s". */
+    comida: { texto: string; alerta: boolean };
+  };
   resumo: { poderTotal: number; vagas: string; consumo: string; proximaVaga: string; cabecalho: string };
+}
+
+/**
+ * Cada aventureiro come comida: mostra o saldo de agora e o de depois da
+ * contratação. Negativo vira alerta (com a comida em 0 a expedição não parte).
+ */
+export function efeitoNaComida(e: VisaoCliente): { texto: string; alerta: boolean } {
+  const agora = calcularTaxas(e).saldo.comida;
+  const depois = agora - Math.round(FORMULAS.consumo.comidaPorAventureiro * 1000);
+  const texto = `Cada um come ${decimal.format(FORMULAS.consumo.comidaPorAventureiro)} comida/s. Saldo de comida: ${formatarTaxa(agora)} → ${formatarTaxa(depois)}`;
+  return depois < 0 ? { texto: `${texto}. Vai faltar comida: melhore a Casa antes.`, alerta: true } : { texto, alerta: false };
 }
 
 export function guilda(e: VisaoCliente): Guilda {
@@ -96,7 +113,12 @@ export function guilda(e: VisaoCliente): Guilda {
   return {
     vagas: `${n} / ${vagas}`,
     subtitulo: `${n} / ${vagas} vagas · consomem comida`,
-    contratar: { custo: custoNaTela(custo), pode: !cheia && pagavel, motivo: cheia ? 'Guilda cheia' : pagavel ? null : 'Recursos insuficientes' },
+    contratar: {
+      custo: custoNaTela(custo),
+      pode: !cheia && pagavel,
+      motivo: cheia ? 'Guilda cheia' : pagavel ? null : 'Recursos insuficientes',
+      comida: efeitoNaComida(e),
+    },
     resumo: {
       poderTotal: e.aventureiros.reduce((s, a) => s + poderAventureiro(a), 0),
       vagas: `${n} de ${vagas}`,
@@ -124,12 +146,13 @@ export function grupoValido(e: VisaoCliente, selecionados: readonly string[]): s
   return selecionados.filter((id) => e.aventureiros.find((a) => a.id === id)?.estado === 'na_vila').slice(0, TAMANHO_MAXIMO_GRUPO);
 }
 
-export function chipsGrupo(e: VisaoCliente, selecionados: readonly string[]): { chips: ChipGrupo[]; poder: number } {
+export function chipsGrupo(e: VisaoCliente, selecionados: readonly string[], agora = e.t): { chips: ChipGrupo[]; poder: number } {
   const grupo = grupoValido(e, selecionados);
   const cheio = grupo.length >= TAMANHO_MAXIMO_GRUPO;
   const chips = e.aventureiros.map((a): ChipGrupo => {
     const selecionado = grupo.includes(a.id);
-    const fora = a.estado === 'em_expedicao' ? 'Em expedição' : a.estado === 'ferido' ? 'Ferido' : null;
+    const ferido = a.feridoAte !== null ? `Ferido · ${formatarRestante(Math.max(0, a.feridoAte - agora)).replace(/^0(\d):/, '$1:')}` : 'Ferido';
+    const fora = a.estado === 'em_expedicao' ? 'Em expedição' : a.estado === 'ferido' ? ferido : null;
     return {
       id: a.id,
       nome: a.nome,
@@ -174,6 +197,35 @@ export interface LinhaDestino {
 }
 
 const faixa = ([a, b]: readonly [number, number]) => `${decimal.format(a)}–${decimal.format(b)}`;
+
+/** Grupo sugerido ao clicar em "Enviar": quem está na vila, do mais forte ao mais fraco, até 3. */
+export function grupoSugerido(e: VisaoCliente): string[] {
+  return e.aventureiros
+    .filter((a) => a.estado === 'na_vila')
+    .sort((a, b) => poderAventureiro(b) - poderAventureiro(a))
+    .slice(0, TAMANHO_MAXIMO_GRUPO)
+    .map((a) => a.id);
+}
+
+/**
+ * Por que a expedição não parte, em texto visível (no celular não há dica de
+ * mouse): sem comida, ninguém disponível ou grupo vazio. null quando pode partir.
+ */
+export function avisoExpedicao(e: VisaoCliente, selecionados: readonly string[], agora = e.t): { texto: string; alerta: boolean } | null {
+  if (e.recursos.comida <= 0) {
+    return { texto: 'Sem comida: a expedição não parte. Pesquise Colheita Farta ou melhore a Casa (com a comida em 0 chegam Fazendeiros).', alerta: true };
+  }
+  const naVila = e.aventureiros.filter((a) => a.estado === 'na_vila');
+  if (naVila.length === 0) {
+    const voltas = e.aventureiros
+      .map((a) => (a.estado === 'ferido' ? a.feridoAte : e.expedicoes.find((x) => x.grupo.includes(a.id))?.fim) ?? null)
+      .filter((t): t is number => t !== null);
+    const proxima = voltas.length ? Math.min(...voltas) : null;
+    return { texto: proxima ? `Ninguém disponível: o próximo aventureiro volta em ${formatarRestante(Math.max(0, proxima - agora))}.` : 'Ninguém disponível na guilda.', alerta: true };
+  }
+  if (grupoValido(e, selecionados).length === 0) return { texto: 'Toque nos aventureiros do painel Grupo para escolher quem vai.', alerta: false };
+  return null;
+}
 
 export function linhasDestinos(e: VisaoCliente, selecionados: readonly string[]): LinhaDestino[] {
   const grupo = grupoValido(e, selecionados);
