@@ -6,7 +6,8 @@
 // - layout do celular até 600 px e o empilhado em 601;
 // - sem rolagem horizontal da página;
 // - até 600 px, nenhum botão visível menor que 44 x 44 px;
-// - touch-action: none só na janela do mapa (o canvas).
+// - touch-action: none só na janela do mapa (o canvas);
+// - até 600 px, pinça com dois dedos no mapa do Reino: abrir aproxima, fechar afasta.
 // Em 390 grava as capturas ao lado dos frames do Figma (docs/referencia/figma_mobile).
 const { chromium } = require('playwright');
 const { PNG } = require('pngjs');
@@ -97,6 +98,38 @@ function ladoALado(app, figma) {
   return PNG.sync.write(o);
 }
 
+/** Zoom atual da câmera do mapa (data-zoom da moldura do canvas). */
+const zoomDoMapa = (p) => p.locator('[data-zoom]').first().getAttribute('data-zoom').then(Number);
+
+/** Dois dedos no centro do mapa: abrem de 60 para 130 px e soltam; depois fecham de 130 para 50 px. */
+async function pinca(p) {
+  const caixa = await p.locator('canvas[aria-label="Mapa do reino"]').boundingBox();
+  const cx = caixa.x + caixa.width / 2;
+  const cy = caixa.y + caixa.height / 2;
+  const cdp = await p.context().newCDPSession(p);
+  const toque = (tipo, d) =>
+    cdp.send('Input.dispatchTouchEvent', {
+      type: tipo,
+      touchPoints: tipo === 'touchEnd' ? [] : [{ x: cx - d / 2, y: cy, id: 1 }, { x: cx + d / 2, y: cy, id: 2 }],
+    });
+  const gesto = async (de, ate) => {
+    await toque('touchStart', de);
+    for (let k = 1; k <= 8; k++) {
+      await toque('touchMove', de + ((ate - de) * k) / 8);
+      await p.waitForTimeout(16);
+    }
+    await toque('touchEnd', ate);
+    await p.waitForTimeout(250);
+  };
+  const antes = await zoomDoMapa(p);
+  await gesto(60, 130);
+  const depoisDeAbrir = await zoomDoMapa(p);
+  await gesto(130, 50);
+  const depoisDeFechar = await zoomDoMapa(p);
+  await cdp.detach();
+  return { antes, depoisDeAbrir, depoisDeFechar };
+}
+
 (async () => {
   const navegador = await chromium.launch();
   // Um login só, reaproveitado nas quatro larguras (o backend limita as tentativas de login).
@@ -132,6 +165,17 @@ function ladoALado(app, figma) {
         const figma = t.figma ? path.join(FIGMA, `${t.figma}.png`) : null;
         fs.writeFileSync(path.join(SAIDA, `portao14_${t.nome}.png`), ladoALado(app, figma && fs.existsSync(figma) ? figma : null));
       }
+    }
+    // Pinça com dois dedos (toques reais pelo protocolo do Chrome): abrir aproxima, fechar afasta, sempre em zoom inteiro.
+    if (largura <= 600) {
+      await p.keyboard.press('Escape');
+      await aba(p, 'Vila');
+      await visao(p, 'Reino');
+      await espera(p);
+      const r = await pinca(p);
+      const ok = r.depoisDeAbrir > r.antes && r.depoisDeFechar < r.depoisDeAbrir && [r.antes, r.depoisDeAbrir, r.depoisDeFechar].every(Number.isInteger);
+      if (!ok) falhas++;
+      console.log(`${String(largura).padStart(3)} px  pinça                zoom ${r.antes} -> abrir ${r.depoisDeAbrir} -> fechar ${r.depoisDeFechar}  ${ok ? 'ok' : 'FALHOU'}`);
     }
     if (erros.length) {
       falhas++;

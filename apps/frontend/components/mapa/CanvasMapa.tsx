@@ -24,6 +24,7 @@ import {
   deslocamento, escalaDoCanvas, limitarCamera, mundoParaTela, moverCamera, telaParaMundo, zoomNoPonto,
   type Area, type Camera, type Ponto, type Tamanho,
 } from '../../lib/mapa/camera';
+import { iniciarPinca, moverPinca, type Pinca } from '../../lib/mapa/pinca';
 import { pesDosGrupos, type LayoutL7 } from '../../lib/mapa/layoutMarcadores';
 import { marcadores } from '../../lib/mapa/marcadores';
 import { camadaObjetos, sombrasAGerar, spritesDosObjetos, type ArvoresNoPlano, type ItemL4, type RelogioAnim } from '../../lib/mapa/objetos';
@@ -413,6 +414,9 @@ export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao 
   const camadaEfeitos = useRef<HTMLDivElement>(null);
   const efeitos = useRef<EfeitosClique | null>(null);
   const gesto = useRef<Gesto | null>(null);
+  /** Dedos (ou ponteiros) pressionados no canvas, pelo pointerId: com dois, é pinça. */
+  const dedos = useRef(new Map<number, Ponto>());
+  const pinca = useRef<Pinca | null>(null);
   const ultimoLayout = useRef<LayoutL7 | null>(null);
   const roda = useRef(0);
   const [VP, setVp] = useState<Tamanho>(VIEWPORT_DESKTOP);
@@ -664,18 +668,46 @@ export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao 
     });
   }
 
+  /** Os dois primeiros dedos pressionados (a pinça usa só dois). */
+  function doisDedos(): [Ponto, Ponto] | null {
+    const [a, b] = dedos.current.values();
+    return a && b ? [a, b] : null;
+  }
+
   function aoPressionar(e: EventoPonteiro<HTMLCanvasElement>) {
     if (e.button !== 0) return;
     indo.current?.kill();
     setPonteiro(ponteiroDe(e.pointerType));
     e.currentTarget.setPointerCapture(e.pointerId);
-    gesto.current = iniciarGesto(pontoDoEvento(e));
+    const p = pontoDoEvento(e);
+    dedos.current.set(e.pointerId, p);
+    const par = doisDedos();
+    if (par && !pinca.current) {
+      // Segundo dedo: começa a pinça; o toque do primeiro não vira clique nem arrasto.
+      gesto.current = null;
+      setArrastando(false);
+      pinca.current = iniciarPinca(par[0], par[1], cam.zoom);
+      return;
+    }
+    if (!pinca.current) gesto.current = iniciarGesto(p);
   }
 
   function aoMover(e: EventoPonteiro<HTMLCanvasElement>) {
     const p = pontoDoEvento(e);
     setCursor(p);
     setPonteiro(ponteiroDe(e.pointerType));
+    if (dedos.current.has(e.pointerId)) dedos.current.set(e.pointerId, p);
+    const par = doisDedos();
+    if (pinca.current && par) {
+      const r = moverPinca(pinca.current, par[0], par[1]);
+      pinca.current = r.pinca;
+      setSobre(null);
+      setCam((c) => {
+        const movida = r.pan.x || r.pan.y ? moverCamera(c, r.pan.x, r.pan.y, area, VP) : c;
+        return r.zoom !== movida.zoom ? zoomNoPonto(movida, r.zoom, r.centro, area, VP) : movida;
+      });
+      return;
+    }
     const g = gesto.current;
     if (g) {
       const r = moverGesto(g, p);
@@ -691,7 +723,25 @@ export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao 
     setSobre(acertar(cena(), p));
   }
 
+  /**
+   * Tira um dedo da pinça: com um dedo ainda na tela, ele continua arrastando
+   * (sem pulo e sem virar clique); sem nenhum, a pinça acaba.
+   */
+  function soltarDaPinca(pointerId: number) {
+    dedos.current.delete(pointerId);
+    if (doisDedos()) return;
+    pinca.current = null;
+    const [resto] = dedos.current.values();
+    gesto.current = resto ? { inicio: resto, ultimo: resto, arrastando: true } : null;
+    setArrastando(Boolean(resto));
+  }
+
   function aoSoltar(e: EventoPonteiro<HTMLCanvasElement>) {
+    if (pinca.current) {
+      soltarDaPinca(e.pointerId);
+      return;
+    }
+    dedos.current.delete(e.pointerId);
     const g = gesto.current;
     gesto.current = null;
     setArrastando(false);
@@ -699,7 +749,12 @@ export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao 
     if (g && soltarGesto(g, pontoDoEvento(e)) === 'clique') clicar(pontoDoEvento(e));
   }
 
-  function aoCancelar() {
+  function aoCancelar(e: EventoPonteiro<HTMLCanvasElement>) {
+    if (pinca.current) {
+      soltarDaPinca(e.pointerId);
+      return;
+    }
+    dedos.current.delete(e.pointerId);
     gesto.current = null;
     setArrastando(false);
   }

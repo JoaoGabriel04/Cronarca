@@ -10,6 +10,7 @@ Regra de ouro: existe um único mundo. O Mapa (zoom 2x) e a Vila (zoom 3x) são 
 
 - Unidade de mundo = 1 pixel de sprite. Um tile de terreno = 32x32 de mundo.
 - Zoom sempre inteiro (1x a 4x), `image-rendering: pixelated`.
+- Zoom pela roda do mouse e, no toque, pela **pinça com dois dedos** (`apps/frontend/lib/mapa/pinca.ts`): cada abertura (ou fechamento) de 1,4x na distância entre os dedos sobe (ou desce) um nível inteiro, com folga para não oscilar; o centro do zoom é o ponto médio entre os dedos e mover os dois juntos arrasta. A janela do mapa tem `touch-action: none`, então a pinça do navegador não age sobre a página.
 - Tela do jogo = 876x712 px de viewport (área "Cena da Vila").
 - Conversão: `tela = (mundo - camera) * zoom + viewport / 2`.
 
