@@ -10,7 +10,7 @@ import { carregarEstado, VERSAO_ESQUEMA, type EstadoJogo } from '../src/estado.t
 import { estadoInicial } from '../src/inicial.ts';
 import { liquidar } from '../src/liquidar.ts';
 import { preverAcao } from '../src/previsao.ts';
-import { calcularTaxas, oficioDoProximoAldeao, quantosNoOficio } from '../src/regras.ts';
+import { calcularTaxas, oficioDoProximoAldeao, pesosDaDistribuicao, quantosNoOficio, saldoComidaComMaisUm } from '../src/regras.ts';
 import { fazer, MIN, novo, recusar, SEG, T0, u } from './ajuda.ts';
 
 const MS_CHEGADA = FORMULAS.aldeoes.segundosPorChegada * SEG;
@@ -47,7 +47,7 @@ describe('conta nova sem eventos: igual ao rodízio antigo', () => {
   }
 });
 
-describe('comida em 0', () => {
+describe('regra da comida (comida em 0, abaixo de 20 ou saldo negativo)', () => {
   it('quem chega é Fazendeiro, inclusive com a automática desligada', () => {
     const e = vila(3, ['lenhador']);
     e.recursos.comida = 0;
@@ -57,7 +57,7 @@ describe('comida em 0', () => {
     expect(oficioDoProximoAldeao(e)).toBe('fazendeiro');
   });
 
-  it('documenta a diferença do rodízio antigo no cenário de fome (Casa 3, 4 aldeões, 3 aventureiros, 3 min)', () => {
+  it('cenário de fome (Casa 3, 4 aldeões, 3 aventureiros, comida 0, 3 min): antes do 17, no 17 e com a regra do 18a', () => {
     const e = estadoInicial({ semente: 7, agora: T0 });
     e.segredo.proximoEventoEm = Number.MAX_SAFE_INTEGER;
     e.slots.casa_1.nivel = 3;
@@ -66,28 +66,49 @@ describe('comida em 0', () => {
     e.recursos.comida = 0;
     const l = liquidar(e, T0 + 3 * MIN);
     const agora = l.aldeoes.map((a) => a.oficio);
-    // Diferença documentada: só o 6º aldeão muda (Fazendeiro antes, Ferreiro agora).
-    // A 1ª chegada (o 5º aldeão) acontece com a comida em 0 e é Fazendeiro nos dois. A 2ª (6º) já tem
-    // comida: antes era Fazendeiro pela posição no rodízio (índice 5 % 5 = 0); agora a Equilibrada
-    // olha quantos há em cada ofício e o Ferreiro (zero) vem antes. Do 7º em diante, igual.
+    // Antes do Portão 17 (rodízio): 68,6 de comida em 3 min.
     expect(fomeAntes.aldeoes).toEqual([
       'fazendeiro', 'lenhador', 'mineiro', 'sabio',
       'fazendeiro', 'fazendeiro', 'lenhador', 'mineiro', 'sabio', 'ferreiro', 'fazendeiro', 'lenhador',
     ]);
+    expect(fomeAntes.comida).toBe(u(68.6));
+    // No Portão 17 (só comida em 0): o 6º virava Ferreiro e a comida ficava em 19,6.
+    // Portão 18a: abaixo de 20 de comida (ou com saldo que ficaria negativo) quem chega é Fazendeiro.
+    // Os três primeiros chegam com a comida abaixo de 20; daí em diante, a Equilibrada.
     expect(agora).toEqual([
       'fazendeiro', 'lenhador', 'mineiro', 'sabio',
-      'fazendeiro', 'ferreiro', 'lenhador', 'mineiro', 'sabio', 'ferreiro', 'fazendeiro', 'lenhador',
+      'fazendeiro', 'fazendeiro', 'fazendeiro', 'ferreiro', 'lenhador', 'mineiro', 'sabio', 'ferreiro',
     ]);
-    const contar = (lista: string[]) => Object.fromEntries(OFICIOS.map((o) => [o, lista.filter((x) => x === o).length]));
-    expect(contar(fomeAntes.aldeoes)).toEqual({ fazendeiro: 4, lenhador: 3, mineiro: 2, sabio: 2, ferreiro: 1 });
-    expect(contar(agora)).toEqual({ fazendeiro: 3, lenhador: 3, mineiro: 2, sabio: 2, ferreiro: 2 });
     expect(l.aldeoes.length).toBe(fomeAntes.aldeoes.length);
-    // Com um Fazendeiro a menos desde 0:40, a vila sai da fome mais devagar, mas sai: comida
-    // 19,6 em 3 min (antes 68,6), sempre subindo depois da 1ª chegada.
-    expect(fomeAntes.comida).toBe(u(68.6));
-    expect(l.recursos.comida).toBe(u(19.6));
-    expect(liquidar(e, T0 + 1 * MIN).recursos.comida).toBe(u(7.4));
-    expect(liquidar(e, T0 + 2 * MIN).recursos.comida).toBe(u(11));
+    expect(liquidar(e, T0 + 1 * MIN).recursos.comida).toBe(u(14.4));
+    expect(liquidar(e, T0 + 2 * MIN).recursos.comida).toBe(u(60));
+    expect(l.recursos.comida).toBe(u(96.6));
+  });
+
+  it('saldo que ficaria negativo com quem chega: Fazendeiro, mesmo com comida de sobra e a automática desligada', () => {
+    const e = vila(3, ['lenhador', 'mineiro']);
+    e.aldeoesConfig = { automatica: false, politica: 'equilibrada' };
+    expect(saldoComidaComMaisUm(e)).toBeLessThan(0);
+    expect(oficioDoProximoAldeao(e)).toBe('fazendeiro');
+    // Com um Fazendeiro, o saldo com mais um fica positivo: volta a valer a configuração (Ocioso).
+    e.aldeoes.push({ oficio: 'fazendeiro' });
+    expect(saldoComidaComMaisUm(e)).toBeGreaterThanOrEqual(0);
+    expect(oficioDoProximoAldeao(e)).toBe('ocioso');
+  });
+
+  it('quem está a caminho para Fazendeiro já conta no saldo', () => {
+    const e = vila(3, ['lenhador', 'mineiro']);
+    e.aldeoes.push({ oficio: 'fazendeiro', ativoEm: e.t + 5 * SEG });
+    expect(saldoComidaComMaisUm(e)).toBeGreaterThanOrEqual(0);
+    expect(oficioDoProximoAldeao(e)).not.toBe('fazendeiro');
+  });
+
+  it('comida abaixo de 20: Fazendeiro; a partir de 20, a política', () => {
+    const e = vila(3, ['fazendeiro', 'fazendeiro', 'lenhador']);
+    e.recursos.comida = u(20) - 1;
+    expect(oficioDoProximoAldeao(e)).toBe('fazendeiro');
+    e.recursos.comida = u(20);
+    expect(oficioDoProximoAldeao(e)).toBe('mineiro');
   });
 });
 
@@ -127,9 +148,11 @@ describe('políticas', () => {
     expect(lista.filter((x) => x === 'fazendeiro').length).toBe(2);
     expect(lista.filter((x) => x === 'lenhador').length).toBe(2);
 
+    // Todos no Ocioso: a proporção zerada vale como Equilibrada (as chegadas aqui seriam Fazendeiros
+    // pela regra da comida, porque ninguém produz comida; por isso a conferência é nos pesos).
     const z = vila(3, ['ocioso', 'ocioso']);
     z.aldeoesConfig = { automatica: true, politica: 'manter', proporcao: {} };
-    expect(chegadas(z, 5)).toEqual(['fazendeiro', 'lenhador', 'mineiro', 'sabio', 'ferreiro']);
+    expect(pesosDaDistribuicao(z)).toEqual(PESOS_POLITICA.equilibrada);
   });
 });
 

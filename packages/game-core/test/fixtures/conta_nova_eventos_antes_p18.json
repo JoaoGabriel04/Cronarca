@@ -1,0 +1,259 @@
+{
+ "gerado": "código antes do Portão 18 (HEAD 1e019fb): conta nova COM eventos, sem ações, 120 min, T0 2026-06-01T12:00Z, sementes 7, 11 e 23",
+ "estados": {
+  "7": {
+   "recursos": {
+    "madeira": 300000000,
+    "pedra": 50000000,
+    "comida": 300000000,
+    "ferro": 15000000,
+    "ouro": 28900000,
+    "saber": 0
+   },
+   "aldeoes": [
+    {
+     "oficio": "fazendeiro"
+    },
+    {
+     "oficio": "lenhador"
+    },
+    {
+     "oficio": "mineiro"
+    },
+    {
+     "oficio": "sabio"
+    }
+   ],
+   "cronica": [
+    {
+     "icone": "Check",
+     "texto": "Uma fogueira acesa. Começa a crônica da aldeia.",
+     "em": 1780315200000
+    },
+    {
+     "icone": "Aldeao",
+     "texto": "Um mineiro chegou à vila.",
+     "em": 1780315220000
+    },
+    {
+     "icone": "Aldeao",
+     "texto": "Um sábio chegou à vila.",
+     "em": 1780315240000
+    },
+    {
+     "icone": "Evento",
+     "texto": "Tempestade: nada (armazém cheio).",
+     "em": 1780316108247
+    },
+    {
+     "icone": "Evento",
+     "texto": "Festival da Colheita: 40 comida.",
+     "em": 1780317208674
+    },
+    {
+     "icone": "Alerta",
+     "texto": "Bandidos na Estrada: levaram 6 ouro e 45 comida.",
+     "em": 1780318308160
+    },
+    {
+     "icone": "Evento",
+     "texto": "Festival da Colheita: nada (armazém cheio).",
+     "em": 1780319177270
+    },
+    {
+     "icone": "Alerta",
+     "texto": "Bandidos na Estrada: levaram 5 ouro e 45 comida.",
+     "em": 1780319934054
+    },
+    {
+     "icone": "Alerta",
+     "texto": "Incêndio: queimaram 30 madeira.",
+     "em": 1780320726061
+    },
+    {
+     "icone": "Evento",
+     "texto": "Festival da Colheita: nada (armazém cheio).",
+     "em": 1780321844331
+    }
+   ],
+   "rng": 3535249239,
+   "proximoEventoEm": 1780323011823
+  },
+  "11": {
+   "recursos": {
+    "madeira": 300000000,
+    "pedra": 50000000,
+    "comida": 300000000,
+    "ferro": 15000000,
+    "ouro": 34000000,
+    "saber": 20000000
+   },
+   "aldeoes": [
+    {
+     "oficio": "fazendeiro"
+    },
+    {
+     "oficio": "lenhador"
+    },
+    {
+     "oficio": "mineiro"
+    },
+    {
+     "oficio": "sabio"
+    }
+   ],
+   "cronica": [
+    {
+     "icone": "Check",
+     "texto": "Uma fogueira acesa. Começa a crônica da aldeia.",
+     "em": 1780315200000
+    },
+    {
+     "icone": "Aldeao",
+     "texto": "Um mineiro chegou à vila.",
+     "em": 1780315220000
+    },
+    {
+     "icone": "Aldeao",
+     "texto": "Um sábio chegou à vila.",
+     "em": 1780315240000
+    },
+    {
+     "icone": "Alerta",
+     "texto": "Bandidos na Estrada: levaram 6 ouro e 22 comida.",
+     "em": 1780316098699
+    },
+    {
+     "icone": "Evento",
+     "texto": "Mercador Viajante: troca 100 madeira por 15 ouro.",
+     "em": 1780317002221
+    },
+    {
+     "icone": "Evento",
+     "texto": "O Mercador Viajante seguiu viagem.",
+     "em": 1780317122221
+    },
+    {
+     "icone": "Alerta",
+     "texto": "Incêndio: queimaram 30 madeira.",
+     "em": 1780317786542
+    },
+    {
+     "icone": "Evento",
+     "texto": "Mercador Viajante: troca 100 madeira por 15 ouro.",
+     "em": 1780318686568
+    },
+    {
+     "icone": "Evento",
+     "texto": "O Mercador Viajante seguiu viagem.",
+     "em": 1780318806568
+    },
+    {
+     "icone": "Evento",
+     "texto": "Cometa: 20 saber.",
+     "em": 1780319614023
+    },
+    {
+     "icone": "Evento",
+     "texto": "Festival da Colheita: nada (armazém cheio).",
+     "em": 1780320301685
+    },
+    {
+     "icone": "Evento",
+     "texto": "Festival da Colheita: nada (armazém cheio).",
+     "em": 1780321216565
+    },
+    {
+     "icone": "Evento",
+     "texto": "Mercador Viajante: troca 100 madeira por 15 ouro.",
+     "em": 1780321906776
+    },
+    {
+     "icone": "Evento",
+     "texto": "O Mercador Viajante seguiu viagem.",
+     "em": 1780322026776
+    }
+   ],
+   "rng": 2903413573,
+   "proximoEventoEm": 1780322772594
+  },
+  "23": {
+   "recursos": {
+    "madeira": 300000000,
+    "pedra": 50000000,
+    "comida": 300000000,
+    "ferro": 15000000,
+    "ouro": 34000000,
+    "saber": 0
+   },
+   "aldeoes": [
+    {
+     "oficio": "fazendeiro"
+    },
+    {
+     "oficio": "lenhador"
+    },
+    {
+     "oficio": "mineiro"
+    },
+    {
+     "oficio": "sabio"
+    }
+   ],
+   "cronica": [
+    {
+     "icone": "Check",
+     "texto": "Uma fogueira acesa. Começa a crônica da aldeia.",
+     "em": 1780315200000
+    },
+    {
+     "icone": "Aldeao",
+     "texto": "Um mineiro chegou à vila.",
+     "em": 1780315220000
+    },
+    {
+     "icone": "Aldeao",
+     "texto": "Um sábio chegou à vila.",
+     "em": 1780315240000
+    },
+    {
+     "icone": "Alerta",
+     "texto": "Incêndio: queimaram 30 madeira.",
+     "em": 1780316396851
+    },
+    {
+     "icone": "Alerta",
+     "texto": "Incêndio: queimaram 30 madeira.",
+     "em": 1780317376971
+    },
+    {
+     "icone": "Alerta",
+     "texto": "Incêndio: queimaram 30 madeira.",
+     "em": 1780318465555
+    },
+    {
+     "icone": "Evento",
+     "texto": "Festival da Colheita: nada (armazém cheio).",
+     "em": 1780319626389
+    },
+    {
+     "icone": "Alerta",
+     "texto": "Incêndio: queimaram 30 madeira.",
+     "em": 1780320805929
+    },
+    {
+     "icone": "Alerta",
+     "texto": "Bandidos na Estrada: levaram 6 ouro e 45 comida.",
+     "em": 1780321505199
+    },
+    {
+     "icone": "Evento",
+     "texto": "Festival da Colheita: nada (armazém cheio).",
+     "em": 1780322209026
+    }
+   ],
+   "rng": 3535249255,
+   "proximoEventoEm": 1780323060437
+  }
+ }
+}

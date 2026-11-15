@@ -1,17 +1,17 @@
 // Grandezas derivadas do estado: tetos, vagas, taxas, desbloqueios.
 // Tudo puro e inteiro; usado pela simulação, pelas ações e pela interface.
-import { OFICIO_OCIOSO, PESOS_POLITICA, type OficioAldeao } from '../data/aldeoes.ts';
+import { COMIDA_MINIMA_ALDEAO, OFICIO_OCIOSO, PESOS_POLITICA, type OficioAldeao } from '../data/aldeoes.ts';
 import { RODIZIO_OFICIOS, type Oficio } from '../data/aventureiros.ts';
 import { CONSTRUCOES, type TipoConstrucao } from '../data/construcoes.ts';
 import { DESTINOS, type DestinoId } from '../data/expedicoes.ts';
 import { FORMULAS } from '../data/formulas.ts';
-import { OBJETIVOS_ERA_1 } from '../data/eras.ts';
+import { ESTADO_INICIAL_CICLO, OBJETIVOS_ERA_1 } from '../data/eras.ts';
 import { RECURSOS, type Recurso } from '../data/recursos.ts';
 import type { ReliquiaId } from '../data/reliquias.ts';
 import { SLOT_IDS, SLOTS } from '../data/slots.ts';
 import type { EstadoJogo, VisaoCliente } from './estado.ts';
 import { tetoMicro } from './formulas.ts';
-import { aplicarBonus, bp, mili } from './inteiros.ts';
+import { aplicarBonus, bp, micro, mili } from './inteiros.ts';
 
 const F = FORMULAS;
 
@@ -32,13 +32,30 @@ function quantasConstruidas(e: VisaoCliente, tipo: TipoConstrucao): number {
   return n;
 }
 
-/** Só depende dos slots: serve também à visão do cliente (sem o segredo). */
-export function tetos(e: Pick<EstadoJogo, 'slots'>): Record<Recurso, number> {
-  const armazem = tetoMicro(somaNiveis(e, 'armazem'));
-  const celeiro = tetoMicro(somaNiveis(e, 'celeiro'));
+/**
+ * Piso do teto no ciclo (Portão 18a): o estoque inicial com o Legado. Assim o
+ * Legado rende o que o nível promete mesmo com o Armazém e o Celeiro no 1, sem
+ * nada ficar acima do teto. Sem Legado, o piso fica abaixo de 300 e não muda nada.
+ */
+export function pisoDoTeto(e: Pick<EstadoJogo, 'reliquias'>): Record<Recurso, number> {
+  const legado = e.reliquias.niveis.legado ?? 0;
+  const bonus = F.reliquias.legadoPorNivel as Partial<Record<Recurso, number>>;
+  const piso = {} as Record<Recurso, number>;
+  for (const r of RECURSOS) piso[r] = micro(ESTADO_INICIAL_CICLO.recursos[r]) + micro(bonus[r] ?? 0) * legado;
+  return piso;
+}
+
+/** Tetos com o Armazém e o Celeiro nos níveis dados (somados), já com o piso do Legado. */
+export function tetosNosNiveis(e: Pick<EstadoJogo, 'reliquias'>, armazem: number, celeiro: number): Record<Recurso, number> {
+  const piso = pisoDoTeto(e);
   const t = {} as Record<Recurso, number>;
-  for (const r of RECURSOS) t[r] = r === 'comida' ? celeiro : armazem;
+  for (const r of RECURSOS) t[r] = Math.max(tetoMicro(r === 'comida' ? celeiro : armazem), piso[r]);
   return t;
+}
+
+/** Tetos de agora: Armazém (5 recursos) e Celeiro (comida), com o piso do Legado. Serve também à visão do cliente. */
+export function tetos(e: Pick<EstadoJogo, 'slots' | 'reliquias'>): Record<Recurso, number> {
+  return tetosNosNiveis(e, somaNiveis(e, 'armazem'), somaNiveis(e, 'celeiro'));
 }
 
 export function aldeoesMaximos(e: VisaoCliente): number {
@@ -71,14 +88,28 @@ export function pesosDaDistribuicao(e: Pick<VisaoCliente, 'aldeoesConfig'>): Rec
 }
 
 /**
- * Ofício de quem chega. Comida em 0: Fazendeiro, sempre (tira a vila da
- * fome, inclusive com a automática desligada). Automática desligada: Ocioso.
+ * Saldo de comida por segundo (milésimos) se mais um aldeão chegasse, contando
+ * como já produzindo quem está a caminho para Fazendeiro.
+ */
+export function saldoComidaComMaisUm(e: VisaoCliente): number {
+  const v = { ...e, aldeoes: e.aldeoes.map((a) => (a.oficio === 'fazendeiro' ? { oficio: a.oficio } : a)) };
+  return calcularTaxas(v).saldo.comida - mili(F.consumo.comidaPorAldeao);
+}
+
+/** Quem chega precisa ser Fazendeiro: comida em 0 ou abaixo do mínimo, ou o saldo ficaria negativo com ele. */
+export function chegaComoFazendeiro(e: VisaoCliente): boolean {
+  return e.recursos.comida < micro(COMIDA_MINIMA_ALDEAO) || saldoComidaComMaisUm(e) < 0;
+}
+
+/**
+ * Ofício de quem chega. Pouca comida ou saldo que ficaria negativo: Fazendeiro,
+ * sempre (inclusive com a automática desligada). Automática desligada: Ocioso.
  * Ligada: o ofício mais abaixo da sua parte pela política, ou seja, o menor
  * quantidade / peso (em inteiros: q_i × p_j < q_j × p_i), desempate pela ordem
  * dos ofícios. Pesos iguais reproduzem o rodízio antigo numa conta nova.
  */
 export function oficioDoProximoAldeao(e: VisaoCliente): OficioAldeao {
-  if (e.recursos.comida <= 0) return 'fazendeiro';
+  if (chegaComoFazendeiro(e)) return 'fazendeiro';
   if (!e.aldeoesConfig.automatica) return OFICIO_OCIOSO;
   const pesos = pesosDaDistribuicao(e);
   let melhor: Oficio | null = null;

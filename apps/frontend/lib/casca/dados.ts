@@ -3,7 +3,7 @@
 
 import {
   CONSTRUCOES, custoConstrucao, DESTINOS, DESTINOS_IDS, destinoAberto, duracaoExpedicaoMs, ERAS, FAIXAS_PERIGO,
-  calcularTaxas, MICRO, NIVEL_MAXIMO_CONSTRUCAO, NOMES_RECURSOS, nivelReliquia, PESQUISAS, RECURSOS, SLOT_IDS, SLOTS, somaNiveis, tetoMicro, tetos,
+  calcularTaxas, chegaComoFazendeiro, MICRO, NIVEL_MAXIMO_CONSTRUCAO, tetosNosNiveis, NOMES_RECURSOS, nivelReliquia, PESQUISAS, RECURSOS, SLOT_IDS, SLOTS, somaNiveis, tetoMicro, tetos,
   type DestinoId, type IconeCronica, type Recurso, type RefSprite, type SlotId, type VisaoCliente,
   aldeoesMaximos, aldeaoAtivo, FORMULAS, NOME_OCIOSO, NOMES_OFICIOS, NOMES_POLITICAS, OFICIO_OCIOSO, OFICIOS, OFICIOS_ALDEAO,
   POLITICAS_PRONTAS, type Oficio, type OficioAldeao, type PoliticaAldeoes, type PoliticaPronta, type TipoConstrucao,
@@ -80,6 +80,23 @@ export interface CartaConstrucao {
   restante: string | null;
 }
 
+/**
+ * "Guarda N" com o teto efetivo (Portão 18a): o Celeiro mostra o teto de comida
+ * já com o piso do Legado; o Armazém mostra o seu teto, e os recursos que o
+ * Legado deixa acima dele vão entre parênteses.
+ */
+export function textoGuarda(e: VisaoCliente, tipo: 'armazem' | 'celeiro', nivelTotal: number): string {
+  if (tipo === 'celeiro') return `Guarda ${formatarInteiro(tetosNosNiveis(e, 0, nivelTotal).comida)}`;
+  return `Guarda ${formatarInteiro(tetoMicro(nivelTotal))}`;
+}
+
+/** " (madeira 580)" quando o piso do Legado passa o teto do Armazém; senão "". */
+export function excecoesDoPiso(e: VisaoCliente, nivelArmazem: number): string {
+  const t = tetosNosNiveis(e, nivelArmazem, 0);
+  const acima = RECURSOS.filter((r) => r !== 'comida' && t[r] > tetoMicro(nivelArmazem));
+  return acima.length ? ` (${acima.map((r) => `${nomeRecurso(r)} ${formatarInteiro(t[r])}`).join(', ')})` : '';
+}
+
 const maiuscula = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 
 function efeitoDe(e: VisaoCliente, slot: SlotId): string {
@@ -87,8 +104,8 @@ function efeitoDe(e: VisaoCliente, slot: SlotId): string {
   const dados = CONSTRUCOES[tipo];
   const nivel = Math.max(1, e.slots[slot].nivel);
   if (dados.producao) return `Produz ${decimal.format(dados.producao.porSegundo * nivel)} ${dados.producao.recurso}/s`;
-  if (tipo === 'armazem') return `Guarda ${formatarInteiro(tetoMicro(somaNiveis(e, 'armazem')))} de cada recurso`;
-  if (tipo === 'celeiro') return `Guarda ${formatarInteiro(tetoMicro(somaNiveis(e, 'celeiro')))} de comida`;
+  if (tipo === 'armazem') return `${textoGuarda(e, 'armazem', somaNiveis(e, 'armazem'))} de cada recurso${excecoesDoPiso(e, somaNiveis(e, 'armazem'))}`;
+  if (tipo === 'celeiro') return `${textoGuarda(e, 'celeiro', somaNiveis(e, 'celeiro'))} de comida`;
   return maiuscula(dados.efeito);
 }
 
@@ -326,6 +343,8 @@ export function dadosAldeoes(e: VisaoCliente): DadosAldeoes {
   if (!temComida && total >= maximo) situacao = 'Sem comida e Casas cheias: pesquise Colheita Farta ou melhore a Casa';
   else if (!temComida) situacao = `Sem comida: os ofícios param e o próximo, em ${segundos} s, chega como Fazendeiro`;
   else if (total >= maximo) situacao = 'Casas cheias: melhore a Casa para chegarem mais';
+  // Portão 18a: pouca comida ou saldo que ficaria negativo trazem um Fazendeiro, com qualquer configuração.
+  else if (chegaComoFazendeiro(e)) situacao = `Próximo em ${segundos} s, como Fazendeiro (comida curta)`;
   else situacao = `Próximo em ${segundos} s`;
 
   const ociosos = e.aldeoes.filter((a) => a.oficio === OFICIO_OCIOSO).length;

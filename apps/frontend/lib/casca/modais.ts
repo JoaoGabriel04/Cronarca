@@ -4,10 +4,10 @@
 
 import {
   construiveis, CONSTRUCOES, custoConstrucao, EVENTO_PARAMETROS, linhaCatalogo, linhasCatalogo, NOMES_RECURSOS, TEXTOS_CATALOGO, FORMULAS, NIVEL_MAXIMO_CONSTRUCAO, objetivosEra, PESQUISAS, PESQUISAS_IDS,
-  micro, reliquiasNaAscensao, SLOTS, somaNiveis, tempoObraMs, tetoMicro,
+  micro, reliquiasNaAscensao, SLOTS, somaNiveis, tempoObraMs,
   type Custo, type EstadoLinhaCatalogo, type LinhaCatalogo, type PesquisaId, type Recurso, type RefSprite, type SlotId, type TipoConstrucao, type VisaoCliente,
 } from '@cronarca/game-core';
-import { formatarInteiro, formatarRestante, textoEra } from './dados';
+import { excecoesDoPiso, formatarInteiro, formatarRestante, textoEra, textoGuarda } from './dados';
 import { juntarNomes } from './telas';
 
 const decimal = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
@@ -54,9 +54,9 @@ export function efeitoNoNivel(e: VisaoCliente, slot: SlotId, nivel: number): str
     case 'casa':
       return `+${FORMULAS.aldeoes.porNivelDeCasa * nivel} aldeões`;
     case 'armazem':
-      return `Guarda ${formatarInteiro(tetoMicro(outros + nivel))}`;
+      return `${textoGuarda(e, 'armazem', outros + nivel)}${excecoesDoPiso(e, outros + nivel)}`;
     case 'celeiro':
-      return `Guarda ${formatarInteiro(tetoMicro(outros + nivel))} de comida`;
+      return `${textoGuarda(e, 'celeiro', outros + nivel)} de comida`;
     case 'taverna': {
       const g = FORMULAS.guilda;
       const hospitalidade = nivel >= 1 && e.pesquisas.concluidas.includes('hospitalidade') ? g.vagasHospitalidadePorTaverna : 0;

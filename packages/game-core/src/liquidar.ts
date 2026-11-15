@@ -43,6 +43,11 @@ function podeChegarAldeao(e: EstadoJogo): boolean {
   return e.aldeoes.length < aldeoesMaximos(e);
 }
 
+/** Ganho de um evento, em micro: o maior entre o fixo e a fração do teto atual do recurso. */
+export function ganhoDeEvento(e: EstadoJogo, recurso: Recurso, fixo: number, fracaoDoTeto: number): number {
+  return Math.max(micro(fixo), fracaoBp(tetos(e)[recurso], bp(fracaoDoTeto)));
+}
+
 function descreverGanhos(ganhos: Partial<Record<Recurso, number>>): string {
   // Arredonda para a Crônica; o que some no arredondamento (menos de meia unidade) não entra na frase.
   const partes = RECURSOS.filter((r) => formatarInteiro(ganhos[r] ?? 0) !== '0').map(
@@ -115,10 +120,10 @@ export function aplicarEvento(e: EstadoJogo, id: EventoId, t: number) {
       }
       break;
     case 'tempestade':
-      registrar(e, 'Evento', `${nome}: ${descreverGanhos(receber(e, { madeira: micro(P.tempestade.madeira) }))}.`, t);
+      registrar(e, 'Evento', `${nome}: ${descreverGanhos(receber(e, { madeira: ganhoDeEvento(e, 'madeira', P.tempestade.madeira, P.tempestade.fracaoDoTeto) }))}.`, t);
       break;
     case 'festival_colheita':
-      registrar(e, 'Evento', `${nome}: ${descreverGanhos(receber(e, { comida: micro(P.festival_colheita.comida) }))}.`, t);
+      registrar(e, 'Evento', `${nome}: ${descreverGanhos(receber(e, { comida: ganhoDeEvento(e, 'comida', P.festival_colheita.comida, P.festival_colheita.fracaoDoTeto) }))}.`, t);
       break;
     case 'incendio': {
       const perda = fracaoBp(e.recursos.madeira, bp(P.incendio.perdaMadeira));
@@ -127,7 +132,7 @@ export function aplicarEvento(e: EstadoJogo, id: EventoId, t: number) {
       break;
     }
     case 'cometa':
-      registrar(e, 'Evento', `${nome}: ${descreverGanhos(receber(e, { saber: micro(P.cometa.saber) }))}.`, t);
+      registrar(e, 'Evento', `${nome}: ${descreverGanhos(receber(e, { saber: ganhoDeEvento(e, 'saber', P.cometa.saber, P.cometa.fracaoDoTeto) }))}.`, t);
       break;
   }
 }

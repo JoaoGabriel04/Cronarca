@@ -142,6 +142,12 @@ describe('cartão dos aldeões', () => {
     expect(d.politicas.map((p) => p.nome)).toEqual(['Equilibrada', 'Comida primeiro', 'Construção', 'Pesquisa', 'Ferro']);
   });
 
+  it('comida curta (abaixo de 20 ou saldo que ficaria negativo): avisa que o próximo vem como Fazendeiro', () => {
+    const e = novo();
+    e.recursos.comida = 10_000_000;
+    expect(dadosAldeoes(e).situacao).toBe('Próximo em 20 s, como Fazendeiro (comida curta)');
+  });
+
   it('com ocioso o "+" libera; a caminho não rende; "manter" aparece só quando é a atual; desligada avisa', () => {
     const e = novo();
     e.aldeoes.push({ oficio: 'ocioso' }, { oficio: 'fazendeiro', ativoEm: e.t + 5000 });

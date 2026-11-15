@@ -57,6 +57,19 @@ describe('modais: Melhorar', () => {
     expect(efeitoNoNivel(e, 'muralha_1', 1)).toBe('Repele bandidos');
   });
 
+  it('teto efetivo com Legado 8 (Portão 18a): madeira 580 e comida 400 até o Armazém/Celeiro 3', () => {
+    const e = novo();
+    e.reliquias.niveis.legado = 8;
+    expect(efeitoNoNivel(e, 'armazem_1', 1)).toBe('Guarda 300 (madeira 580)');
+    expect(efeitoNoNivel(e, 'armazem_1', 2)).toBe('Guarda 465 (madeira 580)');
+    expect(efeitoNoNivel(e, 'armazem_1', 3)).toBe('Guarda 721');
+    expect(efeitoNoNivel(e, 'celeiro_1', 1)).toBe('Guarda 400 de comida');
+    expect(efeitoNoNivel(e, 'celeiro_1', 2)).toBe('Guarda 465 de comida');
+    // Sem Legado, nada muda.
+    e.reliquias.niveis = {};
+    expect(efeitoNoNivel(e, 'armazem_1', 1)).toBe('Guarda 300');
+  });
+
 });
 
 describe('catálogo na tela (A12)', () => {

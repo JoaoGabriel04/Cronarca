@@ -8,7 +8,7 @@ COMPOSE := docker compose
 MOUNT_DIRS := packages/game-core/node_modules apps/backend/node_modules \
 	apps/frontend/node_modules apps/frontend/.next
 
-.PHONY: help up down logs ps migrate seed reset-db test typecheck conferir-mapa conferir-mobile conferir-inicio conferir-mercador gerar-frente evento-mercador shell-backend shell-db env-check
+.PHONY: help up down logs ps migrate seed reset-db test typecheck conferir-mapa conferir-mobile conferir-inicio conferir-mercador conferir-teto gerar-frente evento-mercador shell-backend shell-db env-check
 
 help: ## Lista os comandos
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-14s\033[0m %s\n", $$1, $$2}'
@@ -70,6 +70,11 @@ conferir-inicio: ## Início e Login no celular (360, 390, 430, deitado), teclado
 	docker run --rm --network host --user $$(id -u):$$(id -g) -e HOME=/tmp \
 		-e PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 -v $(CURDIR):/w -w /w $(PLAYWRIGHT_IMG) \
 		sh -c 'npm install --silent --no-save --no-package-lock --prefix /tmp/pw playwright@1.61.1 >/dev/null && NODE_PATH=/tmp/pw/node_modules node scripts/conferir-inicio.cjs'
+
+conferir-teto: ## Portão 18a: Melhorar do Armazém e do Celeiro com o teto efetivo do Legado 8 (só na resposta do estado; o banco não muda) em 390 px; precisa de make up e make seed
+	docker run --rm --network host --user $$(id -u):$$(id -g) -e HOME=/tmp \
+		-e PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 -v $(CURDIR):/w -w /w $(PLAYWRIGHT_IMG) \
+		sh -c 'npm install --silent --no-save --no-package-lock --prefix /tmp/pw playwright@1.61.1 >/dev/null && NODE_PATH=/tmp/pw/node_modules node scripts/conferir-teto.cjs'
 
 conferir-mercador: evento-mercador ## Negociação do Mercador no Chromium em 1440, 601, 600, 390 e 360 px: termos do servidor, botões e prazo visíveis; capturas em docs/referencia/mercador
 	docker run --rm --network host --user $$(id -u):$$(id -g) -e HOME=/tmp \

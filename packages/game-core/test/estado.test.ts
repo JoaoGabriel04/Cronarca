@@ -19,9 +19,9 @@ describe('estado inicial do ciclo', () => {
     expect(e.ciclo).toBe(1);
   });
 
-  it('Legado acima do teto é cortado, como todo recurso que entra', () => {
+  it('Legado rende o que o nível promete: o teto do ciclo tem o piso do estoque inicial (Portão 18a)', () => {
     const l = estadoInicial({ semente: 1, agora: T0, reliquias: { total: 30, gastas: 30, niveis: { legado: 4 } } });
-    expect(l.recursos.madeira).toBe(u(300)); // 100 + 240 -> teto 300
+    expect(l.recursos.madeira).toBe(u(340)); // 100 + 240, antes cortado em 300
     expect(l.recursos.pedra).toBe(u(170));
   });
 });

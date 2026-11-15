@@ -46,5 +46,12 @@ export const PESOS_POLITICA: Record<PoliticaPronta, Record<Oficio, number>> = {
   ferro: { fazendeiro: 1, lenhador: 0, mineiro: 1, sabio: 0, ferreiro: 3 },
 };
 
+/**
+ * Regra da comida (Portão 18a): quem chega vira Fazendeiro, com a automática
+ * ligada ou não, se a comida estiver abaixo disto (unidades) ou se o saldo de
+ * comida ficaria negativo com ele.
+ */
+export const COMIDA_MINIMA_ALDEAO = 20;
+
 /** Configuração inicial (conta nova, saves antigos e cada ciclo novo). */
 export const CONFIG_ALDEOES_INICIAL = { automatica: true, politica: 'equilibrada' } as const;

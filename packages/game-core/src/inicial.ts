@@ -74,7 +74,8 @@ export function estadoInicial(op: OpcoesInicio): EstadoJogo {
     segredo: { rng: 0, proximoEventoEm: 0, resultados: {} },
   };
 
-  // Recursos iniciais + Legado, cortados no teto como todo recurso que entra.
+  // Recursos iniciais + Legado. O teto já tem o piso do Legado (tetos), então nada é cortado;
+  // o corte fica só como garantia de que nada começa acima do teto.
   const teto = tetos(e);
   const bonusLegado = FORMULAS.reliquias.legadoPorNivel as Partial<Record<(typeof RECURSOS)[number], number>>;
   for (const r of RECURSOS) {

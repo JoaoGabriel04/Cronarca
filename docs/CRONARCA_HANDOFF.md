@@ -124,13 +124,13 @@ Portão 0 aprovado com estas decisões. Tudo que é número vai em `packages/gam
 - Cada chegada escreve uma linha na Crônica ("Um lenhador chegou à vila.").
 - Interface: cartão **Aldeões** no topo do painel da Vila (e na Vila do celular): "N de M", como chegam, a situação (próximo em X s, Casas cheias ou sem comida), os cinco ofícios e o Ocioso com quantidade, efeito de agora (ou o que falta para render, ex.: "+5% de pedra quando houver Pedreira"), "N a caminho" e os botões − e + (44 px no celular); embaixo, a chave Automática e a política dos novos aldeões. Desligada, o aviso "Aldeões novos chegam ociosos". O Ocioso ainda não aparece no mapa (fica para o portão dos aldeões no mapa).
 
-**Comida zerada.** Ninguém morre. Os bônus dos ofícios param e expedições não podem partir. Construções continuam produzindo. **Com vaga nas Casas, o próximo aldeão chega como Fazendeiro**, mesmo com a Automática desligada (a política volta quando a comida sobe): a vila não fica presa sem comida, porque melhorar a Casa sempre traz quem produz. A tela avisa em texto: chip de comida em alerta, aviso na aba Expedições ("Sem comida: … Pesquise Colheita Farta ou melhore a Casa") e, no Contratar, o saldo de comida de agora e o de depois (em vermelho se ficar negativo).
+**Comida zerada.** Ninguém morre. Os bônus dos ofícios param e expedições não podem partir. Construções continuam produzindo. **Com vaga nas Casas, o próximo aldeão chega como Fazendeiro**, mesmo com a Automática desligada, se a comida estiver abaixo de 20 (`COMIDA_MINIMA_ALDEAO`) ou se o saldo de comida por segundo ficaria negativo com ele (contando como produzindo quem está a caminho para Fazendeiro). Portão 18a; a política volta quando a comida sobe. O cartão avisa "Próximo em X s, como Fazendeiro (comida curta)": a vila não fica presa sem comida, porque melhorar a Casa sempre traz quem produz. A tela avisa em texto: chip de comida em alerta, aviso na aba Expedições ("Sem comida: … Pesquise Colheita Farta ou melhore a Casa") e, no Contratar, o saldo de comida de agora e o de depois (em vermelho se ficar negativo).
 
 **Pesquisa.** Abre pelo botão Pesquisa no HUD (desktop e topo do celular, com selo das que dá para começar), pelo chip de Saber e pelo Scriptorium no mapa.
 
 **Expedição.** O botão "Enviar" já traz o grupo (quem está na vila, do mais forte, até 3); pela aba direto o grupo começa vazio. O motivo de não partir aparece em texto acima dos destinos; o retrato ferido mostra quanto falta; a recusa do servidor diz o motivo (`lib/jogo/recusas.ts`).
 
-**Teto** vale para os 6 recursos. Produção que passaria do teto é descartada. O recurso que chega de saque ou evento também é cortado no teto.
+**Teto** vale para os 6 recursos. Produção que passaria do teto é descartada. O recurso que chega de saque ou evento também é cortado no teto. **Piso do Legado (Portão 18a):** o teto de cada recurso é o maior entre o do Armazém (ou Celeiro) e o estoque inicial com Legado (`pisoDoTeto`), então o Legado rende o que promete sem nada passar do teto. Sem Legado, o piso fica abaixo de 300 e nada muda; com Legado 8, madeira 580 e comida 400 até o Armazém/Celeiro 3. O Melhorar mostra o teto efetivo ("Guarda 300 (madeira 580)"). Conferir: `make conferir-teto`.
 
 **Obras.** Uma obra por slot, sem limite global. Nível máximo de toda construção: 10.
 
@@ -168,10 +168,10 @@ As durações do Figma (6:00, 8:30, 12:00) são ilustrativas; valem as desta tab
 |---|---|
 | Mercador Viajante | única escolha do jogo: **Aceitar troca** (100 madeira por 15 ouro, exige ter a madeira) ou **Recusar**. Sem resposta em 120 s vale Recusar; offline vale Recusar. Os termos vão no evento (`estado.mercador = { expiraEm, paga, recebe }`, esquema 5): o popup mostra o que se recebe, o que se paga (em vermelho se faltar, com Aceitar desativado), o prazo e a nota "Se recusar ou o tempo acabar, o Mercador segue viagem e nada muda"; a resposta cobra e paga exatamente esses termos. Para conferir: `make evento-mercador` (só dev) e `make conferir-mercador` |
 | Bandidos na Estrada | com Muralha nível 1 ou mais, repelidos sem perda; sem Muralha, perde 15% de ouro e de comida |
-| Tempestade | +30 madeira |
-| Festival da Colheita | +40 comida |
+| Tempestade | +30 madeira ou 10% do teto de madeira, o maior (Portão 18a) |
+| Festival da Colheita | +40 comida ou 10% do teto de comida, o maior |
 | Incêndio | perde 10% da madeira (Muralha não protege) |
-| Cometa | +20 saber |
+| Cometa | +20 saber ou 3% do teto de saber, o maior (o saber só serve às pesquisas). Perdas (Bandidos, Incêndio) não crescem: eventos acontecem offline |
 
 **Clique.** Árvores e pedras são infinitas. O catálogo de objetos clicáveis (id estável, recurso, hitbox) fica nos dados do mapa, não no estado. Limite por objeto: 5 cliques/s, além do limite de 10/s por usuário, ambos como balde de fichas guardado no estado com o relógio do servidor.
 
