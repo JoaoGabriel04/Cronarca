@@ -5,6 +5,7 @@ import { FORMULAS } from '../data/formulas.ts';
 import { VERSAO_MAPA_ATUAL } from '../data/mapa.ts';
 import { RECURSOS } from '../data/recursos.ts';
 import { SLOT_IDS, SLOTS, type SlotId } from '../data/slots.ts';
+import { CONFIG_ALDEOES_INICIAL } from '../data/aldeoes.ts';
 import { registrar } from './cronica.ts';
 import { VERSAO_ESQUEMA, type EstadoJogo } from './estado.ts';
 import { micro } from './inteiros.ts';
@@ -57,6 +58,7 @@ export function estadoInicial(op: OpcoesInicio): EstadoJogo {
     recursos: { madeira: 0, pedra: 0, comida: 0, ferro: 0, ouro: 0, saber: 0 },
     slots,
     aldeoes: ESTADO_INICIAL_CICLO.aldeoes.map((oficio) => ({ oficio })),
+    aldeoesConfig: { ...CONFIG_ALDEOES_INICIAL },
     progressoAldeaoMs: 0,
     aventureiros: [],
     contratacoes: 0,

@@ -1,6 +1,7 @@
 // Estado de um jogador (jsonb em GameState.estado). Esquema versionado.
 // Unidades: recursos em micro-unidades, tempo em ms desde a época Unix.
 import { z } from 'zod';
+import { CONFIG_ALDEOES_INICIAL, OFICIOS_ALDEAO, POLITICAS_ALDEOES } from '../data/aldeoes.ts';
 import { CLASSES, OFICIOS } from '../data/aventureiros.ts';
 import { DESTINOS_IDS } from '../data/expedicoes.ts';
 import { NIVEL_MAXIMO_CONSTRUCAO, TIPOS_CONSTRUCAO } from '../data/construcoes.ts';
@@ -12,7 +13,7 @@ import { FORMULAS } from '../data/formulas.ts';
 import { VERSOES_MAPA } from '../data/mapa.ts';
 import { termosDoMercador } from './mercador.ts';
 
-export const VERSAO_ESQUEMA = 5;
+export const VERSAO_ESQUEMA = 6;
 
 const inteiro = z.number().int();
 const naoNegativo = inteiro.min(0);
@@ -97,7 +98,21 @@ export const esquemaEstado = z
     t: instante,
     recursos: esquemaRecursos,
     slots: esquemaSlots,
-    aldeoes: z.array(z.strictObject({ oficio: z.enum(OFICIOS) })),
+    /**
+     * Esquema 6: Ocioso é um ofício (não produz, come); `ativoEm` só existe
+     * enquanto o aldeão se desloca para um ofício novo (não produz até lá).
+     */
+    aldeoes: z.array(z.strictObject({ oficio: z.enum(OFICIOS_ALDEAO), ativoEm: instante.optional() })),
+    /**
+     * Distribuição dos que chegam (Portão 17): automática segue a política;
+     * desligada, chegam ociosos. "manter" usa a `proporcao` gravada no último
+     * ajuste manual (só ofícios produtivos).
+     */
+    aldeoesConfig: z.strictObject({
+      automatica: z.boolean(),
+      politica: z.enum(POLITICAS_ALDEOES),
+      proporcao: z.partialRecord(z.enum(OFICIOS), naoNegativo).optional(),
+    }),
     /** Tempo acumulado para o próximo aldeão chegar (só conta com vaga e comida). */
     progressoAldeaoMs: naoNegativo,
     aventureiros: z.array(esquemaAventureiro),
@@ -171,6 +186,11 @@ export function migrarEstado(bruto: unknown, versaoEsquema: number): { estado: u
     const mercador = estado.mercador as { expiraEm: number } | null | undefined;
     estado = { ...estado, versao: 5, mercador: mercador ? { ...mercador, ...termosDoMercador() } : null };
     versao = 5;
+  }
+  if (versao === 5) {
+    // Esquema 6 (Portão 17): os ofícios gravados ficam; a distribuição automática liga em Equilibrada.
+    estado = { ...estado, versao: 6, aldeoesConfig: { ...CONFIG_ALDEOES_INICIAL } };
+    versao = 6;
   }
   return { estado, versao };
 }

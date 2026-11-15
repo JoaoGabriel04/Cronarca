@@ -5,7 +5,8 @@ import {
   CONSTRUCOES, custoConstrucao, DESTINOS, DESTINOS_IDS, destinoAberto, duracaoExpedicaoMs, ERAS, FAIXAS_PERIGO,
   calcularTaxas, MICRO, NIVEL_MAXIMO_CONSTRUCAO, NOMES_RECURSOS, nivelReliquia, PESQUISAS, RECURSOS, SLOT_IDS, SLOTS, somaNiveis, tetoMicro, tetos,
   type DestinoId, type IconeCronica, type Recurso, type RefSprite, type SlotId, type VisaoCliente,
-  aldeoesMaximos, FORMULAS, NOMES_OFICIOS, OFICIOS, type Oficio, type TipoConstrucao,
+  aldeoesMaximos, aldeaoAtivo, FORMULAS, NOME_OCIOSO, NOMES_OFICIOS, NOMES_POLITICAS, OFICIO_OCIOSO, OFICIOS, OFICIOS_ALDEAO,
+  POLITICAS_PRONTAS, type Oficio, type OficioAldeao, type PoliticaAldeoes, type PoliticaPronta, type TipoConstrucao,
 } from '@cronarca/game-core';
 
 const inteiro = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
@@ -263,13 +264,27 @@ const BONUS_DO_OFICIO: Partial<Record<Oficio, { recurso: Recurso; produtora: Tip
 };
 
 export interface LinhaOficio {
-  oficio: Oficio;
+  oficio: OficioAldeao;
   nome: string;
+  /** Todos no ofício, contando os que ainda estão a caminho. */
   quantidade: number;
-  /** "+0,7 comida/s", "+10% de madeira" ou o que falta para render. */
+  /** Mudaram para cá e ainda não produzem (deslocamento). */
+  aCaminho: number;
+  /** "+0,7 comida/s", "+10% de madeira", "Não produz, mas come" ou o que falta para render. */
   efeito: string;
-  /** Sem efeito agora (falta a construção ou a comida zerou). */
+  /** Sem efeito agora (Ocioso, falta a construção ou a comida zerou). */
   parado: boolean;
+  /** "+": tira um do Ocioso para este ofício. Nunca na linha do Ocioso. */
+  podeMais: boolean;
+  /** "−": manda um deste ofício para o Ocioso. Nunca na linha do Ocioso. */
+  podeMenos: boolean;
+}
+
+export interface OpcaoPolitica {
+  politica: PoliticaAldeoes;
+  nome: string;
+  /** "Manter proporção atual" aparece só quando é a atual e não se escolhe. */
+  escolhivel: boolean;
 }
 
 export interface DadosAldeoes {
@@ -279,37 +294,61 @@ export interface DadosAldeoes {
   situacao: string;
   /** Cheio ou sem comida: o texto da situação vai em destaque. */
   alerta: boolean;
+  /** Os cinco ofícios e o Ocioso, sempre nessa ordem. */
   oficios: LinhaOficio[];
+  automatica: boolean;
+  politica: PoliticaAldeoes;
+  politicas: OpcaoPolitica[];
+  /** Automática desligada: "Aldeões novos chegam ociosos". */
+  aviso: string | null;
 }
 
 const nomeRecurso = (r: Recurso) => NOMES_RECURSOS[r].toLowerCase();
 
-/** Quantos aldeões, quantos cabem, quando chega o próximo e o que cada ofício faz agora. */
+function efeitoDoOficio(e: VisaoCliente, oficio: Oficio, ativos: number, temComida: boolean): { efeito: string; parado: boolean } {
+  if (oficio === 'fazendeiro') return { efeito: `+${decimal.format(FORMULAS.aldeoes.comidaDoFazendeiro * ativos)} comida/s`, parado: ativos === 0 };
+  const b = BONUS_DO_OFICIO[oficio]!;
+  const bonus = `+${Math.round(FORMULAS.aldeoes.bonusPorOficio * ativos * 100)}% de ${nomeRecurso(b.recurso)}`;
+  if (ativos === 0) return { efeito: bonus, parado: true };
+  if (!temComida) return { efeito: `${bonus} (parado sem comida)`, parado: true };
+  if (somaNiveis(e, b.produtora) === 0) return { efeito: `${bonus} quando houver ${CONSTRUCOES[b.produtora].nome}`, parado: true };
+  return { efeito: bonus, parado: false };
+}
+
+/** Quantos aldeões, quantos cabem, quando chega o próximo, o que cada ofício faz agora e a distribuição automática. */
 export function dadosAldeoes(e: VisaoCliente): DadosAldeoes {
   const total = e.aldeoes.length;
   const maximo = aldeoesMaximos(e);
   const temComida = e.recursos.comida > 0;
+  const config = e.aldeoesConfig;
+  const segundos = Math.max(1, Math.ceil((FORMULAS.aldeoes.segundosPorChegada * 1000 - e.progressoAldeaoMs) / 1000));
   let situacao: string;
   if (!temComida && total >= maximo) situacao = 'Sem comida e Casas cheias: pesquise Colheita Farta ou melhore a Casa';
-  else if (!temComida) situacao = `Sem comida: os ofícios param e o próximo, em ${Math.max(1, Math.ceil((FORMULAS.aldeoes.segundosPorChegada * 1000 - e.progressoAldeaoMs) / 1000))} s, chega como Fazendeiro`;
+  else if (!temComida) situacao = `Sem comida: os ofícios param e o próximo, em ${segundos} s, chega como Fazendeiro`;
   else if (total >= maximo) situacao = 'Casas cheias: melhore a Casa para chegarem mais';
-  else situacao = `Próximo em ${Math.max(1, Math.ceil((FORMULAS.aldeoes.segundosPorChegada * 1000 - e.progressoAldeaoMs) / 1000))} s`;
+  else situacao = `Próximo em ${segundos} s`;
 
-  const oficios = OFICIOS.map((oficio): LinhaOficio | null => {
-    const quantidade = e.aldeoes.filter((a) => a.oficio === oficio).length;
-    if (quantidade === 0) return null;
-    const nome = NOMES_OFICIOS[oficio];
-    if (oficio === 'fazendeiro') {
-      return { oficio, nome, quantidade, efeito: `+${decimal.format(FORMULAS.aldeoes.comidaDoFazendeiro * quantidade)} comida/s`, parado: false };
+  const ociosos = e.aldeoes.filter((a) => a.oficio === OFICIO_OCIOSO).length;
+  const oficios = OFICIOS_ALDEAO.map((oficio): LinhaOficio => {
+    const doOficio = e.aldeoes.filter((a) => a.oficio === oficio);
+    const quantidade = doOficio.length;
+    if (oficio === OFICIO_OCIOSO) {
+      return { oficio, nome: NOME_OCIOSO, quantidade, aCaminho: 0, efeito: 'Não produz, mas come', parado: true, podeMais: false, podeMenos: false };
     }
-    const b = BONUS_DO_OFICIO[oficio]!;
-    const bonus = `+${Math.round(FORMULAS.aldeoes.bonusPorOficio * quantidade * 100)}% de ${nomeRecurso(b.recurso)}`;
-    if (!temComida) return { oficio, nome, quantidade, efeito: `${bonus} (parado sem comida)`, parado: true };
-    if (somaNiveis(e, b.produtora) === 0) {
-      return { oficio, nome, quantidade, efeito: `${bonus} quando houver ${CONSTRUCOES[b.produtora].nome}`, parado: true };
-    }
-    return { oficio, nome, quantidade, efeito: bonus, parado: false };
-  }).filter((l): l is LinhaOficio => l !== null);
+    const ativos = doOficio.filter((a) => aldeaoAtivo(a, e.t)).length;
+    return {
+      oficio, nome: NOMES_OFICIOS[oficio], quantidade, aCaminho: quantidade - ativos,
+      ...efeitoDoOficio(e, oficio, ativos, temComida),
+      podeMais: ociosos > 0, podeMenos: quantidade > 0,
+    };
+  });
 
-  return { total, maximo, situacao, alerta: !temComida || total >= maximo, oficios };
+  const politicas: OpcaoPolitica[] = POLITICAS_PRONTAS.map((p: PoliticaPronta) => ({ politica: p, nome: NOMES_POLITICAS[p], escolhivel: true }));
+  if (config.politica === 'manter') politicas.push({ politica: 'manter', nome: NOMES_POLITICAS.manter, escolhivel: false });
+
+  return {
+    total, maximo, situacao, alerta: !temComida || total >= maximo, oficios,
+    automatica: config.automatica, politica: config.politica, politicas,
+    aviso: config.automatica ? null : 'Aldeões novos chegam ociosos',
+  };
 }

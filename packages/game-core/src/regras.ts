@@ -1,5 +1,6 @@
 // Grandezas derivadas do estado: tetos, vagas, taxas, desbloqueios.
 // Tudo puro e inteiro; usado pela simulação, pelas ações e pela interface.
+import { OFICIO_OCIOSO, PESOS_POLITICA, type OficioAldeao } from '../data/aldeoes.ts';
 import { RODIZIO_OFICIOS, type Oficio } from '../data/aventureiros.ts';
 import { CONSTRUCOES, type TipoConstrucao } from '../data/construcoes.ts';
 import { DESTINOS, type DestinoId } from '../data/expedicoes.ts';
@@ -52,15 +53,51 @@ export function vagasGuilda(e: VisaoCliente): number {
   return g.vagasBase + g.vagasPorNivelDeTaverna * somaNiveis(e, 'taverna') + hospitalidade;
 }
 
-/** Rodízio de ofícios; com a comida em 0, quem chega é Fazendeiro (tira a vila da fome). */
-export function oficioDoProximoAldeao(e: VisaoCliente): Oficio {
-  if (e.recursos.comida <= 0) return 'fazendeiro';
-  return RODIZIO_OFICIOS[e.aldeoes.length % RODIZIO_OFICIOS.length]!;
-}
-
-function contarOficio(e: VisaoCliente, oficio: Oficio): number {
+/** Quantos aldeões têm o ofício (contando os que estão a caminho dele). */
+export function quantosNoOficio(e: Pick<VisaoCliente, 'aldeoes'>, oficio: OficioAldeao): number {
   let n = 0;
   for (const a of e.aldeoes) if (a.oficio === oficio) n += 1;
+  return n;
+}
+
+/** Pesos da distribuição automática: os da política pronta ou, em "manter", a proporção do último ajuste manual. */
+export function pesosDaDistribuicao(e: Pick<VisaoCliente, 'aldeoesConfig'>): Record<Oficio, number> {
+  const c = e.aldeoesConfig;
+  if (c.politica !== 'manter') return PESOS_POLITICA[c.politica];
+  const pesos = {} as Record<Oficio, number>;
+  for (const o of RODIZIO_OFICIOS) pesos[o] = c.proporcao?.[o] ?? 0;
+  // Proporção toda zerada (todos foram para Ocioso): cai na Equilibrada.
+  return RODIZIO_OFICIOS.some((o) => pesos[o] > 0) ? pesos : PESOS_POLITICA.equilibrada;
+}
+
+/**
+ * Ofício de quem chega. Comida em 0: Fazendeiro, sempre (tira a vila da
+ * fome, inclusive com a automática desligada). Automática desligada: Ocioso.
+ * Ligada: o ofício mais abaixo da sua parte pela política, ou seja, o menor
+ * quantidade / peso (em inteiros: q_i × p_j < q_j × p_i), desempate pela ordem
+ * dos ofícios. Pesos iguais reproduzem o rodízio antigo numa conta nova.
+ */
+export function oficioDoProximoAldeao(e: VisaoCliente): OficioAldeao {
+  if (e.recursos.comida <= 0) return 'fazendeiro';
+  if (!e.aldeoesConfig.automatica) return OFICIO_OCIOSO;
+  const pesos = pesosDaDistribuicao(e);
+  let melhor: Oficio | null = null;
+  for (const o of RODIZIO_OFICIOS) {
+    if (pesos[o] <= 0) continue;
+    if (melhor === null || quantosNoOficio(e, o) * pesos[melhor] < quantosNoOficio(e, melhor) * pesos[o]) melhor = o;
+  }
+  return melhor ?? 'fazendeiro';
+}
+
+/** Aldeão que produz agora: tem ofício produtivo e já chegou nele (fora do deslocamento). */
+export function aldeaoAtivo(a: { oficio: OficioAldeao; ativoEm?: number }, t: number): boolean {
+  return a.oficio !== OFICIO_OCIOSO && (a.ativoEm === undefined || a.ativoEm <= t);
+}
+
+/** Quantos produzem no ofício agora (sem os que ainda estão a caminho). */
+function contarOficio(e: VisaoCliente, oficio: Oficio): number {
+  let n = 0;
+  for (const a of e.aldeoes) if (a.oficio === oficio && aldeaoAtivo(a, e.t)) n += 1;
   return n;
 }
 

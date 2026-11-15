@@ -2,6 +2,7 @@
 // tudo o que aconteceu no meio. Entre dois acontecimentos as taxas são
 // constantes, então cada trecho é linear e calculado em inteiros exatos.
 // Por isso liquidar em um passo ou em muitos dá exatamente o mesmo estado.
+import { NOME_OCIOSO, OFICIO_OCIOSO } from '../data/aldeoes.ts';
 import { NOMES_OFICIOS } from '../data/aventureiros.ts';
 import { CONSTRUCOES } from '../data/construcoes.ts';
 import { DESTINOS } from '../data/expedicoes.ts';
@@ -175,8 +176,12 @@ function processarVencimentos(e: EstadoJogo, s: Sorteador) {
     const oficio = oficioDoProximoAldeao(e);
     e.aldeoes.push({ oficio });
     e.progressoAldeaoMs = 0;
-    registrar(e, 'Aldeao', `Um ${NOMES_OFICIOS[oficio].toLowerCase()} chegou à vila.`, t);
+    const nome = oficio === OFICIO_OCIOSO ? NOME_OCIOSO : NOMES_OFICIOS[oficio];
+    registrar(e, 'Aldeao', `Um ${nome.toLowerCase()} chegou à vila.`, t);
   }
+
+  // Quem terminou o deslocamento passa a produzir no ofício novo.
+  for (const a of e.aldeoes) if (a.ativoEm !== undefined && a.ativoEm <= t) delete a.ativoEm;
 }
 
 /** Próximo instante em que algo muda (ou `alvo`, se nada mudar antes). */
@@ -193,6 +198,7 @@ function proximoAcontecimento(e: EstadoJogo, alvo: number, saldoComida: number):
   for (const x of e.expedicoes) considerar(x.fim);
   for (const a of e.aventureiros) if (a.feridoAte !== null) considerar(a.feridoAte);
   if (e.mercador) considerar(e.mercador.expiraEm);
+  for (const a of e.aldeoes) if (a.ativoEm !== undefined) considerar(a.ativoEm);
   considerar(e.segredo.proximoEventoEm);
   if (podeChegarAldeao(e) && e.progressoAldeaoMs < MS_POR_ALDEAO) {
     considerar(e.t + (MS_POR_ALDEAO - e.progressoAldeaoMs));

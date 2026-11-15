@@ -20,6 +20,8 @@ const TEXTOS: Record<ErroAcao, string> = {
   grupo_invalido: 'Escolha o grupo de novo.',
   sem_comida: 'Sem comida: a expedição não parte. Pesquise Colheita Farta ou melhore a Casa.',
   sem_mercador: 'O Mercador já seguiu viagem.',
+  alocacao_invalida: 'Escolha um ofício diferente.',
+  aldeoes_insuficientes: 'Não há aldeões suficientes nesse ofício.',
   reliquia_maxima: 'Esta relíquia já está no máximo.',
   reliquias_insuficientes: 'Faltam relíquias.',
   objetivos_pendentes: 'Cumpra os objetivos da era antes de ascender.',

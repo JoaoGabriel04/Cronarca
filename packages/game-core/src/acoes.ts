@@ -2,7 +2,8 @@
 // quantidades ou resultados. Cada ação liquida o estado até "agora", valida
 // e aplica, ou recusa com um código de erro. Nada é alterado no recusado.
 import { z } from 'zod';
-import { CLASSES } from '../data/aventureiros.ts';
+import { DESLOCAMENTO_ALDEAO_MS, OFICIO_OCIOSO, OFICIOS_ALDEAO, POLITICAS_ALDEOES } from '../data/aldeoes.ts';
+import { CLASSES, OFICIOS, type Oficio } from '../data/aventureiros.ts';
 import { CONSTRUCOES, NIVEL_MAXIMO_CONSTRUCAO } from '../data/construcoes.ts';
 import { DESTINOS, DESTINOS_IDS, TAMANHO_MAXIMO_GRUPO } from '../data/expedicoes.ts';
 import { FORMULAS } from '../data/formulas.ts';
@@ -20,7 +21,7 @@ import { estadoInicial, sortearNome } from './inicial.ts';
 import { aplicarBonus, bp, mili, micro } from './inteiros.ts';
 import { liquidar, receber } from './liquidar.ts';
 import { descreverTroca } from './mercador.ts';
-import { destinoAberto, nivelReliquia, objetivosEra, vagasGuilda } from './regras.ts';
+import { destinoAberto, nivelReliquia, objetivosEra, quantosNoOficio, vagasGuilda } from './regras.ts';
 import { criarSorteador, type Sorteador } from './rng.ts';
 
 const idCurto = z.string().min(1).max(32);
@@ -38,6 +39,13 @@ export const esquemaAcao = z.discriminatedUnion('tipo', [
     grupo: z.array(idCurto).min(1).max(TAMANHO_MAXIMO_GRUPO),
   }),
   z.strictObject({ tipo: z.literal('responder_mercador'), aceitar: z.boolean() }),
+  z.strictObject({
+    tipo: z.literal('alocar_aldeoes'),
+    de: z.enum(OFICIOS_ALDEAO),
+    para: z.enum(OFICIOS_ALDEAO),
+    quantidade: z.number().int().min(1).max(FORMULAS.aldeoes.porNivelDeCasa * NIVEL_MAXIMO_CONSTRUCAO),
+  }),
+  z.strictObject({ tipo: z.literal('configurar_aldeoes'), automatica: z.boolean(), politica: z.enum(POLITICAS_ALDEOES) }),
   z.strictObject({ tipo: z.literal('comprar_reliquia'), reliquia: z.enum(RELIQUIAS_IDS) }),
   z.strictObject({ tipo: z.literal('ascender') }),
   z.strictObject({
@@ -57,6 +65,7 @@ export type ErroAcao =
   | 'guilda_cheia' | 'aventureiro_inexistente' | 'aventureiro_indisponivel' | 'equipamento_maximo'
   | 'destino_bloqueado' | 'grupo_invalido' | 'sem_comida'
   | 'sem_mercador'
+  | 'alocacao_invalida' | 'aldeoes_insuficientes'
   | 'reliquia_maxima' | 'reliquias_insuficientes'
   | 'objetivos_pendentes'
   | 'objeto_invalido' | 'limite_cliques';
@@ -217,6 +226,36 @@ function aplicador(acao: Acao, agora: number, opcoes: OpcoesAcao): Aplicador {
           registrar(e, 'Evento', 'O Mercador Viajante foi dispensado.', e.t);
         }
         e.mercador = null;
+      };
+
+    case 'alocar_aldeoes':
+      return (e) => {
+        if (acao.de === acao.para) return 'alocacao_invalida';
+        // Os últimos do ofício de origem mudam (quem chegou por último sai primeiro).
+        const daOrigem = e.aldeoes.filter((a) => a.oficio === acao.de);
+        if (daOrigem.length < acao.quantidade) return 'aldeoes_insuficientes';
+        for (const a of daOrigem.slice(-acao.quantidade)) {
+          a.oficio = acao.para;
+          // Ir para Ocioso é na hora; para um ofício, o aldeão leva o deslocamento para começar a produzir.
+          if (acao.para === OFICIO_OCIOSO) delete a.ativoEm;
+          else a.ativoEm = e.t + DESLOCAMENTO_ALDEAO_MS;
+        }
+        // Ajuste manual: a automática segue a distribuição que o jogador montou.
+        const proporcao: Partial<Record<Oficio, number>> = {};
+        for (const o of OFICIOS) proporcao[o] = quantosNoOficio(e, o);
+        e.aldeoesConfig = { automatica: e.aldeoesConfig.automatica, politica: 'manter', proporcao };
+      };
+
+    case 'configurar_aldeoes':
+      return (e) => {
+        // "manter" não se escolhe: só vale para ligar/desligar mantendo a proporção do último ajuste.
+        if (acao.politica === 'manter') {
+          if (e.aldeoesConfig.politica !== 'manter') return 'alocacao_invalida';
+          e.aldeoesConfig = { ...e.aldeoesConfig, automatica: acao.automatica };
+          return;
+        }
+        // Política pronta substitui a proporção do ajuste manual.
+        e.aldeoesConfig = { automatica: acao.automatica, politica: acao.politica };
       };
 
     case 'comprar_reliquia':

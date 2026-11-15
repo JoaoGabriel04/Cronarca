@@ -2466,3 +2466,151 @@
   color: #a8342c;
   font-weight: 700;
 }
+
+/* ---------- Portão 17: alocação de ofícios no cartão dos aldeões ---------- */
+.oficios {
+  gap: 4px;
+}
+.oficios li {
+  flex-wrap: nowrap;
+  align-items: center;
+}
+.oficioInfo {
+  display: grid;
+  min-width: 0;
+}
+.oficioEfeito {
+  font-size: 13px;
+}
+.aCaminho {
+  color: #8a5a20;
+}
+.oficioAjuste {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.oficioQuantidade {
+  min-width: 22px;
+  text-align: center;
+  font-weight: 700;
+}
+/* Ocioso não tem botões: o número fica alinhado com os dos ofícios. */
+.oficios li:last-child .oficioAjuste {
+  margin-right: 38px;
+}
+.botaoOficio {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  color: var(--texto, #f6efdc);
+  cursor: pointer;
+}
+.botaoOficio:disabled {
+  cursor: default;
+  filter: grayscale(1) brightness(0.8);
+  opacity: 0.55;
+}
+.botaoOficio:focus-visible,
+.automatica:focus-visible,
+.politica select:focus-visible {
+  outline: 3px solid var(--ouro-claro);
+  outline-offset: 2px;
+}
+.distribuicao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 2px solid #c8b890;
+}
+.automatica {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: #3a261c;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.chave {
+  --e: 3px;
+  --borda: #2a1c12;
+  --fundo: #c8b890;
+  --realce: #c8b890;
+  --sombra: #c8b890;
+  position: relative;
+  width: 48px;
+  height: 26px;
+}
+.chave > span {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 20px;
+  height: 18px;
+  border: 2px solid #2a1c12;
+  background: #f6efdc;
+}
+.chaveLigada {
+  --fundo: #4a8a52;
+  --realce: #4a8a52;
+  --sombra: #4a8a52;
+}
+.chaveLigada > span {
+  left: auto;
+  right: 1px;
+}
+.politica {
+  flex: 1 1 180px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #3a261c;
+  white-space: nowrap;
+}
+.politica select {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 32px;
+  padding: 0 6px;
+  font: inherit;
+  font-size: 14px;
+  color: #f6efdc;
+  cursor: pointer;
+}
+.politica select:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.avisoOciosos {
+  margin-top: 6px;
+  font-style: italic;
+  color: #6a5a40;
+}
+
+/* Celular: alvos de toque de 44 px. */
+@media (max-width: 1023px) {
+  .botaoOficio {
+    width: 44px;
+    height: 44px;
+  }
+  .oficios li:last-child .oficioAjuste {
+    margin-right: 50px;
+  }
+  .automatica,
+  .politica select {
+    min-height: 44px;
+  }
+}

@@ -10,8 +10,8 @@
 // Controles e leitura de depuração são provisórios (a UI é a L8, Portão 11).
 
 import {
-  animacao, CLASSES, CONSTRUCOES, formatarQuantidade, OFICIOS, HITBOX_CONSTRUCAO, mapaDaVersao, RAIO_ACERTO_PIXEL_TELA, SLOT_IDS, SOMBRA_ELIPSE_16, TILE,
-  type MapaJogo, type SlotId, type VisaoCliente,
+  animacao, CLASSES, CONSTRUCOES, formatarQuantidade, OFICIO_OCIOSO, OFICIOS, HITBOX_CONSTRUCAO, mapaDaVersao, RAIO_ACERTO_PIXEL_TELA, SLOT_IDS, SOMBRA_ELIPSE_16, TILE,
+  type MapaJogo, type Oficio, type SlotId, type VisaoCliente,
 } from '@cronarca/game-core';
 import { gsap } from 'gsap';
 import { Plus } from 'lucide-react';
@@ -402,7 +402,11 @@ const TODOS_OFICIOS = OFICIOS.map((oficio) => ({ oficio }));
 export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao = false, controle, children, mostrarAjuda = true, ajustavel = false, animado = true, cameraInicial, celular = false, aldeoesNaTela = false }: PropsCanvasMapa) {
   const mapa = mapaDaVersao(estado.mundo.versaoMapa);
   const area = useMemo<Area>(() => areaDoMapa(mapa), [mapa]);
-  const itens = useMemo(() => camadaObjetos(mapa, estado.slots, estado.aldeoes), [mapa, estado.slots, estado.aldeoes]);
+  // O Ocioso ainda não tem lugar no mapa (fica para o portão dos aldeões no mapa): só os ofícios produtivos aparecem.
+  const itens = useMemo(
+    () => camadaObjetos(mapa, estado.slots, estado.aldeoes.filter((a): a is { oficio: Oficio } => a.oficio !== OFICIO_OCIOSO)),
+    [mapa, estado.slots, estado.aldeoes],
+  );
   // Tecla B: só o desenho muda (todas de pé, com os 5 aldeões); o clique continua seguindo o estado.
   const itensTodos = useMemo(() => camadaObjetos(mapa, TODOS_CONSTRUIDOS, TODOS_OFICIOS), [mapa]);
   const relogioRef = useRef(relogio);

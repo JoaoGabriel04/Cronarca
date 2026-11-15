@@ -8,7 +8,10 @@
 // - até 600 px, nenhum botão visível menor que 44 x 44 px;
 // - touch-action: none só na janela do mapa (o canvas);
 // - até 600 px, pinça com dois dedos no mapa do Reino: abrir aproxima, fechar afasta;
-// - arrastar sobre o texto do jogo não seleciona nada (campos de texto, sim).
+// - arrastar sobre o texto do jogo não seleciona nada (campos de texto, sim);
+// - até 600 px, cartão dos aldeões (Portão 17): "−" manda para o Ocioso, "+" tira do Ocioso
+//   (o número muda na hora e o ofício novo mostra "a caminho"), a Automática desliga com o
+//   aviso "Aldeões novos chegam ociosos"; no fim a conta volta à distribuição de antes.
 // Em 390 grava as capturas ao lado dos frames do Figma (docs/referencia/figma_mobile).
 const { chromium } = require('playwright');
 const { PNG } = require('pngjs');
@@ -206,6 +209,55 @@ async function pinca(p) {
       const ok = sel.texto === '' && sel.corpo === 'none' && sel.noCampo !== 'none';
       if (!ok) falhas++;
       console.log(`${String(largura).padStart(3)} px  seleção              arrastar selecionou "${sel.texto}"  corpo ${sel.corpo}  campo ${sel.noCampo}  toque longo ${sel.callout || '?'}  ${ok ? 'ok' : 'FALHOU'}`);
+    }
+    // Aldeões (Portão 17): alocar pelo cartão abaixo do mapa da Vila.
+    if (largura <= 600) {
+      await p.keyboard.press('Escape');
+      await aba(p, 'Vila');
+      await visao(p, 'Vila');
+      await espera(p);
+      const cartao = p.locator('section[aria-labelledby="titulo-aldeoes"]').filter({ visible: true }).first();
+      await cartao.scrollIntoViewIfNeeded();
+      const linha = (nome) => cartao.locator('li').filter({ has: p.locator(`text="${nome}"`) });
+      const qtd = async (nome) => Number(await cartao.getByLabel(new RegExp(`^\\d+ ${nome}$`)).textContent());
+      const menos = (nome) => cartao.getByRole('button', { name: `${nome}: menos um (vai para Ocioso)` });
+      const mais = (nome) => cartao.getByRole('button', { name: `${nome}: mais um (sai do Ocioso)` });
+      const oficios = ['Fazendeiro', 'Lenhador', 'Mineiro', 'Sábio', 'Ferreiro'];
+      const de = [];
+      for (const o of oficios) if (await menos(o).isEnabled()) de.push(o);
+      const origem = de.find((o) => o !== 'Fazendeiro') ?? de[0];
+      const destino = oficios.find((o) => o !== origem && o !== 'Fazendeiro');
+      const ociosoAntes = await qtd('Ocioso');
+      const origemAntes = await qtd(origem);
+      await menos(origem).tap();
+      await espera(p, 300);
+      const ociosoDepois = await qtd('Ocioso');
+      const origemDepois = await qtd(origem);
+      await mais(destino).tap();
+      await espera(p, 300);
+      const aCaminho = (await linha(destino).textContent()).includes('a caminho');
+      const chave = cartao.getByRole('switch', { name: 'Automática' });
+      await chave.tap();
+      await espera(p, 400);
+      const desligada = (await chave.getAttribute('aria-checked')) === 'false';
+      const aviso = await cartao.getByText('Aldeões novos chegam ociosos').isVisible();
+      const politicaManter = await cartao.locator('select').inputValue();
+      const m = await medir(p, largura);
+      if (largura === 390) await cartao.screenshot({ path: path.join(SAIDA, 'portao17_aldeoes_390.png') });
+      // Volta a conta como estava: o destino devolve um ao Ocioso, o Ocioso devolve um à origem, Automática e Equilibrada.
+      await menos(destino).tap();
+      await espera(p, 300);
+      await mais(origem).tap();
+      await espera(p, 300);
+      await chave.tap();
+      await espera(p, 400);
+      await cartao.locator('select').selectOption('equilibrada');
+      await espera(p, 600);
+      const ok =
+        ociosoDepois === ociosoAntes + 1 && origemDepois === origemAntes - 1 && aCaminho && desligada && aviso &&
+        politicaManter === 'manter' && m.pequenos.length === 0 && m.horizontal <= 0 && m.cortados.length === 0;
+      if (!ok) falhas++;
+      console.log(`${String(largura).padStart(3)} px  aldeões              ${origem} ${origemAntes}->${origemDepois}  Ocioso ${ociosoAntes}->${ociosoDepois}  ${destino} a caminho ${aCaminho ? 'sim' : 'não'}  automática desligada ${desligada ? 'sim' : 'não'} (aviso ${aviso ? 'sim' : 'não'})  política ${politicaManter}  alvos < 44: ${m.pequenos.join('; ') || 'nenhum'}  ${ok ? 'ok' : 'FALHOU'}`);
     }
     // Pinça com dois dedos (toques reais pelo protocolo do Chrome): abrir aproxima, fechar afasta, sempre em zoom inteiro.
     if (largura <= 600) {

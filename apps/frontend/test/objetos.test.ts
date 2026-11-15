@@ -9,9 +9,10 @@ import { arquivoDoSprite, lerPng } from './png';
 const m = MAPA;
 const inicio = estadoInicial({ semente: 1, agora: 0 }).slots;
 const todos = Object.fromEntries(SLOT_IDS.map((id) => [id, { nivel: 1 }])) as Record<SlotId, { nivel: number }>;
-const aldeoesInicio = estadoInicial({ semente: 1, agora: 0 }).aldeoes;
-const cincoOficios = OFICIOS.map((oficio) => ({ oficio }));
 const ofx = (...lista: Oficio[]) => lista.map((oficio) => ({ oficio }));
+// O mapa só recebe ofícios produtivos (o CanvasMapa tira os ociosos); o início não tem ociosos.
+const aldeoesInicio = ofx(...estadoInicial({ semente: 1, agora: 0 }).aldeoes.map((a) => a.oficio as Oficio));
+const cincoOficios = OFICIOS.map((oficio) => ({ oficio }));
 
 describe('L4: props do núcleo, construções e aldeões (o resto está na imagem)', () => {
   it('ordenados pelo Y do pé; empate por x e depois por id (aldeões juntos com o resto)', () => {

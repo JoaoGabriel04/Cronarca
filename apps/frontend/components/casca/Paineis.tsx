@@ -5,7 +5,8 @@
 // Crônica. Os botões só emitem intenções tipadas: os modais de Melhorar e de
 // expedição chegam nos Portões 12 e 13.
 
-import type { DestinoId, SlotId } from '@cronarca/game-core';
+import type { DestinoId, OficioAldeao, PoliticaAldeoes, SlotId } from '@cronarca/game-core';
+import { Minus, Plus } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { CartaConstrucao, CartaDestino, DadosAldeoes, LinhaCronica } from '../../lib/casca/dados';
 import { SpriteAnimado } from '../anim/SpriteAnimado';
@@ -15,7 +16,10 @@ import { Icone } from './Icone';
 export type EventoCasca =
   | { tipo: 'melhorarClicado'; slot: SlotId }
   | { tipo: 'enviarClicado'; destino: DestinoId }
-  | { tipo: 'verClicado'; destino: DestinoId };
+  | { tipo: 'verClicado'; destino: DestinoId }
+  /** "+" (do Ocioso para o ofício) ou "−" (do ofício para o Ocioso), um aldeão por toque. */
+  | { tipo: 'alocarAldeao'; de: OficioAldeao; para: OficioAldeao }
+  | { tipo: 'configurarAldeoes'; automatica: boolean; politica: PoliticaAldeoes };
 
 function CartaoConstrucao({ c, aoEvento }: { c: CartaConstrucao; aoEvento: (e: EventoCasca) => void }) {
   return (
@@ -94,10 +98,11 @@ export function CartaoDestino({ c, aoEvento }: { c: CartaDestino; aoEvento: (e: 
 }
 
 /**
- * Aldeões da vila: quantos há e cabem, quando chega o próximo e o que cada
- * ofício faz agora. Chegam sozinhos; o jogador só influi pelas Casas e pela comida.
+ * Aldeões da vila: quantos há e cabem, quando chega o próximo, o que cada
+ * ofício faz agora e a distribuição (Portão 17). "+" tira um do Ocioso,
+ * "−" manda um para o Ocioso; quem muda leva alguns segundos a caminho.
  */
-export function CartaoAldeoes({ d }: { d: DadosAldeoes }) {
+export function CartaoAldeoes({ d, aoEvento }: { d: DadosAldeoes; aoEvento: (e: EventoCasca) => void }) {
   return (
     <section className={`caixa ${estilos.cartao} ${estilos.aldeoes}`} aria-labelledby="titulo-aldeoes">
       <h3 id="titulo-aldeoes" className={estilos.cartaoNome}>
@@ -107,20 +112,78 @@ export function CartaoAldeoes({ d }: { d: DadosAldeoes }) {
           {d.total} de {d.maximo}
         </span>
       </h3>
-      <p className={estilos.cartaoTexto}>Chegam sozinhos, um a cada 20 s, enquanto houver vaga nas Casas e comida.</p>
+      <p className={estilos.cartaoTexto}>Chegam um a cada 20 s, enquanto houver vaga nas Casas e comida.</p>
       <p className={`${estilos.cartaoTexto} ${d.alerta ? estilos.alerta : ''}`}>{d.situacao}</p>
-      {d.oficios.length > 0 && (
-        <ul className={estilos.oficios}>
-          {d.oficios.map((o) => (
-            <li key={o.oficio} className={o.parado ? estilos.oficioParado : undefined}>
-              <span className={estilos.oficioNome}>
-                {o.nome} ×{o.quantidade}
+      <ul className={estilos.oficios} aria-label="Ofícios">
+        {d.oficios.map((o) => (
+          <li key={o.oficio} className={o.parado ? estilos.oficioParado : undefined}>
+            <span className={estilos.oficioInfo}>
+              <span className={estilos.oficioNome}>{o.nome}</span>
+              <span className={estilos.oficioEfeito}>
+                {o.efeito}
+                {o.aCaminho > 0 && <span className={estilos.aCaminho}> · {o.aCaminho} a caminho</span>}
               </span>
-              <span>{o.efeito}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+            </span>
+            <span className={estilos.oficioAjuste}>
+              {o.oficio !== 'ocioso' && (
+                <button
+                  type="button"
+                  className={`caixa ${estilos.botaoOficio}`}
+                  aria-label={`${o.nome}: menos um (vai para Ocioso)`}
+                  disabled={!o.podeMenos}
+                  onClick={() => aoEvento({ tipo: 'alocarAldeao', de: o.oficio, para: 'ocioso' })}
+                >
+                  <Minus size={16} strokeWidth={3} />
+                </button>
+              )}
+              <span className={estilos.oficioQuantidade} aria-label={`${o.quantidade} ${o.nome}`}>
+                {o.quantidade}
+              </span>
+              {o.oficio !== 'ocioso' && (
+                <button
+                  type="button"
+                  className={`caixa ${estilos.botaoOficio}`}
+                  aria-label={`${o.nome}: mais um (sai do Ocioso)`}
+                  disabled={!o.podeMais}
+                  onClick={() => aoEvento({ tipo: 'alocarAldeao', de: 'ocioso', para: o.oficio })}
+                >
+                  <Plus size={16} strokeWidth={3} />
+                </button>
+              )}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <div className={estilos.distribuicao}>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={d.automatica}
+          className={estilos.automatica}
+          onClick={() => aoEvento({ tipo: 'configurarAldeoes', automatica: !d.automatica, politica: d.politica })}
+        >
+          <span>Automática</span>
+          <span className={`caixa ${estilos.chave} ${d.automatica ? estilos.chaveLigada : ''}`} aria-hidden>
+            <span />
+          </span>
+        </button>
+        <label className={estilos.politica}>
+          <span>Novos aldeões</span>
+          <select
+            className="caixa"
+            value={d.politica}
+            disabled={!d.automatica}
+            onChange={(ev) => aoEvento({ tipo: 'configurarAldeoes', automatica: d.automatica, politica: ev.target.value as PoliticaAldeoes })}
+          >
+            {d.politicas.map((p) => (
+              <option key={p.politica} value={p.politica} disabled={!p.escolhivel}>
+                {p.nome}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      {d.aviso && <p className={`${estilos.cartaoTexto} ${estilos.avisoOciosos}`}>{d.aviso}</p>}
     </section>
   );
 }
@@ -148,7 +211,7 @@ export function PainelLateral({ titulo, subtitulo, icone, construcoes, destinos,
           <p>{subtitulo}</p>
           <Icone nome={icone} />
         </header>
-        {aldeoes && <CartaoAldeoes d={aldeoes} />}
+        {aldeoes && <CartaoAldeoes d={aldeoes} aoEvento={aoEvento} />}
         <ul className={estilos.lista}>
           {construcoes?.map((c) => <CartaoConstrucao key={c.slot} c={c} aoEvento={aoEvento} />)}
           {destinos?.map((c) => <CartaoDestino key={c.destino} c={c} aoEvento={aoEvento} />)}

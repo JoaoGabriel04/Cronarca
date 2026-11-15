@@ -204,6 +204,13 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
         // A12: o terreno vazio abre o catálogo já na linha daquele slot.
         abrirCatalogo(e.slotId);
         return;
+      case 'alocarAldeao':
+        // Prevista: o número muda na hora; o servidor confere (e recusa se faltar aldeão).
+        void enviarPrevista({ tipo: 'alocar_aldeoes', de: e.de, para: e.para, quantidade: 1 });
+        return;
+      case 'configurarAldeoes':
+        void enviarPrevista({ tipo: 'configurar_aldeoes', automatica: e.automatica, politica: e.politica });
+        return;
     }
   };
 
@@ -409,7 +416,7 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
         {celular && aba === 'vila' && visao === 'vila' && (
           <div className={estilos.abaixoDoMapa}>
             <BotaoConstrucoes selo={selo} aoAbrir={() => abrirCatalogo(null)} />
-            <CartaoAldeoes d={dadosAldeoes(visivel)} />
+            <CartaoAldeoes d={dadosAldeoes(visivel)} aoEvento={aoEvento} />
             <CartaoCronica linhas={linhasCronica(visivel, LINHAS_CRONICA)} />
           </div>
         )}

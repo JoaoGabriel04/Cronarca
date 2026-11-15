@@ -1,0 +1,134 @@
+{
+ "gerado": "código antes do Portão 17 (rodízio), conta nova sem eventos, semente 7, T0 2026-06-01T12:00Z",
+ "estados": {
+  "5": {
+   "t": 1780315500000,
+   "recursos": {
+    "madeira": 300000000,
+    "pedra": 50000000,
+    "comida": 104000000,
+    "ferro": 15000000,
+    "ouro": 40000000,
+    "saber": 0
+   },
+   "aldeoes": [
+    {
+     "oficio": "fazendeiro"
+    },
+    {
+     "oficio": "lenhador"
+    },
+    {
+     "oficio": "mineiro"
+    },
+    {
+     "oficio": "sabio"
+    }
+   ],
+   "progressoAldeaoMs": 0,
+   "cronica": [
+    {
+     "icone": "Check",
+     "texto": "Uma fogueira acesa. Começa a crônica da aldeia.",
+     "em": 1780315200000
+    },
+    {
+     "icone": "Aldeao",
+     "texto": "Um mineiro chegou à vila.",
+     "em": 1780315220000
+    },
+    {
+     "icone": "Aldeao",
+     "texto": "Um sábio chegou à vila.",
+     "em": 1780315240000
+    }
+   ]
+  },
+  "15": {
+   "t": 1780316100000,
+   "recursos": {
+    "madeira": 300000000,
+    "pedra": 50000000,
+    "comida": 146000000,
+    "ferro": 15000000,
+    "ouro": 40000000,
+    "saber": 0
+   },
+   "aldeoes": [
+    {
+     "oficio": "fazendeiro"
+    },
+    {
+     "oficio": "lenhador"
+    },
+    {
+     "oficio": "mineiro"
+    },
+    {
+     "oficio": "sabio"
+    }
+   ],
+   "progressoAldeaoMs": 0,
+   "cronica": [
+    {
+     "icone": "Check",
+     "texto": "Uma fogueira acesa. Começa a crônica da aldeia.",
+     "em": 1780315200000
+    },
+    {
+     "icone": "Aldeao",
+     "texto": "Um mineiro chegou à vila.",
+     "em": 1780315220000
+    },
+    {
+     "icone": "Aldeao",
+     "texto": "Um sábio chegou à vila.",
+     "em": 1780315240000
+    }
+   ]
+  },
+  "30": {
+   "t": 1780317000000,
+   "recursos": {
+    "madeira": 300000000,
+    "pedra": 50000000,
+    "comida": 209000000,
+    "ferro": 15000000,
+    "ouro": 40000000,
+    "saber": 0
+   },
+   "aldeoes": [
+    {
+     "oficio": "fazendeiro"
+    },
+    {
+     "oficio": "lenhador"
+    },
+    {
+     "oficio": "mineiro"
+    },
+    {
+     "oficio": "sabio"
+    }
+   ],
+   "progressoAldeaoMs": 0,
+   "cronica": [
+    {
+     "icone": "Check",
+     "texto": "Uma fogueira acesa. Começa a crônica da aldeia.",
+     "em": 1780315200000
+    },
+    {
+     "icone": "Aldeao",
+     "texto": "Um mineiro chegou à vila.",
+     "em": 1780315220000
+    },
+    {
+     "icone": "Aldeao",
+     "texto": "Um sábio chegou à vila.",
+     "em": 1780315240000
+    }
+   ]
+  }
+ }
+}

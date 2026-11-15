@@ -115,13 +115,16 @@ Portão 0 aprovado com estas decisões. Tudo que é número vai em `packages/gam
 
 **Aldeões.**
 - Chegada: 1 aldeão a cada 20 s, de graça, enquanto houver vaga (`4 × soma dos níveis das casas`) e comida > 0.
-- Ofício automático, em rodízio determinístico: Fazendeiro, Lenhador, Mineiro, Sábio, Ferreiro, e repete. Não há ação de atribuir ofício na v0.
+- Ofícios (Portão 17): Fazendeiro, Lenhador, Mineiro, Sábio, Ferreiro e **Ocioso** (não produz, mas come). Números em `packages/game-core/data/aldeoes.ts`.
+- Distribuição automática (`estado.aldeoesConfig = { automatica, politica, proporcao? }`, esquema 6): ligada, quem chega vai para o ofício de menor `quantidade / peso` da política, desempate pela ordem dos ofícios, contando quem está a caminho. Políticas prontas: Equilibrada 1/1/1/1/1, Comida primeiro 3/1/1/1/1, Construção 1/2/2/0/0, Pesquisa 1/1/0/3/0, Ferro 1/0/1/0/3 (fazendeiro/lenhador/mineiro/sábio/ferreiro). Numa conta nova a Equilibrada dá a mesma ordem do antigo rodízio. Desligada, quem chega é Ocioso. Começa ligada na Equilibrada (conta nova, cada ciclo e saves do esquema 5).
+- Ajuste manual (`alocar_aldeoes { de, para, quantidade }`, validado no servidor e previsto no cliente): "+" tira do Ocioso, "−" manda para o Ocioso. Ir para Ocioso é na hora; para um ofício, o aldeão leva 10 s (`ativoEm`) e só então produz. Depois de um ajuste a Automática continua como estava e a política vira **Manter proporção atual** (a distribuição dos ofícios produtivos naquele momento; toda zerada, vale a Equilibrada). Escolher uma política pronta (`configurar_aldeoes`) substitui isso. Ajustes não escrevem na Crônica.
+- Sem vagas por construção: o limite continua `4 × níveis das casas` (40 alcançável).
 - Efeito: Fazendeiro produz 0,35 comida/s. Lenhador, Mineiro, Sábio e Ferreiro dão +5% cada na produção de madeira, pedra, saber e ferro, respectivamente (o Mineiro vale para pedra e o Ferreiro para ferro).
 - Consumo de comida: conforme a tabela de fórmulas.
 - Cada chegada escreve uma linha na Crônica ("Um lenhador chegou à vila.").
-- Interface: cartão **Aldeões** no topo do painel da Vila (e na Vila do celular): "N de M", como chegam, a situação (próximo em X s, Casas cheias ou sem comida) e cada ofício presente com o efeito de agora, ou o que falta para render (ex.: "+5% de pedra quando houver Pedreira").
+- Interface: cartão **Aldeões** no topo do painel da Vila (e na Vila do celular): "N de M", como chegam, a situação (próximo em X s, Casas cheias ou sem comida), os cinco ofícios e o Ocioso com quantidade, efeito de agora (ou o que falta para render, ex.: "+5% de pedra quando houver Pedreira"), "N a caminho" e os botões − e + (44 px no celular); embaixo, a chave Automática e a política dos novos aldeões. Desligada, o aviso "Aldeões novos chegam ociosos". O Ocioso ainda não aparece no mapa (fica para o portão dos aldeões no mapa).
 
-**Comida zerada.** Ninguém morre. Os bônus dos ofícios param e expedições não podem partir. Construções continuam produzindo. **Com vaga nas Casas, o próximo aldeão chega como Fazendeiro** (o rodízio volta quando a comida sobe): a vila não fica presa sem comida, porque melhorar a Casa sempre traz quem produz. A tela avisa em texto: chip de comida em alerta, aviso na aba Expedições ("Sem comida: … Pesquise Colheita Farta ou melhore a Casa") e, no Contratar, o saldo de comida de agora e o de depois (em vermelho se ficar negativo).
+**Comida zerada.** Ninguém morre. Os bônus dos ofícios param e expedições não podem partir. Construções continuam produzindo. **Com vaga nas Casas, o próximo aldeão chega como Fazendeiro**, mesmo com a Automática desligada (a política volta quando a comida sobe): a vila não fica presa sem comida, porque melhorar a Casa sempre traz quem produz. A tela avisa em texto: chip de comida em alerta, aviso na aba Expedições ("Sem comida: … Pesquise Colheita Farta ou melhore a Casa") e, no Contratar, o saldo de comida de agora e o de depois (em vermelho se ficar negativo).
 
 **Pesquisa.** Abre pelo botão Pesquisa no HUD (desktop e topo do celular, com selo das que dá para começar), pelo chip de Saber e pelo Scriptorium no mapa.
 
@@ -413,6 +416,7 @@ Cada portão exige aprovação humana explícita antes de seguir.
 | 14b | Animação com mais quadros | sprites de 2 a 6 quadros com durações por quadro lidas do `quadros.json`, fase por instância, relógio único, pré-carregamento, quadro 1 com movimento reduzido | seção Sprites |
 | 14c | Árvores com vento | mapa v2 sem árvores, 1583 árvores na L4 com culling por grade, balanço de 4 quadros com fase por id, camada de frente, conferência contra a arte original | `CRONARCA_MAPA_GRANDE.md`, seção 3b |
 | 15 | Ranking | tabela lida do servidor, atualização nos marcos | `Modal Ranking` |
+| 17 | Alocação de ofícios dos aldeões | Ocioso, ajuste manual com deslocamento de 10 s, distribuição automática por política, "Manter proporção atual", esquema 6, cartão com − e + | seção Aldeões |
 
 A A13 cancela o 7b: o mapa é uma imagem fixa (ver `CRONARCA_MAPA_GRANDE.md`, que prevalece sobre as seções 1, 4, 4b e 6 da spec do mapa e sobre o `CRONARCA_MUNDO_SPEC.md`, agora só histórico). Os portões 6 a 9 podem usar um estado de exemplo até o 5 estar pronto, mas o 10 só começa depois do 5.
 

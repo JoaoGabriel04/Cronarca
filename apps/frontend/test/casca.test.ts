@@ -127,13 +127,30 @@ describe('casca: "Salvo há"', () => {
 });
 
 describe('cartão dos aldeões', () => {
-  it('conta nova: 2 de 4, próximo em 20 s, fazendeiro rende comida e o lenhador já melhora a Serraria', () => {
+  it('conta nova: 2 de 4, próximo em 20 s; os cinco ofícios e o Ocioso sempre aparecem', () => {
     const d = dadosAldeoes(novo());
-    expect(d).toMatchObject({ total: 2, maximo: 4, situacao: 'Próximo em 20 s', alerta: false });
-    expect(d.oficios).toEqual([
-      { oficio: 'fazendeiro', nome: 'Fazendeiro', quantidade: 1, efeito: '+0,35 comida/s', parado: false },
-      { oficio: 'lenhador', nome: 'Lenhador', quantidade: 1, efeito: '+5% de madeira', parado: false },
-    ]);
+    expect(d).toMatchObject({ total: 2, maximo: 4, situacao: 'Próximo em 20 s', alerta: false, automatica: true, politica: 'equilibrada', aviso: null });
+    expect(d.oficios.map((o) => o.oficio)).toEqual(['fazendeiro', 'lenhador', 'mineiro', 'sabio', 'ferreiro', 'ocioso']);
+    expect(d.oficios[0]).toEqual({
+      oficio: 'fazendeiro', nome: 'Fazendeiro', quantidade: 1, aCaminho: 0, efeito: '+0,35 comida/s', parado: false, podeMais: false, podeMenos: true,
+    });
+    expect(d.oficios[1]).toMatchObject({ quantidade: 1, efeito: '+5% de madeira', parado: false });
+    expect(d.oficios[2]).toMatchObject({ quantidade: 0, parado: true, podeMenos: false });
+    expect(d.oficios[5]).toEqual({
+      oficio: 'ocioso', nome: 'Ocioso', quantidade: 0, aCaminho: 0, efeito: 'Não produz, mas come', parado: true, podeMais: false, podeMenos: false,
+    });
+    expect(d.politicas.map((p) => p.nome)).toEqual(['Equilibrada', 'Comida primeiro', 'Construção', 'Pesquisa', 'Ferro']);
+  });
+
+  it('com ocioso o "+" libera; a caminho não rende; "manter" aparece só quando é a atual; desligada avisa', () => {
+    const e = novo();
+    e.aldeoes.push({ oficio: 'ocioso' }, { oficio: 'fazendeiro', ativoEm: e.t + 5000 });
+    e.aldeoesConfig = { automatica: false, politica: 'manter', proporcao: { fazendeiro: 2, lenhador: 1 } };
+    const d = dadosAldeoes(e);
+    expect(d.oficios.every((o) => o.oficio === 'ocioso' || o.podeMais)).toBe(true);
+    expect(d.oficios[0]).toMatchObject({ quantidade: 2, aCaminho: 1, efeito: '+0,35 comida/s' });
+    expect(d.politicas.at(-1)).toEqual({ politica: 'manter', nome: 'Manter proporção atual', escolhivel: false });
+    expect(d.aviso).toBe('Aldeões novos chegam ociosos');
   });
 
   it('ofício sem a construção do recurso fica parado e diz o que falta', () => {
