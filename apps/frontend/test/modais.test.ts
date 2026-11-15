@@ -90,7 +90,12 @@ describe('catálogo na tela (A12)', () => {
     expect(porSlot.mercado_1).toMatchObject({ estado: 'construivel', pode: true });
     expect(porSlot.mercado_1!.custo.map((c) => c.recurso)).toEqual(['madeira']);
     expect(porSlot.muralha_1).toMatchObject({ estado: 'em_obra', acao: null, custo: [], obra: { restante: '00:32' } });
-    expect(porSlot.casa_1).toMatchObject({ estado: 'construida', acao: 'melhorar', pode: true, nivel: 'Nível 3' });
+    // Construída: o resumo do próximo nível já na linha (o mesmo cálculo do modal Melhorar).
+    expect(porSlot.casa_1).toMatchObject({
+      estado: 'construida', acao: 'melhorar', pode: true, nivel: 'Nível 3 → 4', motivo: null,
+      efeito: { hoje: '+12 aldeões', depois: '+16 aldeões' }, tempo: '1:22 de obra',
+    });
+    expect(porSlot.casa_1!.custo.map((c) => `${c.recurso} ${c.valor}`)).toEqual(['madeira 447', 'pedra 223']);
     expect(porSlot.serraria_2!.nome).toBe('Serraria II');
   });
 
@@ -179,5 +184,21 @@ describe('modais: Ascensão', () => {
     expect(formatarDuracao(45_000)).toBe('0:45');
     expect(formatarDuracao(90_000)).toBe('1:30');
     expect(formatarDuracao(3_720_000)).toBe('1:02:00');
+  });
+});
+
+describe('catálogo: linha de construção já feita', () => {
+  it('sem recurso: o motivo diz o que falta e o Melhorar fica apagado', () => {
+    const e = novo();
+    const casa = linhasCatalogoTela(e, T0).find((l) => l.slot === 'casa_1')!;
+    expect(casa).toMatchObject({ acao: 'melhorar', pode: false, nivel: 'Nível 1 → 2' });
+    expect(casa.motivo).toMatch(/^Falta /);
+  });
+
+  it('no nível máximo: sem botão, sem custo, "Nível 10 · máximo"', () => {
+    const e = novo();
+    e.slots.casa_1.nivel = 10;
+    const casa = linhasCatalogoTela(e, T0).find((l) => l.slot === 'casa_1')!;
+    expect(casa).toMatchObject({ acao: null, pode: false, nivel: 'Nível 10 · máximo', efeito: null, tempo: null, custo: [] });
   });
 });

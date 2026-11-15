@@ -36,10 +36,25 @@ const TELAS = [
   { nome: 'expedicoes', figma: 'expedicoes', ir: (p) => aba(p, 'Expedições') },
   { nome: 'eras', ir: (p) => aba(p, 'Eras') },
   { nome: 'catalogo', ir: async (p) => { await aba(p, 'Vila'); await visao(p, 'Vila'); await abrirConstrucoes(p); } },
-  { nome: 'modal_melhorar', figma: 'modal_melhorar', ir: async (p) => { await aba(p, 'Vila'); await visao(p, 'Vila'); await abrirConstrucoes(p); await espera(p); await p.locator('[role="dialog"] li[data-estado="construida"] button').first().click(); } },
+  // O Melhorar do catálogo age direto; o modal Melhorar abre tocando na construção no mapa (a Casa).
+  { nome: 'modal_melhorar', figma: 'modal_melhorar', ir: async (p) => { await aba(p, 'Vila'); await visao(p, 'Vila'); await espera(p, 800); await tocarNaCasa(p); await p.locator('[role="dialog"]').first().waitFor(); } },
   { nome: 'modal_configuracoes', ir: (p) => p.getByRole('button', { name: 'Configurações' }).click() },
   { nome: 'modal_ranking', figma: 'modal_ranking', ir: async (p) => { if (p.viewportSize().width <= 600) { await p.getByRole('button', { name: 'Configurações' }).click(); await espera(p); await p.getByRole('button', { name: 'Ver ranking' }).click(); } else { await p.getByRole('button', { name: 'Ranking' }).click(); } await p.locator('[role="dialog"] [role="table"] [role="row"]').nth(1).waitFor(); } },
 ];
+
+/** Centro da hitbox da Casa (slot casa_1 + origem do núcleo + meio da hitbox), em mundo. */
+const CASA_NO_MUNDO = { x: 147 + 1312 + 24, y: 186 + 928 + 23 };
+
+/** Toca na Casa no mapa: converte mundo -> tela pela câmera que a moldura expõe (data-cam-x/y, data-zoom). */
+async function tocarNaCasa(p) {
+  const alvo = await p.evaluate((casa) => {
+    const m = document.querySelector('[data-zoom]');
+    const c = m.querySelector('canvas').getBoundingClientRect();
+    const z = Number(m.dataset.zoom);
+    return { x: c.left + (casa.x - Number(m.dataset.camX)) * z + c.width / 2, y: c.top + (casa.y - Number(m.dataset.camY)) * z + c.height / 2 };
+  }, CASA_NO_MUNDO);
+  await p.touchscreen.tap(alvo.x, alvo.y);
+}
 
 async function medir(p, largura) {
   return p.evaluate((largura) => {

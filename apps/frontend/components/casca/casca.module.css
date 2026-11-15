@@ -2307,10 +2307,23 @@
 /* Celular: a alternância Vila/Reino no canto de cima à direita do mapa
    (frame "Mapa - Mobile"); embaixo ficava o botão Construir, que saiu do mapa. */
 @media (max-width: 600px) {
+  /* Compacta: dois botões de 64 x 44 (alvo de toque), cerca de 140 de largura em vez de 218. */
   .alternar {
     top: 8px;
     bottom: auto;
     right: 8px;
+    width: auto;
+    height: auto;
+    gap: 4px;
+    padding: 4px;
+  }
+  .alternar button,
+  .alternar button:first-child,
+  .alternar button:last-child {
+    width: 64px;
+    height: 44px;
+    font-size: 14px;
+    letter-spacing: 0.5px;
   }
   /* Chip do Mercador abaixo da alternância: em 360 px os dois se cruzavam e a
      alternância cobria o chip (o toque não chegava nele). */

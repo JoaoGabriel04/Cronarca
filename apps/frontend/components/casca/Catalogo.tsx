@@ -6,7 +6,7 @@
 // intenções: quem constrói é o JogoAoVivo, e quem valida é o servidor.
 
 import { TEXTOS_CATALOGO, type SlotId } from '@cronarca/game-core';
-import { Check, Lock } from 'lucide-react';
+import { ArrowRight, Check, Lock } from 'lucide-react';
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { filtrarCatalogo, type FiltroCatalogo, type LinhaCatalogoTela } from '../../lib/casca/modais';
 import { Icone } from './Icone';
@@ -47,7 +47,17 @@ function Linha({ l, foco, construindo, aoAgir }: { l: LinhaCatalogoTela; foco: b
     >
       <SpriteAnimado className={estilos.pixel} sprite={l.sprite} instancia={l.slot} lado={48} />
       <div className={estilos.linhaInfo}>
-        <h3 className={estilos.nomeLinha}>{l.nome}</h3>
+        <h3 className={estilos.nomeLinha}>
+          {l.nome}
+          {l.nivel && <span className={estilos.nivelNome}>{l.nivel}</span>}
+        </h3>
+        {l.efeito && (
+          <p className={estilos.efeitoLinha}>
+            {l.efeito.hoje}
+            <ArrowRight size={14} strokeWidth={3} aria-label="passa a" className={estilos.setaLinha} />
+            <strong>{l.efeito.depois}</strong>
+          </p>
+        )}
         {l.custo.length > 0 && (
           <p className={estilos.custosLinha}>
             {l.custo.map((c) => (
@@ -56,6 +66,12 @@ function Linha({ l, foco, construindo, aoAgir }: { l: LinhaCatalogoTela; foco: b
                 {c.valor}
               </span>
             ))}
+            {l.tempo && (
+              <span className={estilos.tempoLinha}>
+                <Icone nome="icone-tempo" tamanho={16} />
+                {l.tempo}
+              </span>
+            )}
           </p>
         )}
         {l.obra && (
@@ -67,10 +83,10 @@ function Linha({ l, foco, construindo, aoAgir }: { l: LinhaCatalogoTela; foco: b
             </div>
           </div>
         )}
-        {l.nivel && (
+        {l.nivel && !l.acao && (
           <p className={estilos.nivelLinha}>
             <Check size={16} strokeWidth={3} aria-hidden="true" className={estilos.verde} />
-            {l.nivel}
+            {T.maximo}
           </p>
         )}
         {l.motivo && (
@@ -84,14 +100,14 @@ function Linha({ l, foco, construindo, aoAgir }: { l: LinhaCatalogoTela; foco: b
         <button
           type="button"
           tabIndex={-1}
-          className={`caixa botao ${l.acao === 'construir' ? 'botao-dourado' : ''} ${estilos.botaoLinha} ${desativado ? estilos.desativado : ''}`}
+          className={`caixa botao ${l.pode ? 'botao-dourado' : ''} ${estilos.botaoLinha} ${desativado ? estilos.desativado : ''}`}
           aria-disabled={desativado || undefined}
           aria-describedby={l.motivo ? idMotivo : undefined}
           onClick={() => {
             if (!desativado) aoAgir();
           }}
         >
-          {construindo ? T.construindo : l.acao === 'construir' ? T.construir : T.melhorar}
+          {construindo ? (l.acao === 'melhorar' ? T.melhorando : T.construindo) : l.acao === 'construir' ? T.construir : T.melhorar}
         </button>
       )}
     </li>

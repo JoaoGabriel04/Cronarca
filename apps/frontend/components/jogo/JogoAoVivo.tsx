@@ -104,7 +104,7 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
   const [apagando, setApagando] = useState(false);
   /** Construíveis no momento em que o catálogo abriu: o selo some até aparecer um novo. */
   const [vistos, setVistos] = useState<ReadonlySet<SlotId>>(new Set());
-  /** Slot cujo construir espera o servidor (o catálogo fecha com a confirmação). */
+  /** Slot cuja obra (construir ou melhorar pelo catálogo) espera o servidor (o catálogo fecha com a confirmação). */
   const [construindo, setConstruindo] = useState<SlotId | null>(null);
   /** Grupo da expedição: começa vazio; só quem está na vila entra (lib/casca/telas). */
   const [selecionados, setSelecionados] = useState<string[]>([]);
@@ -213,14 +213,15 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
   }
 
   /**
-   * Construir pelo catálogo: a obra aparece prevista; com a confirmação do
-   * servidor o catálogo fecha, o jogo vai para a Vila e a câmera anima até o
-   * slot, que pisca. Recusa: aviso e o catálogo continua aberto.
+   * Construir ou melhorar pelo catálogo (a linha já mostrou o resumo): a obra
+   * aparece prevista; com a confirmação do servidor o catálogo fecha, o jogo
+   * vai para a Vila e a câmera anima até o slot, que pisca. Recusa: aviso e o
+   * catálogo continua aberto.
    */
-  const construir = async (slot: SlotId) => {
+  const obraPeloCatalogo = async (tipo: 'construir' | 'melhorar', slot: SlotId) => {
     if (construindo) return;
     setConstruindo(slot);
-    const d = await enviarPrevista({ tipo: 'construir', slot });
+    const d = await enviarPrevista({ tipo, slot });
     setConstruindo(null);
     if (!d.ok) return;
     setModal(null);
@@ -448,9 +449,8 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
           linhas={linhasCatalogoTela(visivel, agora, modal.ordem)}
           foco={modal.foco}
           construindo={construindo}
-          aoConstruir={(slot) => void construir(slot)}
-          // Troca de modal (não empilha dois diálogos com foco preso).
-          aoMelhorar={(slot) => setModal({ tipo: 'obra', slot })}
+          aoConstruir={(slot) => void obraPeloCatalogo('construir', slot)}
+          aoMelhorar={(slot) => void obraPeloCatalogo('melhorar', slot)}
           aoFechar={() => setModal(null)}
         />
       )}

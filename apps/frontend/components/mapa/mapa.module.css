@@ -76,3 +76,14 @@
   background: rgb(26 16 10 / 0.8);
   border: 1px solid #f0e8c0;
 }
+
+/* Celular: a leitura de depuração (só em desenvolvimento) desce para o pé do
+   mapa, para não ficar embaixo da alternância Vila/Reino. */
+@media (max-width: 600px) {
+  .depuracao {
+    top: auto;
+    bottom: 8px;
+    max-width: calc(100% - 16px);
+    font-size: 11px;
+  }
+}

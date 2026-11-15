@@ -4,12 +4,18 @@
 export const TEXTOS_CATALOGO = {
   titulo: 'Construções',
   subtitulo: 'Escolha o que erguer. O terreno é escolhido por nós.',
-  rodape: 'Cada construção ocupa o terreno do seu tipo. Ao construir, a câmera vai até ela.',
+  rodape: 'Cada construção ocupa o terreno do seu tipo. Ao construir ou melhorar, a câmera vai até ela.',
   filtroTodas: 'Todas',
   filtroDisponiveis: 'Disponíveis',
   construir: 'Construir',
   construindo: 'Construindo…',
   melhorar: 'Melhorar',
+  melhorando: 'Melhorando…',
+  maximo: 'Máximo',
+  /** Depois do nível 10: "Nível 10 · máximo". */
+  nivelMaximo: 'máximo',
+  /** Depois do tempo: "1:22 de obra". */
+  deObra: 'de obra',
   nivel: 'Nível',
   /** Seguido dos recursos que faltam: "Falta pedra e ouro". */
   falta: 'Falta',

@@ -140,8 +140,12 @@ export interface LinhaCatalogoTela {
   custo: CustoModal[];
   /** Motivo em texto (não só cor): "Falta pedra e ouro", "Requer Cartografia". */
   motivo: string | null;
-  /** Construída: "Nível 3". */
+  /** Construída: "Nível 3 → 4" ou "Nível 10 · máximo". */
   nivel: string | null;
+  /** Construída e abaixo do máximo: o efeito de hoje e o do próximo nível ("+12 aldeões" → "+16 aldeões"). */
+  efeito: { hoje: string; depois: string } | null;
+  /** Tempo da obra do próximo nível ("1:22 de obra"); null sem obra possível. */
+  tempo: string | null;
   obra: { restante: string; fracao: number } | null;
   /** O botão da linha (Em obra e Bloqueada não têm). */
   acao: 'construir' | 'melhorar' | null;
@@ -152,6 +156,26 @@ export interface LinhaCatalogoTela {
 function paraTela(e: VisaoCliente, l: LinhaCatalogo, agora: number): LinhaCatalogoTela {
   const T = TEXTOS_CATALOGO;
   const vazio = l.estado === 'construivel' || l.estado === 'sem_recursos';
+  if (l.estado === 'construida') {
+    // Resumo do próximo nível na própria linha (o mesmo cálculo do modal Melhorar).
+    const o = obra(e, l.slot, agora);
+    const maximo = o.situacao === 'maximo';
+    const faltando = o.custo.filter((c) => c.falta).map((c) => NOMES_RECURSOS[c.recurso].toLowerCase());
+    return {
+      slot: l.slot,
+      nome: l.nome,
+      sprite: { grupo: 'construcao', id: l.tipo },
+      estado: l.estado,
+      custo: o.custo,
+      motivo: faltando.length ? `${T.falta} ${juntarNomes(faltando)}` : null,
+      nivel: maximo ? `${T.nivel} ${o.nivel} · ${T.nivelMaximo}` : `${T.nivel} ${o.nivel} → ${o.alvo}`,
+      efeito: maximo || o.hoje === null ? null : { hoje: o.hoje, depois: o.depois },
+      tempo: maximo ? null : `${o.tempo} ${T.deObra}`,
+      obra: null,
+      acao: maximo ? null : 'melhorar',
+      pode: !maximo && faltando.length === 0,
+    };
+  }
   return {
     slot: l.slot,
     nome: l.nome,
@@ -162,10 +186,12 @@ function paraTela(e: VisaoCliente, l: LinhaCatalogo, agora: number): LinhaCatalo
       l.estado === 'sem_recursos' ? `${T.falta} ${juntarNomes(l.falta.map((r) => NOMES_RECURSOS[r].toLowerCase()))}`
       : l.estado === 'bloqueada' && l.requer ? `${T.requer} ${PESQUISAS[l.requer].nome}`
       : null,
-    nivel: l.estado === 'construida' ? `${T.nivel} ${l.nivel}` : null,
+    nivel: null,
+    efeito: null,
+    tempo: vazio ? `${formatarDuracao(tempoObraMs(1))} ${T.deObra}` : null,
     obra: l.obra ? { restante: formatarRestante(l.obra.fim - agora), fracao: l.obra.fracao } : null,
-    acao: vazio ? 'construir' : l.estado === 'construida' ? 'melhorar' : null,
-    pode: l.estado === 'construivel' || l.estado === 'construida',
+    acao: vazio ? 'construir' : null,
+    pode: l.estado === 'construivel',
   };
 }
 
