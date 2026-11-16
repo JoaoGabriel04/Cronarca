@@ -12,3 +12,10 @@ apps/backend/src/generated/
 # Entregas brutas de arte (já integradas ao projeto) e metadados do Windows
 entrega_*.zip
 *:Zone.Identifier
+
+# Dumps do banco (têm dados de usuários): nunca commitar; apagar depois de conferir.
+dumps/
+*.dump
+*.sql.gz
+saves_*.sql
+saves_*.json
