@@ -1,18 +1,26 @@
 // Aventureiros e aldeões (handoff "Economia v0" e "Dados do jogo").
 
-export const CLASSES = ['guerreiro', 'arqueiro', 'mago', 'ladino', 'clerigo'] as const;
+/**
+ * Classes do combate (Portão 20a, esquema 9; CRONARCA_COMBATE_E_MAPA.md 1.3):
+ * Lanceiro vence Cavaleiro, Cavaleiro vence Arqueiro, Arqueiro vence
+ * Lanceiro; o Mago do Tempo é suporte, sem vantagem. Nas expedições a classe
+ * ainda não tem efeito (o poder ignora a classe).
+ */
+export const CLASSES = ['lanceiro', 'arqueiro', 'cavaleiro', 'mago_do_tempo'] as const;
 export type Classe = (typeof CLASSES)[number];
 
 export const NOMES_CLASSES: Record<Classe, string> = {
-  guerreiro: 'Guerreiro',
+  lanceiro: 'Lanceiro',
   arqueiro: 'Arqueiro',
-  mago: 'Mago',
-  ladino: 'Ladino',
-  clerigo: 'Clérigo',
+  cavaleiro: 'Cavaleiro',
+  mago_do_tempo: 'Mago do Tempo',
 };
 
 /** Classe do aventureiro inicial de cada ciclo. */
-export const CLASSE_INICIAL: Classe = 'guerreiro';
+export const CLASSE_INICIAL: Classe = 'lanceiro';
+
+/** Classes do esquema 8 e anteriores, e a classe nova de cada uma (migração 8 → 9). */
+export const CLASSES_ANTIGAS = { guerreiro: 'lanceiro', arqueiro: 'arqueiro', ladino: 'arqueiro', clerigo: 'cavaleiro', mago: 'mago_do_tempo' } as const satisfies Record<string, Classe>;
 
 /** Lista fixa de nomes (decisão do Portão 4). O sorteio evita repetir enquanto houver nome livre. */
 export const NOMES_AVENTUREIROS = [

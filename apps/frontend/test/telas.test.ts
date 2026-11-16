@@ -12,8 +12,8 @@ function comHerois(): VisaoCliente {
   const e = novo();
   const base = e.aventureiros[0]!;
   e.aventureiros.push(
-    { ...base, id: 'a2', nome: 'Dara', classe: 'ladino', nivel: 1, arma: 0, armadura: 0, estado: 'em_expedicao', feridoAte: null },
-    { ...base, id: 'a3', nome: 'Cael', classe: 'mago', nivel: 3, arma: 6, armadura: 0, estado: 'ferido', feridoAte: T0 + 32_000 },
+    { ...base, id: 'a2', nome: 'Dara', classe: 'arqueiro', nivel: 1, arma: 0, armadura: 0, estado: 'em_expedicao', feridoAte: null },
+    { ...base, id: 'a3', nome: 'Cael', classe: 'mago_do_tempo', nivel: 3, arma: 6, armadura: 0, estado: 'ferido', feridoAte: T0 + 32_000 },
   );
   return e;
 }

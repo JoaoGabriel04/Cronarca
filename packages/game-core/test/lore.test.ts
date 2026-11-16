@@ -71,7 +71,7 @@ describe('proximoPasso', () => {
     e.pesquisas.concluidas.push('carta_real');
     const p = proximoPasso(e);
     expect(p.trilhas[0]).toMatchObject({ cumprida: true, passo: 'Cumprido' });
-    // Cripta aberta, guerreiro inicial fraco: fortalecer a guilda.
+    // Cripta aberta, Lanceiro inicial fraco: fortalecer a guilda.
     expect(p.principal).toMatch(/^Fortaleça a guilda: \d+% na Cripta$/);
   });
 
@@ -219,7 +219,7 @@ describe('esquema 8', () => {
     e.slots.scriptorium_1.nivel = 1;
     e.pesquisas.concluidas.push('cartografia');
     const c = carregarEstado(v7(e), 7);
-    expect(VERSAO_ESQUEMA).toBe(8);
+    expect(VERSAO_ESQUEMA).toBeGreaterThanOrEqual(8);
     expect(c.diario).toEqual(['prologo', 'scriptorium', 'cartografia']);
     expect(c.prologoVisto).toBe(true);
     expect(c.cronica).toEqual(e.cronica); // a migração não escreve na Crônica

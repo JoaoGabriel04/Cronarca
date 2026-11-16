@@ -6,5 +6,7 @@ export default defineProject({
     name: 'frontend',
     include: ['test/**/*.test.ts'],
     environment: 'node',
+    // Testes de imagem leem PNGs grandes (mapa, quadros); rodando junto com o resto da suíte, 5 s não bastava.
+    testTimeout: 15_000,
   },
 });

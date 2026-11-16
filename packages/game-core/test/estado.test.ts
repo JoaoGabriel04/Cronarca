@@ -14,7 +14,7 @@ describe('estado inicial do ciclo', () => {
     expect(prontos.sort()).toEqual(['armazem_1', 'casa_1', 'celeiro_1', 'serraria_1']);
     expect(e.aldeoes.map((a) => a.oficio)).toEqual(['fazendeiro', 'lenhador']);
     expect(e.aventureiros).toHaveLength(1);
-    expect(e.aventureiros[0]).toMatchObject({ classe: 'guerreiro', nivel: 1, arma: 0, armadura: 0, estado: 'na_vila' });
+    expect(e.aventureiros[0]).toMatchObject({ classe: 'lanceiro', nivel: 1, arma: 0, armadura: 0, estado: 'na_vila' });
     expect(e.versao).toBe(VERSAO_ESQUEMA);
     expect(e.ciclo).toBe(1);
   });

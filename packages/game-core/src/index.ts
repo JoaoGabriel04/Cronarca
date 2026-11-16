@@ -39,3 +39,5 @@ export * from './ranking.ts';
 export * from './mercador.ts';
 export * from './diario.ts';
 export * from './objetivo.ts';
+export * from '../data/combate.ts';
+export * from './combate/index.ts';

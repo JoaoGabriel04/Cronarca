@@ -5,7 +5,7 @@ import { FALHA } from '../data/falha.ts';
 import { CAPITULOS_IDS } from '../data/lore.ts';
 import { diarioDaMigracao } from './diario.ts';
 import { CONFIG_ALDEOES_INICIAL, OFICIOS_ALDEAO, POLITICAS_ALDEOES } from '../data/aldeoes.ts';
-import { CLASSES, OFICIOS } from '../data/aventureiros.ts';
+import { CLASSES, CLASSES_ANTIGAS, OFICIOS } from '../data/aventureiros.ts';
 import { DESTINOS_IDS } from '../data/expedicoes.ts';
 import { NIVEL_MAXIMO_CONSTRUCAO, TIPOS_CONSTRUCAO } from '../data/construcoes.ts';
 import { PESQUISAS_IDS } from '../data/pesquisas.ts';
@@ -16,7 +16,7 @@ import { FORMULAS } from '../data/formulas.ts';
 import { VERSOES_MAPA } from '../data/mapa.ts';
 import { termosDoMercador } from './mercador.ts';
 
-export const VERSAO_ESQUEMA = 8;
+export const VERSAO_ESQUEMA = 9;
 
 const inteiro = z.number().int();
 const naoNegativo = inteiro.min(0);
@@ -210,6 +210,13 @@ export function migrarEstado(bruto: unknown, versaoEsquema: number): { estado: u
     // Diário (Portão 16): o que já vale hoje, mais a Era I de quem já ascendeu; contas antigas não veem o prólogo de novo.
     estado = { ...estado, versao: 8, diario: diarioDaMigracao(estado as Parameters<typeof diarioDaMigracao>[0]), prologoVisto: true };
     versao = 8;
+  }
+  if (versao === 8) {
+    // Classes 5 → 4 (Portão 20a): só o id da classe muda; nível, XP, equipamento, estado, nome e id ficam.
+    // Expedições e relatórios guardam só ids de aventureiro; a Crônica não cita classes.
+    const aventureiros = (estado.aventureiros as { classe: keyof typeof CLASSES_ANTIGAS }[]).map((a) => ({ ...a, classe: CLASSES_ANTIGAS[a.classe] ?? a.classe }));
+    estado = { ...estado, versao: 9, aventureiros };
+    versao = 9;
   }
   return { estado, versao };
 }

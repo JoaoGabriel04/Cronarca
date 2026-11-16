@@ -86,7 +86,7 @@ describe('trilhas e grupos', () => {
     const quarto = x.inicio + (x.fim - x.inicio) / 4;
     expect(em(quarto).pe).toEqual(em(x.fim - (x.fim - x.inicio) / 4).pe);
     expect(em(quarto).restanteMs).toBe(x.fim - quarto);
-    expect(em(x.inicio).classe).toBe('guerreiro');
+    expect(em(x.inicio).classe).toBe('lanceiro');
   });
 
   it('várias expedições: cada uma com seu grupo e sua trilha', () => {

@@ -64,6 +64,12 @@ export const ANIMACOES: ReadonlyMap<string, Animacao> = montarCatalogo({ ...QUAD
  */
 export const EQUIVALENCIA_SPRITES: Readonly<Record<string, Readonly<Record<string, string>>>> = {
   expedicao: { floresta_lobos: 'floresta' },
+  /**
+   * Classes novas (Portão 20a) com a arte antiga, até a arte delas chegar no
+   * Portão 22: este é o único ponto do mapeamento (retratos, marcadores, tudo
+   * passa por animacao()). Arqueiro usa o próprio sprite. Os PNGs não mudam.
+   */
+  aventureiro: { lanceiro: 'guerreiro', cavaleiro: 'clerigo', mago_do_tempo: 'mago' },
   evento: { festival_colheita: 'festival' },
 };
 

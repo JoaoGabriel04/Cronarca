@@ -109,7 +109,7 @@ Portão 0 aprovado com estas decisões. Tudo que é número vai em `packages/gam
 **Estado inicial do ciclo** (também o estado após ascender, somado ao bônus de Legado):
 - Recursos: madeira 100, pedra 50, comida 80, ferro 15, ouro 40, saber 0.
 - Construções prontas, nível 1: `casa_1`, `armazem_1`, `celeiro_1`, `serraria_1`. Demais slots vazios.
-- Aldeões: 2 (um Fazendeiro, um Lenhador). Aventureiros: 1 (Guerreiro nível 1, nome sorteado de uma lista fixa). Guilda: 4 vagas.
+- Aldeões: 2 (um Fazendeiro, um Lenhador). Aventureiros: 1 (Lanceiro nível 1, nome sorteado de uma lista fixa). Guilda: 4 vagas.
 
 **Produção por nível, por segundo** (base): Serraria 1,0 madeira; Pedreira 0,8 pedra; Forja 0,15 ferro; Scriptorium 0,12 saber; Mercado 0,04 ouro. Duas serrarias somam. Armazém, Celeiro, Casa, Taverna e Muralha não produzem.
 
@@ -125,6 +125,8 @@ Portão 0 aprovado com estas decisões. Tudo que é número vai em `packages/gam
 - Interface: cartão **Aldeões** no topo do painel da Vila (e na Vila do celular): "N de M", como chegam, a situação (próximo em X s, Casas cheias ou sem comida), os cinco ofícios e o Ocioso com quantidade, efeito de agora (ou o que falta para render, ex.: "+5% de pedra quando houver Pedreira"), "N a caminho" e os botões − e + (44 px no celular); embaixo, a chave Automática e a política dos novos aldeões. Desligada, o aviso "Aldeões novos chegam ociosos". No mapa, até 3 Ociosos ficam em volta da fogueira (A6). O cartão tem a ajuda "O que são aldeões?" (e a Guilda, "O que são aventureiros?"), que abre um texto curto.
 
 **Comida zerada.** Ninguém morre. Os bônus dos ofícios param e expedições não podem partir. Construções continuam produzindo. **Com vaga nas Casas, o próximo aldeão chega como Fazendeiro**, mesmo com a Automática desligada, se a comida estiver abaixo de 20 (`COMIDA_MINIMA_ALDEAO`) ou se o saldo de comida por segundo ficaria negativo com ele (contando como produzindo quem está a caminho para Fazendeiro). Portão 18a; a política volta quando a comida sobe. O cartão avisa "Próximo em X s, como Fazendeiro (comida curta)": a vila não fica presa sem comida, porque melhorar a Casa sempre traz quem produz. A tela avisa em texto: chip de comida em alerta, aviso na aba Expedições ("Sem comida: … Pesquise Colheita Farta ou melhore a Casa") e, no Contratar, o saldo de comida de agora e o de depois (em vermelho se ficar negativo).
+
+**Combate (Portão 20, só game-core; sem tela).** Simulador puro em `packages/game-core/src/combate/` (`simularBatalha`, `poderCombate`/`poderTropa`, `gerarEco`), números em `data/combate.ts`, inteiros e em pontos-base. Geometria por linhas (frente, meio, trás; as linhas se fecham quando uma esvazia; alcance em linhas, distância i + j + 1), ticks de 100 ms, limite de 600 ticks (no limite, mais vida total; empate, o Eco), log compacto documentado no topo de `simulador.ts`. Triângulo Lanceiro > Cavaleiro > Arqueiro > Lanceiro (x1,5 / x0,75); Mago do Tempo atinge 2, atrasa os atingidos e acelera aliados. Táticas mudam dano causado e recebido (±20%). `poderCombate` convive com `poderAventureiro` (expedições sem mudança). A curva de vitória é íngreme (decisão do dono): o que decide é o preparo. Calibragem: `make calibrar-combate` gera `docs/CALIBRACAO_COMBATE.md` (limiares de poder por composição e formação; proposta de mínimo, recomendado e metas, a aprovar).
 
 **Lore, Diário e Objetivo (Portão 16, esquema 8).** Textos em `packages/game-core/data/lore.ts` (aprovados pelo dono): prólogo de 3 cartões e 9 capítulos do Diário (`CAPITULOS`). `estado.diario` guarda os ids liberados, na ordem, e `estado.prologoVisto`; os dois atravessam a ascensão. Liberação em `src/diario.ts` (`CONDICOES`), na liquidação e na ascensão, com a linha "Nova página no Diário: <título>." na Crônica e sem recompensa. Migração 7 → 8: o que já vale hoje, mais a Era I e a primeira ascensão para quem está no ciclo 2 ou mais; prólogo já visto. `proximoPasso(estado)` (`src/objetivo.ts`, puro) dá a frase principal, as três trilhas (Carta Real, Cripta, 40 aldeões) com motivo e a dica do Sábio ("O Sábio diz: ..."), com custos, tetos e chances dos dados; a Cripta pede "envie" a partir de 50% de chance. Interface: chip Objetivo na linha das abas (1024 px ou mais) ou faixa abaixo dos recursos (menos de 1024 px, com o botão Diário), painel dos objetivos, Diário (capítulos bloqueados como "?" e a dica; ponto de "novo" só no navegador), prólogo na primeira entrada (ação `fechar_prologo`) e o Marco da era acima dos objetivos em Eras. Para acrescentar capítulos (Portão 21): o texto em `CAPITULOS` e a condição em `CONDICOES`, sem migração; nunca apagar um id. Conferir: `make conferir-lore`.
 
@@ -287,7 +289,7 @@ Ofícios com sprite: Lenhador, Mineiro, Ferreiro, Fazendeiro, Sábio, Sem funç�
 
 ### Aventureiros e guilda
 
-Classes com sprite: Guerreiro, Arqueiro, Mago, Ladino, Clérigo. Campos: nome, classe, nível, poder, estado (`na_vila`, `em_expedicao`, `ferido` com contagem), arma 0 a 6, armadura 0 a 6. Guilda: 4 vagas na Era I, consomem comida. Contratar custa ouro e comida (exemplo: 43 ouro, 20 comida). Melhorar arma e armadura custa ferro e ouro (exemplo: arma 3 = 19 ferro, 29 ouro).
+Classes (Portão 20a, esquema 9): Lanceiro, Arqueiro, Cavaleiro e Mago do Tempo; a migração 8 → 9 converte guerreiro → Lanceiro, arqueiro e ladino → Arqueiro, clérigo → Cavaleiro, mago → Mago do Tempo, sem perder nível, XP, equipamento, estado, nome nem id. Até a arte nova (Portão 22), as classes novas usam a arte antiga por `EQUIVALENCIA_SPRITES.aventureiro` (`src/animacao.ts`), o único ponto do mapeamento. Campos: nome, classe, nível, poder, estado (`na_vila`, `em_expedicao`, `ferido` com contagem), arma 0 a 6, armadura 0 a 6. Guilda: 4 vagas na Era I, consomem comida. Contratar custa ouro e comida (exemplo: 43 ouro, 20 comida). Melhorar arma e armadura custa ferro e ouro (exemplo: arma 3 = 19 ferro, 29 ouro).
 
 ### Expedições (5 destinos, sprite 64)
 
@@ -384,7 +386,7 @@ Esquema proposto, a aprovar no Portão 2 e implementado no Portão 4:
   "recursos": { "madeira": 0, "pedra": 0, "comida": 0, "ferro": 0, "ouro": 0, "saber": 0 },
   "slots": { "casa_1": { "tipo": "Casa", "nivel": 3, "obraAte": null } },
   "aldeoes": [{ "oficio": "Lenhador" }],
-  "aventureiros": [{ "nome": "Aldric", "classe": "Guerreiro", "nivel": 4, "arma": 3, "armadura": 2, "estado": "na_vila", "feridoAte": null }],
+  "aventureiros": [{ "nome": "Aldric", "classe": "lanceiro", "nivel": 4, "arma": 3, "armadura": 2, "estado": "na_vila", "feridoAte": null }],
   "expedicoes": [{ "destino": "floresta_lobos", "grupo": ["Brenna"], "fim": 0, "semente": 0, "resultado": null }],
   "reliquias": { "total": 7, "gastas": 0, "niveis": { "maos_calejadas": 1 } },
   "cronica": [{ "icone": "Check", "texto": "", "em": 0 }]

@@ -6,7 +6,7 @@
 
 import { nevoasAtivas } from './nevoa';
 import {
-  DESTINOS, destinoAberto,
+  CLASSE_INICIAL, DESTINOS, destinoAberto,
   type Classe, type DestinoId, type MapaJogo, type VisaoCliente,
 } from '@cronarca/game-core';
 
@@ -141,7 +141,7 @@ export function marcadores(m: MapaJogo, e: EstadoMapa, agora: number): Marcadore
     const lider = e.aventureiros.find((a) => a.id === x.grupo[0]);
     grupos.push({
       expedicao: x.id,
-      classe: lider?.classe ?? 'guerreiro',
+      classe: lider?.classe ?? CLASSE_INICIAL,
       pe: pontoNoCaminho(caminho, fracao),
       restanteMs: Math.max(0, x.fim - agora),
     });
