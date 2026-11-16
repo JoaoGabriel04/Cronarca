@@ -1,12 +1,12 @@
 // API de jogo (Portão 5). O servidor é a autoridade: liquida pelo próprio
 // relógio, sorteia com o gerador guardado no estado e nunca devolve o segredo.
-import { liquidar, visaoDoCliente, type EstadoJogo } from '@cronarca/game-core';
+import { avisoDeComposicao, faseDesbloqueada, liquidar, prontidaoDaTropa, visaoDoCliente, type EstadoJogo } from '@cronarca/game-core';
 import { Router, type Response } from 'express';
 import { LimiteTentativas } from '../auth/limite.ts';
 import { CONFIG_JOGO } from '../config.ts';
 import type { ContextoApp } from '../contexto.ts';
 import { exigirSessao } from '../middleware.ts';
-import { esquemaApagar, esquemaCorpoAcao, lerAcao } from './esquemas.ts';
+import { esquemaApagar, esquemaConsultaProntidao, esquemaCorpoAcao, lerAcao } from './esquemas.ts';
 import { apagarProgresso, executarAcao, obterOuCriarEstado } from './repositorio.ts';
 import { registrarAtividade } from '../ranking/repositorio.ts';
 
@@ -36,6 +36,34 @@ export function rotasJogo(ctx: ContextoApp) {
     const { estado, rev } = await obterOuCriarEstado(ctx.prisma, usuarioId(res), agora, ctx.sortearSemente);
     await registrarAtividade(ctx.prisma, usuarioId(res), agora);
     res.json(corpoEstado(estado, rev, agora));
+  });
+
+  /**
+   * Prontidão da tropa para uma fase (Portão 20d-2), só leitura: o poder da tropa
+   * (ids de aventureiros do próprio jogador), o mínimo e o recomendado da fase, o que
+   * falta e o aviso de composição. Não grava estado e não conta como atividade.
+   */
+  r.get('/readiness', async (req, res) => {
+    const consulta = esquemaConsultaProntidao.safeParse(req.query);
+    if (!consulta.success) {
+      res.status(400).json({ erro: 'dados_invalidos' });
+      return;
+    }
+    const { fase, tropa: ids } = consulta.data;
+    const agora = agoraMs();
+    const { estado, rev } = await obterOuCriarEstado(ctx.prisma, usuarioId(res), agora, ctx.sortearSemente);
+    const liquidado = liquidar(estado, Math.max(agora, estado.t));
+    if (!faseDesbloqueada(liquidado, fase)) {
+      res.status(403).json({ erro: 'fase_bloqueada' });
+      return;
+    }
+    const guerreiros = ids.map((id) => liquidado.aventureiros.find((a) => a.id === id));
+    if (guerreiros.some((g) => !g)) {
+      res.status(404).json({ erro: 'aventureiro_inexistente' });
+      return;
+    }
+    const tropa = guerreiros as NonNullable<(typeof guerreiros)[number]>[];
+    res.json({ fase, tropa: ids, prontidao: prontidaoDaTropa(tropa, fase), composicao: avisoDeComposicao(tropa), rev, agora });
   });
 
   /** Conta a requisição no limite por usuário; false (e 429 já respondido) se passou. */

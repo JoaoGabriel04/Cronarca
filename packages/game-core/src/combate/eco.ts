@@ -39,14 +39,17 @@ export function poderDoEco(fase: number): number {
   return arredondar(BigInt(CURVA_ECO.base) * p.num * BigInt(mult), p.den * 100n);
 }
 
+/** poder × pontos-base / 10 000, arredondado para cima, em BigInt (o produto passa de 2^53 nas fases altas). */
+const paraCima = (poder: number, bp: number) => Number((BigInt(poder) * BigInt(bp) + 9_999n) / 10_000n);
+
 /** Poder mínimo da tropa para tentar a fase (abaixo, o botão "Enviar tropa" fica bloqueado), arredondado para cima. */
 export function poderMinimo(fase: number): number {
-  return Math.floor((poderDoEco(fase) * PODER_FASE_BP.minimo + 9_999) / 10_000);
+  return paraCima(poderDoEco(fase), PODER_FASE_BP.minimo);
 }
 
 /** Poder recomendado: com ele, a composição razoável vence. Arredondado para cima. */
 export function poderRecomendado(fase: number): number {
-  return Math.floor((poderDoEco(fase) * PODER_FASE_BP.recomendado + 9_999) / 10_000);
+  return paraCima(poderDoEco(fase), PODER_FASE_BP.recomendado);
 }
 
 /** Quantas unidades o Eco tem: 3, +1 a cada 20 fases, até 8. */

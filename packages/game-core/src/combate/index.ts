@@ -2,3 +2,4 @@
 export * from './unidade.ts';
 export * from './simulador.ts';
 export * from './eco.ts';
+export * from './prontidao.ts';

@@ -109,6 +109,12 @@ export const CURVA_ECO = {
 export type NivelEco = 'facil' | 'media' | 'dificil' | 'muito_dificil' | 'chefe';
 
 /**
+ * Maior fase aceita nas leituras de prontidão: acima de ~650 o poder do Eco
+ * passa do inteiro seguro do JavaScript (2^53), e a conta deixaria de ser exata.
+ */
+export const FASE_MAXIMA = 600;
+
+/**
  * Poder mínimo e recomendado para tentar uma fase, em pontos-base do poder do
  * Eco (Portão 20c): o mínimo é o limiar da melhor contra-escalação (abaixo dele
  * nenhuma tropa plausível vence); o recomendado, o da composição razoável.
