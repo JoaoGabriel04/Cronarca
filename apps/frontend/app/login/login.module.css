@@ -1,33 +1,34 @@
 /* Posições e medidas do frame "Login - Desktop" (1440x900). */
 
-/* Logo (selo + nome) a 6 px do palco por pixel da arte: --u px de tela, inteiro.
-   Termina em x = 594, longe do cartão (x = 820). */
+/* Logo (selo + nome, arte de 91 x 32) a 4x: 364 x 128, em pixel inteiro de tela (--e4, de cena/escala.ts),
+   como no Início. Termina em x = 412, longe do cartão (x = 940). */
 .marca {
   position: absolute;
   left: 48px;
   top: 24px;
-  width: 546px;
-  height: 192px;
+  width: calc(91 * var(--e4) * 1px);
+  height: calc(32 * var(--e4) * 1px);
   image-rendering: pixelated;
 }
 
 .lema {
   position: absolute;
   left: 48px;
-  top: 228px;
+  top: 160px;
   margin: 0;
   font-size: 20px;
   letter-spacing: 1px;
   color: var(--texto-claro);
 }
 
-/* Cartão de 540 de largura em x=820, y=70. A altura segue o conteúdo. */
+/* Cartão do Figma v2: 440 de largura em x = 940, y = 72 (não cobre o castelo, que termina em x = 912).
+   A altura segue o conteúdo. */
 .cartao {
   position: absolute;
-  left: 820px;
-  top: 70px;
-  width: 540px;
-  padding: 28px 44px 34px; /* selo a 34 do topo externo; conteúdo de x=50 a 490 */
+  left: 940px;
+  top: 72px;
+  width: 440px;
+  padding: 28px 26px 30px; /* campos de 376, como no Figma */
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -35,7 +36,7 @@
 
 /* Cadastro tem dois campos a mais: sobe o cartão e aperta o respiro para caber em 900. */
 .cartaoCadastro {
-  top: 40px;
+  top: 32px;
 }
 
 .cartaoCadastro .formulario {
@@ -68,7 +69,7 @@
 .sub {
   /* No Figma cabe em uma linha de 440; o navegador mede o texto um pouco mais largo. */
   margin: 5px -16px 0;
-  font-size: 17px;
+  font-size: 16px;
   line-height: 24px;
   text-align: center;
   color: var(--texto-suave);
@@ -142,10 +143,9 @@
   .lema {
     display: none;
   }
-  /* Castelo entre a logo e o cartão (a paisagem da Cena tem order 3 por padrão). */
+  /* Castelo entre a logo e o cartão (a paisagem da Cena tem order 3 por padrão); a margem vem de dados.ts. */
   :global(.cena-login .cena-celular-paisagem) {
     order: 2;
-    margin-top: 8px;
   }
   .cartao,
   .cartaoCadastro {

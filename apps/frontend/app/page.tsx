@@ -27,7 +27,7 @@ export default function Inicio() {
         </h1>
         <p className={estilos.subtitulo}>Crônicas de um reino por erguer</p>
         <span className={estilos.fio} style={{ left: 520 }} aria-hidden="true" />
-        <span className={estilos.fio} style={{ left: 760 }} aria-hidden="true" />
+        <span className={estilos.fio} style={{ left: 780 }} aria-hidden="true" />
         <span className={estilos.losango} aria-hidden="true" />
         <MenuInicio />
       </Cena>

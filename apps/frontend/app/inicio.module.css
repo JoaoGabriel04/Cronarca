@@ -1,28 +1,29 @@
 /* Posições do frame "Inicio - Desktop" (1440x900). */
 
-/* Logo (selo + nome) de 546 x 192 no palco, centralizada. O texto de antes
-   ocupava ~140 de altura: subtítulo e ornamentos desceram 32. */
+/* Cabeçalho nas posições do Figma v2 (Tela inicial v2): logo em y = 24, subtítulo em 154 e ornamentos em
+   188 a 198, acima do castelo (que começa em 222). A logo (selo + nome, arte de 91 x 32) fica a 4x:
+   364 x 128, em pixel inteiro de tela (--e4, de cena/escala.ts), em vez dos 6x de antes. */
 .titulo {
   position: absolute;
   left: 0;
   top: 24px;
   width: 1440px;
-  height: 192px;
+  height: calc(32 * var(--e4) * 1px);
   margin: 0;
   line-height: 0;
   text-align: center;
 }
 
 .logo {
-  width: 546px;
-  height: 192px;
+  width: calc(91 * var(--e4) * 1px);
+  height: calc(32 * var(--e4) * 1px);
   image-rendering: pixelated;
 }
 
 .subtitulo {
   position: absolute;
   left: 0;
-  top: 228px;
+  top: 154px;
   width: 1440px;
   margin: 0;
   font-size: 26px;
@@ -33,18 +34,18 @@
 
 .fio {
   position: absolute;
-  top: 276px;
-  width: 160px;
-  height: 4px;
+  top: 192px;
+  width: 140px;
+  height: 3px;
   background: var(--ouro);
 }
 
 .losango {
   position: absolute;
-  left: 704px;
-  top: 270px;
-  width: 32px;
-  height: 16px;
+  left: 700px;
+  top: 188px;
+  width: 40px;
+  height: 10px;
   background: var(--ouro);
 }
 
@@ -80,8 +81,8 @@
 
 .config {
   position: absolute;
-  left: 1330px;
-  top: 820px;
+  left: 1352px;
+  top: 24px;
 }
 
 .config img {
@@ -112,7 +113,7 @@
     position: static;
     order: 2;
     width: auto;
-    margin: 12px 0 28px;
+    margin: 4px 0 0;
     font-size: 16px;
     letter-spacing: 1px;
   }
@@ -127,15 +128,18 @@
     top: auto;
     width: min(100%, 342px);
     height: auto;
-    margin-top: 16px;
-    padding: 16px 16px 14px;
+    margin-top: 0; /* o menu começa onde a paisagem acaba (y = 650 no frame de 390) */
+    gap: 6px;
+    padding: 10px 12px 6px;
   }
   .menu > :global(.botao) {
     width: 100%;
+    height: 44px;
   }
   .versao {
     position: static;
-    margin-top: 2px;
+    margin-top: 0;
+    line-height: 14px;
   }
   .config {
     left: auto;

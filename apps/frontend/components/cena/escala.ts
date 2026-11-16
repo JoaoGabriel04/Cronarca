@@ -16,13 +16,37 @@ export const ESCALA_MAX = 8;
 export const LARGURA_PALCO = 1440;
 export const ALTURA_PALCO = 900;
 
-/** Roda no <head>, antes da primeira pintura, e a cada redimensionamento. */
+/** Escalas k (px do frame por pixel de arte) que os sprites do desktop usam (dados.ts). */
+export const ESCALAS_K = [3, 4] as const;
+
+/** Escala inteira da cena (--u) para a tela: pixels do frame de 1440x900 cabendo na janela, entre ESCALA_MIN e ESCALA_MAX. */
+export function escalaDaTela(largura: number, altura: number): number {
+  const u = Math.floor(Math.min(largura / (LARGURA_PALCO / PIXEL_DO_FIGMA), altura / (ALTURA_PALCO / PIXEL_DO_FIGMA)));
+  return Math.max(ESCALA_MIN, Math.min(ESCALA_MAX, u));
+}
+
+/**
+ * Quantos pixels de tela vale um pixel de arte de um sprite de escala k com --u = u:
+ * round(k * u / 6), no mínimo 1. Sempre inteiro, então o sprite nunca sai com pixel
+ * quebrado. Com k = 6 é exatamente u; em u = 6 (1440x900) é exatamente k.
+ */
+export const pixelsDeTelaPorPixelDeArte = (k: number, u: number): number => Math.max(1, Math.round((k * u) / PIXEL_DO_FIGMA));
+
+/**
+ * Pixels do frame por pixel de arte que o CSS usa (--e2, --e3, --e4, --e6): o palco tem
+ * zoom z = u/6, então n pixels de tela por pixel de arte são n * 6 / u pixels do frame.
+ */
+export const pixelsDoFramePorPixelDeArte = (k: number, u: number): number => (pixelsDeTelaPorPixelDeArte(k, u) * PIXEL_DO_FIGMA) / u;
+
+/** Roda no <head>, antes da primeira pintura, e a cada redimensionamento. Mesma conta das funções acima. */
 export const SCRIPT_ESCALA = `(function(){
 function f(){
 var u=Math.floor(Math.min(innerWidth/${LARGURA_PALCO / PIXEL_DO_FIGMA},innerHeight/${ALTURA_PALCO / PIXEL_DO_FIGMA}));
 u=Math.max(${ESCALA_MIN},Math.min(${ESCALA_MAX},u));
 var s=document.documentElement.style;
 s.setProperty('--u',u+'px');s.setProperty('--z',String(u/${PIXEL_DO_FIGMA}));
+var ks=[${ESCALAS_K.join(',')}];
+for(var i=0;i<ks.length;i++){var n=Math.max(1,Math.round(ks[i]*u/${PIXEL_DO_FIGMA}));s.setProperty('--e'+ks[i],String(n*${PIXEL_DO_FIGMA}/u));}
 }
 f();addEventListener('resize',f);
 })();`;

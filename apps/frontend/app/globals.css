@@ -86,13 +86,24 @@ input {
   position: fixed;
   inset: 0;
   overflow: hidden;
+  /* Só aparece onde a sangria do fundo largo não alcança (proporções extremas). */
+  background: linear-gradient(to bottom, #05071a, #0a1a12);
 }
 
+/* O palco (240u x 150u px de tela) centralizado com origem em pixel inteiro: sem o round(), uma sobra ímpar
+   deixaria o fundo e os sprites em meio pixel. */
 .cena-centro {
   position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
+  left: calc((100% - var(--u) * 240) / 2);
+  top: calc((100% - var(--u) * 150) / 2);
+  width: calc(var(--u) * 240);
+  height: calc(var(--u) * 150);
+}
+@supports (left: round(down, 1px, 1px)) {
+  .cena-centro {
+    left: round(down, calc((100% - var(--u) * 240) / 2), 1px);
+    top: round(down, calc((100% - var(--u) * 150) / 2), 1px);
+  }
 }
 
 .cena-palco {
@@ -102,63 +113,49 @@ input {
   zoom: var(--z);
 }
 
+/* Fundo largo (420 x 210 de arte, 6 px do palco por pixel): a janela central de 240 x 150 é o palco; o resto é sangria. */
 .cena-fundo {
   position: absolute;
-  inset: 0;
-  width: 1440px;
-  height: 900px;
+  left: -540px;
+  top: -180px;
+  width: 2520px;
+  height: 1260px;
+  max-width: none;
 }
 
+/*
+ * Sprite do desktop (Tela inicial v2). O palco tem zoom z = u/6; cada sprite tem
+ * --a (lado da arte), --cx e --by (centro e pé, em px do frame) e a classe kN (N = px do
+ * frame por pixel de arte). --e vem de escala.ts: --eN = n * 6 / u, onde n = round(N * u / 6)
+ * é o número inteiro de pixels de tela por pixel de arte. Assim a largura em tela é sempre
+ * arte x n (pixel inteiro); em 1440x900 (u = 6) é exatamente a do Figma. O pé e o centro
+ * ficam no mesmo ponto; o canto vai ao pixel de tela (round(), se o navegador tiver).
+ */
 .sprite {
+  --e: var(--e4);
+  --w: calc(var(--a) * var(--e) * 1px);
   position: absolute;
   pointer-events: none;
+  left: calc(var(--cx) * 1px - var(--w) / 2);
+  top: calc(var(--by) * 1px - var(--w));
+  width: var(--w);
+  height: var(--w);
+}
+.sprite.k3 { --e: var(--e3); }
+.sprite.k4 { --e: var(--e4); }
+
+@supports (left: round(nearest, 1px, 1px)) {
+  .sprite {
+    left: calc(round(nearest, (var(--cx) * 1px - var(--w) / 2) * var(--z), 1px) / var(--z));
+    top: calc(round(nearest, (var(--by) * 1px - var(--w)) * var(--z), 1px) / var(--z));
+  }
 }
 
-/* Sprites com quadros do quadros_cena.json (SpriteAnimado): pixel inteiro, sem suavizar. */
-.sprite-quadros img,
-.cena-celular-castelo img,
-.cena-celular-fileira > img {
+.sprite img {
   display: block;
-  image-rendering: pixelated;
-}
-
-/* SVGs de 2 quadros (pinheiro, arbusto, flores, cerca): troca a cada 450 ms. */
-.sprite-svg {
-  position: relative;
-  display: block;
-}
-
-.sprite-svg img {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
-}
-
-.sprite-svg .quadro-1 {
-  animation: quadro-a 900ms step-end infinite;
-}
-.sprite-svg .quadro-2 {
-  animation: quadro-b 900ms step-end infinite;
-}
-.sprite-svg.comeca-no-2 img {
-  animation-delay: -450ms;
-}
-
-@keyframes quadro-a {
-  0% { opacity: 1; }
-  50% { opacity: 0; }
-}
-@keyframes quadro-b {
-  0% { opacity: 0; }
-  50% { opacity: 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sprite-svg img { animation: none; }
-  .sprite-svg .quadro-2 { opacity: 0; }
-  .sprite-svg.comeca-no-2 .quadro-1 { opacity: 0; }
-  .sprite-svg.comeca-no-2 .quadro-2 { opacity: 1; }
+  image-rendering: pixelated;
 }
 
 /* ---------- Cena no celular (Início e Login) ----------
@@ -167,9 +164,20 @@ input {
    1440 x 900 não cabe. Vira coluna única que rola na vertical; o desktop não muda.
    Arte sempre em escala inteira de px por pixel da arte. */
 
-.cena-celular-paisagem,
-.cena-celular-fileira {
+.cena-celular-paisagem {
   display: none;
+}
+
+/* Pixels de tela por pixel de arte no celular: 3 e 4 (Figma, 390 px); abaixo de 384 px, um passo menos. */
+:root {
+  --m3: 3;
+  --m4: 4;
+}
+@media (max-width: 383px) {
+  :root {
+    --m3: 2;
+    --m4: 3;
+  }
 }
 
 @media (max-width: 899px), (max-height: 499px) {
@@ -180,14 +188,14 @@ input {
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
-    background: #0a0e2a !important; /* o céu do topo do fundo; o gradiente do desktop depende do palco */
+    background: #05071a !important; /* o céu do topo do fundo (no desktop, o degradê de apoio) */
   }
 
   .cena-centro {
     position: static;
     display: block;
-    /* O place-items do desktop também alinha blocos (encolheria o palco à largura do conteúdo). */
-    place-items: normal;
+    width: auto;
+    height: auto;
   }
 
   .cena-palco {
@@ -212,9 +220,9 @@ input {
     display: none;
   }
 
-  /* Paisagem: o castelo com o pé na linha do horizonte do fundo. O fundo tem
-     240 x 150 pixels de arte e o horizonte na linha 94; a 2x ele mede 480 x 300. */
-  /* z-index -1: a paisagem e o chão (::after) ficam atrás de todo o conteúdo da coluna. */
+  /* Paisagem (Tela inicial v2): um bloco de altura fixa com o fundo a 6x (1440 px de largura,
+     centralizado) e os sprites ancorados nas bordas e no centro, como no frame de 390 do Figma.
+     z-index -1: a paisagem e o chão (::after) ficam atrás de todo o conteúdo da coluna. */
   .cena-celular-paisagem {
     display: block;
     position: relative;
@@ -222,17 +230,18 @@ input {
     order: 3;
     flex: none;
     width: calc(100% + 32px);
-    margin: 0 -16px;
+    margin-left: -16px;
+    margin-right: -16px;
   }
 
   .cena-celular-fundo {
     position: absolute;
     left: 50%;
-    top: calc(100% - 188px);
-    width: 480px;
-    height: 300px;
+    top: calc((var(--fundo-y) - 180) * 1px);
+    width: 2520px;
+    height: 1260px;
     max-width: none;
-    transform: translateX(-240px);
+    margin-left: -1260px;
     z-index: -2;
   }
 
@@ -242,52 +251,33 @@ input {
     position: absolute;
     left: 0;
     right: 0;
-    top: calc(100% + 112px);
+    top: calc(var(--fundo-y) * 1px + 900px);
     height: 4000px;
-    background: #12281e;
+    background: #08150f;
     z-index: -2;
   }
 
-  .cena-celular-castelo {
+  /* Sprites: --m3 e --m4 são os pixels de tela por pixel de arte (3 e 4 a partir de 384 px de largura). */
+  .cel-sprite {
+    --m: var(--m3);
+    --w: calc(var(--a) * var(--m) * 1px);
     position: absolute;
-    left: 50%;
-    bottom: 0;
-    transform: translateX(-50%);
+    pointer-events: none;
+    top: calc(var(--by) * 1px - var(--w));
+    width: var(--w);
+    height: var(--w);
+  }
+  .cel-sprite.k4 { --m: var(--m4); }
+  .cel-sprite.ancora-esq { left: calc(var(--dx) * 1px); }
+  .cel-sprite.ancora-dir { right: calc(var(--dx) * 1px); }
+  .cel-sprite.ancora-centro { left: calc(50% + var(--dx) * 1px - var(--w) / 2); }
+  .cel-sprite img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
   }
 
-  .cena-celular-pinheiro {
-    position: absolute;
-    bottom: -18px;
-    z-index: -1;
-  }
-  .cena-celular-pinheiro.esq {
-    left: -34px;
-  }
-  .cena-celular-pinheiro.dir {
-    right: -34px;
-  }
-
-  .cena-celular-fileira {
-    order: 5;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    width: min(100%, 342px);
-    margin-top: 20px;
-  }
-}
-
-/* Telas mais largas que o fundo a 2x (tablet em pé, celular deitado): fundo a 4x. */
-@media (min-width: 481px) and (max-width: 899px), (min-width: 481px) and (max-height: 499px) {
-  .cena-celular-fundo {
-    top: calc(100% - 376px);
-    width: 960px;
-    height: 600px;
-    transform: translateX(-480px);
-  }
-  .cena-celular-paisagem::after {
-    top: calc(100% + 224px);
-  }
 }
 
 /* ---------- Caixas em pixel art ----------
