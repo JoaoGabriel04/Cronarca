@@ -86,7 +86,9 @@ export const PODER = { escala: 64, divisor: 1_000 } as const;
 /**
  * Curva dos Ecos (seção 1.5). E(n) = 100 × (21/20)^(n−1). Multiplicadores em
  * centésimos. O chefe substitui o "muito difícil" a cada 10 fases. Endurecimento:
- * +5 centésimos a cada 30 fases (k = piso((n−1)/30), até 5) no difícil, muito difícil e chefe.
+ * +2 centésimos a cada 30 fases (k = piso((n−1)/30), até 5, ou seja, no máximo +0,10) no
+ * difícil, muito difícil e chefe. Era +5 (máximo +0,25); o Portão 20d-1 (decisão do dono em
+ * 16/11) baixou para +2 porque com +5 o difícil caía a 17% e o muito difícil a 7% (docs/CALIBRACAO_COMBATE.md).
  */
 export const CURVA_ECO = {
   base: 100,
@@ -102,7 +104,7 @@ export const CURVA_ECO = {
     { nivel: 'muito_dificil', mult: 110 },
   ],
   chefe: { aCada: 10, mult: 130 },
-  endurecimento: { aCada: 30, passo: 5, passosMaximos: 5 },
+  endurecimento: { aCada: 30, passo: 2, passosMaximos: 5 },
 } as const;
 export type NivelEco = 'facil' | 'media' | 'dificil' | 'muito_dificil' | 'chefe';
 

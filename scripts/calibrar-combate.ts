@@ -151,7 +151,7 @@ const linhas: string[] = [];
 const L = (s = '') => linhas.push(s);
 L('# Calibração do combate (Portão 20c)');
 L();
-L('Gerado por `make calibrar-combate` (`scripts/calibrar-combate.ts`). Sementes fixas: ' + SEMENTES.join(', ') + '. O script só mede: os valores em uso estão em `packages/game-core/data/combate.ts` (multiplicadores e poder mínimo/recomendado aprovados pelo dono no Portão 20c). Endurecimento e peso por classe no Poder seguem em aberto.');
+L('Gerado por `make calibrar-combate` (`scripts/calibrar-combate.ts`). Sementes fixas: ' + SEMENTES.join(', ') + '. O script só mede: os valores em uso estão em `packages/game-core/data/combate.ts` (multiplicadores e poder mínimo/recomendado aprovados pelo dono no Portão 20c). O endurecimento é o de `CURVA_ECO.endurecimento` (Portão 20d-1); o peso por classe no Poder segue adiado.');
 L();
 L('**Como ler.** A curva de vitória é íngreme (decisão do dono: sem crítico nem erro aleatório). Então a pergunta não é "com que sorte se vence", e sim "com que preparo". Medimos:');
 L('- **tropas plausíveis**: todas as combinações das 4 classes no tamanho da tropa, cada classe numa linha que faz sentido (corpo a corpo na frente ou no meio; Arqueiro e Mago no meio ou atrás);');
@@ -262,7 +262,7 @@ for (const nv of NIVEIS) {
   L(`| ${NOME_NIVEL[nv]} | ${MULTS[nv]} | ${pct(a.vencem / a.total)} | ${a.arq.map((k) => pct(k / a.arqTotal)).join(' | ')} |`);
 }
 L();
-L('Por faixa de fases (o endurecimento soma +0,05 a cada 30 fases nos difíceis, muito difíceis e chefes):');
+L(`Por faixa de fases (o endurecimento soma +${r2(CURVA_ECO.endurecimento.passo * 10)} a cada ${CURVA_ECO.endurecimento.aCada} fases nos difíceis, muito difíceis e chefes, até +${r2(CURVA_ECO.endurecimento.passo * CURVA_ECO.endurecimento.passosMaximos * 10)}):`);
 L();
 L('| Faixa | ' + NIVEIS.map((nv) => NOME_NIVEL[nv]).join(' | ') + ' |');
 L('|---|' + NIVEIS.map(() => '---').join('|') + '|');

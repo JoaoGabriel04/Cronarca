@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import type { Classe } from '../data/aventureiros.ts';
 import type { Linha, Tatica } from '../data/combate.ts';
 import {
-  classesDaComposicao, gerarEco, MARCA, poderCombate, poderDoEco, poderEsperado, poderMinimo, poderRecomendado, poderTropa, poderUnidade, simularBatalha,
+  classesDaComposicao, dificuldadeDaFase, gerarEco, MARCA, poderCombate, poderDoEco, poderEsperado, poderMinimo, poderRecomendado, poderTropa, poderUnidade, simularBatalha,
   tropaComPoder, unidadeComPoder, unidadeDoGuerreiro, type ResultadoBatalha, type UnidadeCombate,
 } from '../src/combate/index.ts';
 
@@ -169,12 +169,13 @@ describe('Poder de combate', () => {
 describe('gerarEco', () => {
   it('E(n) bate com a tabela da seção 1.5; o poder do Eco segue os multiplicadores calibrados no 20c, em inteiros', () => {
     // [fase, nível, E(n) da seção 1.5, poder do Eco calibrado, mínimo (0,88), recomendado (1,02)]
+    // Fases 34, 35, 40 e 100 seguem o endurecimento de +0,02 (Portão 20d-1); com +0,05 eram 550, 604, 905 e 18 160.
     // (com os multiplicadores do rascunho, o Eco era 75, 105, 88, 139, 176, 264, 700, 324, 625, 788, 1173, 23 169, 9 863)
     const tabela: [number, string, number, number, number, number][] = [
       [1, 'facil', 100, 75, 66, 77], [2, 'media', 105, 100, 88, 102], [3, 'facil', 110, 88, 78, 90], [4, 'dificil', 116, 122, 108, 125],
       [5, 'muito_dificil', 122, 134, 118, 137], [10, 'chefe', 155, 202, 178, 207], [30, 'chefe', 412, 535, 471, 546], [31, 'facil', 432, 324, 286, 331],
-      [34, 'dificil', 500, 550, 484, 561], [35, 'muito_dificil', 525, 604, 532, 617], [40, 'chefe', 670, 905, 797, 924],
-      [100, 'chefe', 12_524, 18_160, 15_981, 18_524], [101, 'facil', 13_150, 9_863, 8_680, 10_061],
+      [34, 'dificil', 500, 535, 471, 546], [35, 'muito_dificil', 525, 588, 518, 600], [40, 'chefe', 670, 885, 779, 903],
+      [100, 'chefe', 12_524, 17_033, 14_990, 17_374], [101, 'facil', 13_150, 9_863, 8_680, 10_061],
     ];
     for (const [fase, nivel, esperado, poder, minimo, recomendado] of tabela) {
       expect(gerarEco(fase), `fase ${fase}`).toMatchObject({ fase, nivel, esperado, poder });
@@ -183,6 +184,19 @@ describe('gerarEco', () => {
       expect(poderMinimo(fase)).toBe(minimo);
       expect(poderRecomendado(fase)).toBe(recomendado);
     }
+  });
+
+  it('endurecimento de +0,02 a cada 30 fases só nos difíceis, muito difíceis e chefes, até +0,10', () => {
+    // Fase 30 ainda é o chefe de 1,30; o endurecimento entra na fase 31 (k = piso((fase − 1) / 30)).
+    const m = (fase: number) => dificuldadeDaFase(fase).mult;
+    expect([m(4), m(5), m(10), m(30)]).toEqual([105, 110, 130, 130]);
+    expect([m(34), m(35), m(40)]).toEqual([107, 112, 132]);
+    expect([m(64), m(65), m(70)]).toEqual([109, 114, 134]);
+    expect([m(124), m(125), m(130)]).toEqual([113, 118, 138]);
+    // Teto: k = 5 (+0,10) a partir da fase 151.
+    expect([m(154), m(155), m(160), m(1000)].map((x, i) => x - [105, 110, 130, 130][i]!)).toEqual([10, 10, 10, 10]);
+    // Fáceis e médias não endurecem nunca.
+    for (const fase of [1, 2, 3, 31, 32, 61, 151, 152, 153, 1001]) expect([75, 95, 80]).toContain(m(fase));
   });
 
   it('determinístico; composição pelo orçamento (3 unidades no começo, até 8), poder da tropa perto do do Eco', () => {

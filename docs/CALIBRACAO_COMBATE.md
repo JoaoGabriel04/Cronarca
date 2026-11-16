@@ -1,6 +1,6 @@
 # Calibração do combate (Portão 20c)
 
-Gerado por `make calibrar-combate` (`scripts/calibrar-combate.ts`). Sementes fixas: 11, 23, 37, 41, 59. O script só mede: os valores em uso estão em `packages/game-core/data/combate.ts` (multiplicadores e poder mínimo/recomendado aprovados pelo dono no Portão 20c). Endurecimento e peso por classe no Poder seguem em aberto.
+Gerado por `make calibrar-combate` (`scripts/calibrar-combate.ts`). Sementes fixas: 11, 23, 37, 41, 59. O script só mede: os valores em uso estão em `packages/game-core/data/combate.ts` (multiplicadores e poder mínimo/recomendado aprovados pelo dono no Portão 20c). O endurecimento é o de `CURVA_ECO.endurecimento` (Portão 20d-1); o peso por classe no Poder segue adiado.
 
 **Como ler.** A curva de vitória é íngreme (decisão do dono: sem crítico nem erro aleatório). Então a pergunta não é "com que sorte se vence", e sim "com que preparo". Medimos:
 - **tropas plausíveis**: todas as combinações das 4 classes no tamanho da tropa, cada classe numa linha que faz sentido (corpo a corpo na frente ou no meio; Arqueiro e Mago no meio ou atrás);
@@ -114,18 +114,18 @@ Fases 1 a 120 (todas), amostra fixa de cerca de 60 tropas plausíveis por fase.
 |---|---|---|---|---|---|---|
 | Fácil | 0,75 / 0,80 | 92% | 100% | 40% | 100% | 100% |
 | Média | 0,95 | 60% | 100% | 0% | 100% | 71% |
-| Difícil | 1,05 | 17% | 0% | 0% | 25% | 0% |
-| Muito difícil | 1,10 | 7% | 0% | 0% | 0% | 0% |
+| Difícil | 1,05 | 27% | 0% | 0% | 50% | 0% |
+| Muito difícil | 1,10 | 11% | 0% | 0% | 33% | 0% |
 | Chefe | 1,30 | 0% | 0% | 0% | 0% | 0% |
 
-Por faixa de fases (o endurecimento soma +0,05 a cada 30 fases nos difíceis, muito difíceis e chefes):
+Por faixa de fases (o endurecimento soma +0,02 a cada 30 fases nos difíceis, muito difíceis e chefes, até +0,10):
 
 | Faixa | Fácil | Média | Difícil | Muito difícil | Chefe |
 |---|---|---|---|---|---|
 | 1–30 | 95% | 66% | 34% | 15% | 0% |
-| 31–60 | 90% | 49% | 16% | 8% | 0% |
-| 61–90 | 89% | 54% | 6% | 1% | 0% |
-| 91–120 | 95% | 67% | 5% | 3% | 0% |
+| 31–60 | 90% | 49% | 21% | 11% | 0% |
+| 61–90 | 89% | 54% | 22% | 6% | 0% |
+| 91–120 | 95% | 67% | 29% | 11% | 0% |
 
 ## 3. Multiplicador do Eco x % de tropas plausíveis que vencem (jogador tipo em E(n))
 
