@@ -138,3 +138,20 @@ O prompt deve dizer, nesta ordem:
 - Documentos: `CRONARCA_PLANO_MESTRE.md` (este), `CRONARCA_DESIGN_PENDENTE.md`, `CRONARCA_REGISTRO_DE_PORTOES.md`, `CRONARCA_COMBATE_E_MAPA.md`, `CRONARCA_VISAO_E_DECISOES.md`.
 - Prompts: `PROMPT_TELA_INICIAL_V2.md` (atual), `PROMPT_UNIFICAR_ANIMACAO_ARVORES.md` (suspenso), `PROMPT_PORTAO_16`, `17`, `18`, `20`, `PROMPT_PORTAO_AJUSTES_RAPIDOS.md`.
 - Geradores de arte: `sprites/gen.py` (classes), `gen_qg.py`, `gen_extra.py`, `cena/gen_castelo.py`, `cena/gen_cena.py`.
+
+---
+
+## 8. Achado do 20d-2 (16/11): teto de poder dos guerreiros
+- Poder máximo de um guerreiro: 166 (nível 20, arma e armadura 6/6). Tropa de 8: no máximo ~1 330.
+- O poder recomendado chega a ~1 330 por volta da **fase 45**. Acima disso, com guerreiros reais, a campanha trava; a calibragem de 120 fases usa tropa sintética.
+- O chefe da fase 30 (necessário para avançar de era) é alcançável: recomendado ~546, ou seja, cerca de 4 guerreiros no máximo.
+- Decisão de design em aberto (antes do Portão 23 ou 25): o que sustenta as fases 45 a 120. Opções: tamanho de tropa maior com o QG, níveis acima de 20 por era, equipamento de eras novas, relíquias de combate, ou campanha por era (a fase volta a 1 na era seguinte, com Ecos próprios). Hoje a hipótese do plano é "saltos por era".
+- Decididos no 20d: FASE_MAXIMA = 600 e poder mínimo e recomendado em BigInt (precisão exata acima da fase ~480). Endpoint `GET /game/readiness` aceita qualquer fase válida; a validação de fase desbloqueada entra com a campanha (Portão 23).
+
+### 8.1 Proposta para o teto de poder (registrada em 16/11, a decidir antes do Portão 23)
+Status: **proposta, não decidida.** Nada muda no código agora.
+1. **Campanha da Era I limitada ao alcançável:** 40 fases, com a fase 30 como chefe que libera Avançar de era e as 31 a 40 como "além do chefe" opcionais. O jogo termina a campanha da era onde ela pode ser vencida, em vez de travar sem aviso na fase ~45.
+2. **Campanha reinicia a cada era**, com Ecos e curva próprios (base de poder maior). A curva de 5% por fase vale só dentro da era. O crescimento vem do conteúdo da era: nível máximo maior, armas e armaduras novas, tropa maior com o nível do QG ("saltos por era").
+3. **Relíquias de combate** (percentual de poder da tropa) para quem repete a era com Recomeçar com Bônus, dando sentido à repetição e ligando combate e ciclo.
+4. **Medir antes de fechar números:** versão simples do simulador de ciclo com jogador automático (hoje no backlog, depois do 25) antecipada para antes do Portão 23, para medir o poder real da tropa em cada ponto do ciclo. Sem isso, o E(n) (poder esperado) é só hipótese.
+5. **Evitar:** apenas aumentar o teto (níveis sem limite, tropa enorme): empurra o problema e deixa números enormes.
