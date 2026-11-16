@@ -211,3 +211,9 @@ Regra daqui em diante: a cada portão, antes de encerrar a conversa, atualizo as
 - Novos sprites criados no design agora na página "Sprites", coluna x=2600 (y=9300): Novo - Castelo (188:3362), QG (188:3363), Recursos (188:3364), Expedições (188:3365), Ícones de classe (188:3366), Ecos (188:3367). Folhas em escala inteira; fonte: sprites_qg.zip, sprites_extra.zip, castelo_1-8.png. Ainda fora do repositório.
 - Correção: faltavam na página Sprites os aventureiros novos (Lanceiro, Cavaleiro, Mago do Tempo, 6 quadros de 32 px, sprites_classes_novas.zip / gen.py). Adicionados em "Novo - Aventureiros" (189:3360), coluna x=2600. Pendente: trocar os placeholders de classe nas telas pelos PNGs.
 - Placeholders de classe trocados no Figma (Telas v2) pelos PNGs novos: Modal Contratar (Desktop 154:38103, Mobile 156:38313) e Replay (Desktop 159:41705, Mobile 159:42423). Lanceiro, Cavaleiro e Mago do Tempo usam o quadro 1 em escala inteira (3x, 2x ou 1x); Eco Lanceiro usa eco_lanceiro_1. Mantidos com a arte antiga: Arqueiro (sem sprite novo), Inimigos e as telas antigas da página "Telas" (Selo classe), Mapa e Construir (instâncias Guerreiro). Fonte: frame "Fonte - Aventureiros novos" na página Sprites (191:50242).
+
+## 16/11/2026: suspensões e decisões do Portão 20
+- **Suspenso:** Portão 0 das árvores (animação unificada). As 5 decisões abertas da auditoria não serão implementadas; substituído pela Tela inicial v2 (Opção 1). Pode ser retomado depois, com nova auditoria.
+- **Portão 20 (20a a 20c): aceito** (03ec0ae, 50ddcd9). Multiplicadores 0,95 / 1,05 / 1,10, chefe 1,30; poder mínimo 0,88, recomendado 1,02.
+- **Decididos:** endurecimento cai de +0,05 para +0,02 (limite +0,10); peso por classe no Poder adiado, entra só um aviso de composição; `poderMinimo` e `poderRecomendado` ganham função utilizável (20d-2); migração 8 para 9 verificada offline antes do deploy (20d-3).
+- Especificação de combate passa para a revisão 8 (seções 1.5, 1.5b e 1.6).
