@@ -145,19 +145,27 @@
    ]
   },
   "castelo": {
-   "quadros": 4,
+   "quadros": 8,
    "duracoesMs": [
+    250,
+    200,
+    250,
+    200,
     250,
     200,
     250,
     200
    ],
-   "tamanho": 48,
+   "tamanho": 96,
    "arquivos": [
     "castelo_1.png",
     "castelo_2.png",
     "castelo_3.png",
-    "castelo_4.png"
+    "castelo_4.png",
+    "castelo_5.png",
+    "castelo_6.png",
+    "castelo_7.png",
+    "castelo_8.png"
    ]
   },
   "cavaleiro": {
@@ -226,6 +234,18 @@
     "pinho1_2.png",
     "pinho1_3.png",
     "pinho1_4.png"
+   ]
+  },
+  "cerca": {
+   "quadros": 2,
+   "duracoesMs": [
+    450,
+    450
+   ],
+   "tamanho": 16,
+   "arquivos": [
+    "cerca_1.png",
+    "cerca_2.png"
    ]
   }
  }

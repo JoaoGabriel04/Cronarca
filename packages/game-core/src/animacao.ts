@@ -11,7 +11,8 @@ const esquemaSprite = z
   .strictObject({
     quadros: z.number().int().min(1),
     duracoesMs: z.array(z.number().int().positive()).min(1),
-    tamanho: z.union([z.literal(16), z.literal(32), z.literal(48), z.literal(64)]),
+    // 96: o castelo novo da cena do Início e do Login (Tela inicial v2).
+    tamanho: z.union([z.literal(16), z.literal(32), z.literal(48), z.literal(64), z.literal(96)]),
     arquivos: z.array(z.string().regex(/^[a-z0-9_]+_[1-9]\.png$/)).min(1),
   })
   .refine((s) => s.duracoesMs.length === s.quadros && s.arquivos.length === s.quadros, 'quadros, duracoesMs e arquivos com tamanhos diferentes');

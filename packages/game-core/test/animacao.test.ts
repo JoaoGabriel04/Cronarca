@@ -108,7 +108,7 @@ describe('quadros.json', () => {
   });
 
   it('jogo: 47 sprites, 202 quadros (45 da entrega + cerca e flores); a cena não entra no pré-carregamento do jogo', () => {
-    expect(ANIMACOES.size).toBe(47 + 14);
+    expect(ANIMACOES.size).toBe(47 + 15); // 15 da cena: os 14 de antes e a cerca (Tela inicial v2)
     expect(todosOsQuadros()).toHaveLength(202);
     expect(new Set(todosOsQuadros()).size).toBe(202);
     expect(animacao('cenario', 'cerca').quadros[1]).toBe(urlDoQuadro('cenario', 'cerca_2.png'));
@@ -116,21 +116,36 @@ describe('quadros.json', () => {
 });
 
 describe('cena do Início e do Login (quadros_cena.json)', () => {
-  it('14 sprites e 58 quadros no grupo cena, nomes com dígito aceitos', () => {
+  it('15 sprites e 64 quadros no grupo cena (castelo novo de 8 quadros e a cerca), nomes com dígito aceitos', () => {
     const cena = [...ANIMACOES.values()].filter((a) => a.chave.startsWith('cena/'));
-    expect(cena).toHaveLength(14);
-    expect(cena.flatMap((a) => a.quadros)).toHaveLength(58);
+    expect(cena).toHaveLength(15);
+    expect(cena.flatMap((a) => a.quadros)).toHaveLength(64);
     expect(animacao('cena', 'pinho0').tamanho).toBe(48);
     expect(animacao('cena', 'arbusto7').quadros[3]).toBe(urlDoQuadro('cena', 'arbusto7_4.png'));
     expect(todosOsQuadros().some((q) => q.startsWith('/sprites/cena/'))).toBe(false);
   });
 
-  it('os da cena usados hoje: castelo 4, cavaleiro 4, fogueira 6, placa 4 quadros', () => {
-    expect(quadrosDaCena(['castelo', 'cavaleiro', 'fogueira', 'placa']).map((q) => q.split('/').pop())).toEqual([
-      'castelo_1.png', 'castelo_2.png', 'castelo_3.png', 'castelo_4.png',
-      'cavaleiro_1.png', 'cavaleiro_2.png', 'cavaleiro_3.png', 'cavaleiro_4.png',
-      'fogueira_1.png', 'fogueira_2.png', 'fogueira_3.png', 'fogueira_4.png', 'fogueira_5.png', 'fogueira_6.png',
-      'placa_1.png', 'placa_2.png', 'placa_3.png', 'placa_4.png',
-    ]);
+  it('castelo novo: 96 px, 8 quadros com bandeiras balançando (250/200 ms, ciclo de 1,8 s)', () => {
+    const c = animacao('cena', 'castelo');
+    expect(c).toMatchObject({ tamanho: 96, duracoesMs: [250, 200, 250, 200, 250, 200, 250, 200], cicloMs: 1_800 });
+    expect(c.quadros).toHaveLength(8);
+    expect(c.quadros[7]).toBe(urlDoQuadro('cena', 'castelo_8.png'));
+  });
+
+  it('cerca na fonte única da cena: 16 px, 2 quadros de 450 ms', () => {
+    expect(animacao('cena', 'cerca')).toMatchObject({ tamanho: 16, duracoesMs: [450, 450] });
+    expect(animacao('cena', 'cerca').quadros).toEqual([urlDoQuadro('cena', 'cerca_1.png'), urlDoQuadro('cena', 'cerca_2.png')]);
+  });
+
+  it('a lista fechada da Tela inicial v2: pinho0 e pinho1 (4), castelo (8), cavaleiro (4), fogueira (6), flores (4), placa (4), cerca (2)', () => {
+    const quadros = (nome: string) => quadrosDaCena([nome]).map((q) => q.split('/').pop());
+    expect(quadros('castelo')).toEqual(Array.from({ length: 8 }, (_, i) => `castelo_${i + 1}.png`));
+    expect(quadros('pinho0')).toHaveLength(4);
+    expect(quadros('pinho1')).toHaveLength(4);
+    expect(quadros('cavaleiro')).toHaveLength(4);
+    expect(quadros('fogueira')).toHaveLength(6);
+    expect(quadros('flores')).toHaveLength(4);
+    expect(quadros('placa')).toHaveLength(4);
+    expect(quadros('cerca')).toEqual(['cerca_1.png', 'cerca_2.png']);
   });
 });
