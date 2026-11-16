@@ -1,6 +1,6 @@
 # Cronarca: Combate e Mapa (especificação para aprovação)
 
-Status: **revisão 7, rascunho de design, nada implementado.** Complementa `CRONARCA_VISAO_E_DECISOES.md` e já incorpora o que a auditoria do código encontrou. Onde digo "DECISÃO MINHA" ou "A CONFIRMAR", é um palpite seu a validar.
+Status: **revisão 8 (16/11/2026).** Seções 1.5, 1.5b e 1.6 atualizadas com a calibragem do Portão 20c; o resto segue como na revisão 7. Complementa `CRONARCA_VISAO_E_DECISOES.md` e já incorpora o que a auditoria do código encontrou. Onde digo "DECISÃO MINHA" ou "A CONFIRMAR", é um palpite seu a validar.
 
 ## Decisões já fechadas (revisão 7)
 1. **Combate e exploração são sistemas separados.** O combate acontece no **Quartel General** (QG), uma construção. A exploração do mapa serve para descobrir o QG e, depois, para economia, relíquias e lore.
@@ -103,18 +103,18 @@ Seu pedido: ordem fácil, média, fácil, difícil, muito difícil, e a escala a
 | Posição | Nível | Multiplicador do poder esperado |
 |---|---|---|
 | 1 | Fácil | 0,75 |
-| 2 | Média | 1,00 |
+| 2 | Média | 0,95 |
 | 3 | Fácil | 0,80 |
-| 4 | Difícil | 1,20 |
-| 5 | Muito difícil | 1,45 |
+| 4 | Difícil | 1,05 |
+| 5 | Muito difícil | 1,10 |
 
-**Chefe** a cada 10 fases (substitui o "muito difícil" dessas): multiplicador 1,70.
+**Chefe** a cada 10 fases (substitui o "muito difícil" dessas): multiplicador 1,30.
 
-**Poder esperado do jogador na fase n**: `E(n) = 100 × 1,05^(n-1)` (rascunho, será calibrado).
+**Poder esperado do jogador na fase n**: `E(n) = 100 × 1,05^(n-1)`. Multiplicadores calibrados no Portão 20c (antes: 1,00 / 1,20 / 1,45 e chefe 1,70, que tornavam difícil, muito difícil e chefe impossíveis para o jogador tipo: 0% de vitória).
 
 **Poder do Eco** = `E(n) × multiplicador`.
 
-**Endurecimento:** a cada 30 fases, os níveis difícil, muito difícil e chefe ganham +0,05 no multiplicador (limite de +0,25). Os fáceis e médias **não** endurecem, para o jogador sempre ter fases em que se sente forte.
+**Endurecimento:** a cada 30 fases, os níveis difícil, muito difícil e chefe ganham +0,02 no multiplicador (limite de +0,10; era +0,05 até +0,25, decidido em 16/11 por deixar o difícil abaixo da meta). Os fáceis e médias **não** endurecem, para o jogador sempre ter fases em que se sente forte.
 
 Exemplo calculado:
 
@@ -148,17 +148,19 @@ Para **tentar** uma fase, a tropa enviada precisa de Poder mínimo. Isso impede 
 **Regras:**
 - Conta o **Poder da tropa enviada** (soma do poder de cada guerreiro que vai), e não o total de guerreiros que o jogador tem.
 - Dois valores por fase: **mínimo** (abaixo dele o botão "Enviar tropa" fica bloqueado) e **recomendado** (o poder do Eco, que dá boa chance de vitória).
-- Rascunho: `mínimo = 80% do poder do Eco`. Esse fator é ajustado por simulação, de forma que o mínimo corresponda a uma chance de vitória ainda real (algo como 20% a 25%), e não impossível.
+- Calibrado (20c): **mínimo = 0,88 do poder do Eco** (o limiar da melhor contra-escalação: abaixo dele nenhuma tropa plausível vence) e **recomendado = 1,02 do poder do Eco** (o limiar da composição razoável). O Poder engana conforme a composição: só corpo a corpo precisa de ~1,31 do Eco, só Arqueiros de ~0,93.
 - O mínimo só **pesa** nas fases difíceis, muito difíceis e chefes. Nas fáceis, o jogador típico já passa.
 - Para tentar a fase n, é preciso ter vencido a n-1. Fases já vencidas podem ser refeitas (butim reduzido, ver Repetição).
 
-| Fase | Nível | Poder do Eco (recomendado) | Mínimo (80%) | Poder esperado do jogador |
-|---|---|---|---|---|
-| 1 | Fácil | 75 | 60 | 100 |
-| 4 | Difícil | 139 | 111 | 116 |
-| 5 | Muito difícil | 176 | 141 | 122 |
-| 10 | Chefe | 264 | 211 | 155 |
-| 30 | Chefe | 700 | 560 | 412 |
+| Fase | Nível | Poder do Eco | Mínimo (0,88) | Recomendado (1,02) | Poder esperado do jogador |
+|---|---|---|---|---|---|
+| 1 | Fácil | 75 | 66 | 77 | 100 |
+| 4 | Difícil | 122 | 107 | 124 | 116 |
+| 5 | Muito difícil | 134 | 118 | 136 | 122 |
+| 10 | Chefe | 202 | 177 | 206 | 155 |
+| 30 | Chefe | 536 | 471 | 546 | 412 |
+
+(Valores aproximados, calculados de E(n) e dos multiplicadores atuais; o código é a fonte.)
 
 **Como o Poder é calculado:** uma única função, no servidor, que resume vida, ataque, defesa, nível e equipamento de cada guerreiro num número. A **mesma função** serve ao mínimo, ao recomendado e à calibragem, e é definida no portão do simulador (20). Se ela não refletir bem a chance real de vitória, o requisito engana, por isso precisa ser validada por simulação.
 
@@ -173,13 +175,15 @@ Para **tentar** uma fase, a tropa enviada precisa de Poder mínimo. Isso impede 
 ### 1.6 Calibragem por simulação
 Como a simulação é pura e determinística, dá para rodar milhares de batalhas em lote no servidor e **ajustar o poder recomendado até a taxa de vitória ficar onde queremos**, com um jogador "tipo" (poder igual a E(n), composição razoável):
 
-| Nível | Meta de vitória (rascunho) |
-|---|---|
-| Fácil | cerca de 85% a 90% |
-| Média | cerca de 65% |
-| Difícil | cerca de 45% |
-| Muito difícil | cerca de 25% a 30% |
-| Chefe | cerca de 15% a 25% (com preparo, sobe) |
+| Nível | Meta | Medido (20c, endurecimento +0,02) |
+|---|---|---|
+| Fácil | ~90% | 92% |
+| Média | ~60% | 60% |
+| Difícil | ~30% | 27% |
+| Muito difícil | 10% a 20% | 11% |
+| Chefe | 0% com o jogador tipo (pede poder acima do esperado) | 0% |
+
+Medido sobre tropas plausíveis com poder igual a E(n). Quem investe acima do esperado e monta a formação certa passa dos difíceis e dos chefes.
 
 Isso vira um script de balanceamento no repositório, não só um número no código.
 
