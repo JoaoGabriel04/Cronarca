@@ -1,23 +1,25 @@
 # Cronarca: Combate e Mapa (especificação para aprovação)
 
-Status: **revisão 4, rascunho de design, nada implementado.** Complementa `CRONARCA_VISAO_E_DECISOES.md`. Tudo aqui precisa ser conferido contra o código real pelo Claude Code (auditoria) antes de virar portão. Onde digo "DECISÃO MINHA" ou "A CONFIRMAR", é um palpite seu a validar.
+Status: **revisão 7, rascunho de design, nada implementado.** Complementa `CRONARCA_VISAO_E_DECISOES.md` e já incorpora o que a auditoria do código encontrou. Onde digo "DECISÃO MINHA" ou "A CONFIRMAR", é um palpite seu a validar.
 
-## Decisões já fechadas (revisão 4)
+## Decisões já fechadas (revisão 7)
 1. **Combate e exploração são sistemas separados.** O combate acontece no **Quartel General** (QG), uma construção. A exploração do mapa serve para descobrir o QG e, depois, para economia, relíquias e lore.
-2. **Quartel e QG viram uma construção só**, com duas funções: **Treino** (contratar e treinar guerreiros) e **Mesa de Guerra** (batalhas contra Ecos). Até o QG ser descoberto e reerguido, **treinar e contratar guerreiros ficam bloqueados**.
-3. **O QG é descoberto cedo**, nas primeiras expedições (primeira sessão de jogo).
-4. **Mudar de era reseta a vila** (construções, descobertas do mapa, recursos). **O QG permanece**, já construído na vila nova, e **os guerreiros e seus níveis também permanecem**. Como a vila nova não tem moradia nem comida para eles, o QG tem **Alojamento próprio**, fora da população da vila.
-5. **Para lutar uma fase, a tropa enviada precisa de um Poder mínimo** (soma do poder dos guerreiros que vão à batalha, e não de todos os que o jogador tem).
-6. Dificuldade dos Ecos acompanha a **fase**, não o jogador (Ecos iguais para todos).
-7. Batalha automática com replay, calculada no servidor.
-8. A campanha é **contínua** entre eras, já que os guerreiros também são.
-9. **Nunca se perde guerreiro.** Não existe morte permanente. A consequência da derrota é **ferimento com cooldown maior**, curado na Enfermaria.
-10. **Quatro classes desde a Era I:** Lanceiro, Arqueiro, Cavaleiro e Mago do Tempo.
-11. O **soldado que a conta já recebe** entra como primeiro guerreiro quando o QG for reerguido.
-12. A exploração libera **temas de Eco** por região (o laço entra).
-13. **Memória do Tempo fica de fora por enquanto.** Se voltar, depende de qual bônus se trata.
-14. **Ranking:** ordem por era, depois fase mais alta, com poder total como desempate.
-15. **Manutenção de comida do Alojamento:** valor pequeno e simbólico desde o começo, que cresce conforme aumenta o número de guerreiros.
+2. **Aventureiro e guerreiro são a mesma unidade.** O sistema de aventureiros que já existe (nível, XP, arma, armadura, estados, guilda, expedições) é **evoluído**, e não duplicado. As expedições continuam como exploração e saque, e os Ecos usam os mesmos aventureiros. O nome na interface ("guerreiro" ou "aventureiro") é decidido no portão 22.
+3. **A contratação continua aberta** (Taverna, como hoje). O QG, quando descoberto e reerguido, libera a **Mesa de Guerra** (batalhas contra Ecos), o limite da tropa enviada e o Alojamento persistente.
+4. **O QG é descoberto cedo**, na primeira ou segunda expedição, por um destino novo no sistema de expedições que já existe.
+5. **Um único reset, com dois destinos** (seção 1.10): **Ascensão** ("Recomeçar com Bônus", mesma era, com a **Falha** subindo e deixando o próximo ciclo mais difícil) e **Avançar de era** (conteúdo novo e **Falha zerada**). A vila reseta nos dois casos. **QG, aventureiros com seus níveis, relíquias, Crônica e progresso da campanha permanecem.**
+6. **Alojamento do QG:** os aventureiros que atravessam o reset moram no QG, fora da população da vila (a Taverna já funciona assim hoje durante o ciclo).
+7. **Para lutar uma fase, a tropa enviada precisa de um Poder mínimo** (soma do poder dos que vão à batalha, e não de todos os que o jogador tem).
+8. Dificuldade dos Ecos acompanha a **fase**, não o jogador (Ecos iguais para todos). A Falha **não** afeta a campanha de Ecos.
+9. Batalha automática com replay, calculada no servidor, com o simulador no **game-core** (onde já vivem as regras puras, o PRNG e os testes).
+10. **Nunca se perde aventureiro.** A derrota gera ferimento com cooldown maior, curado na Enfermaria.
+11. **Quatro classes:** Lanceiro, Arqueiro, Cavaleiro e Mago do Tempo. As cinco atuais (guerreiro, arqueiro, mago, ladino, clérigo) não têm efeito mecânico hoje, só nome e arte, então a migração de saves (versão 6 do esquema) é só de nome. A arte de Lanceiro, Cavaleiro e Mago do Tempo (6 quadros de 32 px cada) é gerada por mim com o pipeline de sprites. Mapeamento na seção 1.3.
+12. O soldado inicial (aventureiro da classe guerreiro) já é o primeiro guerreiro, não precisa de regra especial.
+13. A exploração libera **temas de Eco** por região.
+14. **As relíquias já cumprem o papel de bônus permanente.** Não criamos Memória do Tempo.
+15. **Ranking:** mantém era, ciclo e relíquias, e **fase mais alta** entra antes do desempate por quem chegou primeiro.
+16. **Manutenção de comida:** pequena e simbólica desde o começo, crescendo conforme o número de aventureiros (hoje é 0,08/s cada; ajustar no portão do QG).
+17. Aldeões visíveis em qualquer zoom e largura: tratado no portão pequeno de ajustes (`PROMPT_PORTAO_AJUSTES_RAPIDOS.md`).
 
 ---
 
@@ -37,13 +39,13 @@ Nada novo na stack, só módulos novos.
 
 | Parte | Escolha | Motivo |
 |---|---|---|
-| Simulação | Módulo TS puro no backend (`combate/simular.ts`), sem Express nem Prisma dentro | Testável sozinho, rodável em lote para balancear |
+| Simulação | Módulo TS puro no **game-core** (`packages/game-core`), onde já vivem regras puras, PRNG com semente e testes | Testável sozinho, rodável em lote para balancear, mesma base das regras que o servidor já usa |
 | Tempo | Ticks fixos (por exemplo 100 ms de jogo por tick), sem `Date.now()` | Mesmo resultado sempre |
 | Números | Inteiros (ou ponto fixo). Nada de float em dano e vida | Evita divergência |
 | Aleatório | PRNG com semente (xorshift32 ou mulberry32), semente gerada **no servidor** ao despachar a marcha | Reprodutível e não manipulável |
 | Saída | **Log de eventos** compacto (quem atacou quem, dano, morte, habilidade, tick) | O cliente só toca o log, não precisa resimular |
 | Replay | Canvas 2D com pixel art, GSAP só para transições da tela, relógio global de sprites do Portão 14b | Sem biblioteca nova |
-| Dados | Prisma: `Guerreiro`, `Batalha`, `CampanhaProgresso` (ver 1.9) | Persistir só o necessário |
+| Dados | O estado do jogador já é **JSON versionado**, sem tabelas por entidade. Novos blocos entram nele (ver 1.9) | Persistir só o necessário, migração simples |
 
 DECISÃO MINHA: o cliente **não** resimula, só toca o log. Resimular no cliente exigiria código idêntico dos dois lados e traria risco de divergência.
 
@@ -55,6 +57,18 @@ DECISÃO MINHA: o cliente **não** resimula, só toca o log. Resimular no client
 - Cavaleiro vence Arqueiro.
 - Arqueiro vence Lanceiro.
 - Mago do Tempo: suporte e dano em área pequena; atrasa inimigos e acelera aliados; muito frágil; sem relação de vantagem.
+
+**Migração das cinco classes atuais para as quatro** (rascunho, o plano do Claude Code confirma). Como a classe não tem nenhum efeito mecânico hoje (o poder ignora a classe, arma e armadura são iguais para todas), o mapeamento é só de nome e arte:
+
+| Hoje | Passa a ser | Motivo |
+|---|---|---|
+| guerreiro | Lanceiro | linha de frente, corpo a corpo (e é a classe inicial) |
+| arqueiro | Arqueiro | igual |
+| ladino | Arqueiro | leve e ágil, sem duplicar o Mago |
+| clérigo | Cavaleiro | armado e pesado, sem duplicar o Mago |
+| mago | Mago do Tempo | igual |
+
+Nível (1 a 20), XP, arma e armadura (0 a 6) são mantidos. O que muda no código: lista de classes e classe inicial no game-core, esquema do estado (`z.enum`) com migração de versão, quadros e sprites, telas e marcadores, e testes. Sem a migração, todo save antigo seria recusado.
 
 **Formação:** três linhas (frente, meio, trás). Corpo a corpo atinge primeiro a linha da frente do outro lado; arqueiros e magos atingem mais fundo. Mudar quem fica na frente muda o resultado.
 
@@ -122,11 +136,11 @@ Exemplo calculado:
 
 A fase 101 "fácil" tem 9 863 de poder, mais de 130 vezes a fase 1 "fácil". Os números são só ilustração: o certo é **calibrar por simulação** (1.6).
 
-**Estrutura da campanha** (fechada com a revisão 3):
-- A campanha é **contínua e sem fim**, com chefe a cada 10 fases. Como os guerreiros e seus níveis atravessam as eras, a numeração das fases também não recomeça.
+**Estrutura da campanha** (fechada):
+- A campanha é **contínua e sem fim**, com chefe a cada 10 fases. Como os aventureiros e seus níveis atravessam o reset, a numeração das fases também.
 - A fórmula continua `E(n) = 100 × 1,05^(n-1)`, mas o crescimento do poder do jogador pode dar saltos grandes a cada era (equipamentos de nível maior, classe nova). Isso é esperado e deve ser **calibrado por simulação**, e não adivinhado.
-- **Avançar de era é uma escolha do jogador.** Para liberar, ele precisa acender o Marco da era e vencer o chefe da fase 30. Pode passar disso e continuar subindo de fase antes de avançar. Cada era traz temas de Ecos novos, Névoa nova e equipamentos novos.
-- Ranking: **fase mais alta**, **era** e **poder total**. A forma exata de combinar os três é decisão em aberto (Parte 4).
+- **Avançar de era** exige o chefe da fase 30 da era, além dos objetivos do ciclo (seção 1.10). O jogador pode passar disso e continuar subindo de fase antes de avançar.
+- Ranking: **era, ciclo, relíquias, fase mais alta**, e por fim quem chegou primeiro.
 
 ### 1.5b Poder mínimo para lutar uma fase
 Para **tentar** uma fase, a tropa enviada precisa de Poder mínimo. Isso impede o jogador de ir a uma fase impossível com tropa fraca e liga o treino à campanha.
@@ -169,44 +183,80 @@ Como a simulação é pura e determinística, dá para rodar milhares de batalha
 
 Isso vira um script de balanceamento no repositório, não só um número no código.
 
-### 1.7 Guerreiros: progressão, consequências e eras
-- **Treino** no Quartel General, aba Treino: comida, ferro e tempo. Bloqueado até o QG ser descoberto e reerguido.
-- **Alojamento do QG:** os guerreiros moram no QG, não na população da vila. A capacidade sobe com o nível do QG. Cada guerreiro tem uma manutenção de comida **pequena e simbólica desde o começo**, que cresce conforme aumenta o número de guerreiros (a curva exata é calibrada no portão do QG). Se o Alojamento estiver cheio, é preciso subir o QG ou dispensar alguém.
+### 1.7 Guerreiros (aventureiros): progressão e consequências
+- **Contratação** na Taverna, como hoje (ouro 40 × 1,58^n mais 20 de comida). O QG não a substitui. **Hoje a classe do contratado é sorteada** entre as cinco. Com classes que têm vantagem entre si, sorteio atrapalha o planejamento de tropa. **A CONFIRMAR, recomendação:** o jogador **escolhe a classe** ao contratar, sem custo extra no começo.
+- **Já existem:** nível 1 a 20, XP (vitória +2, recuo +1, subir pede 4 × nível), arma e armadura de 0 a 6, estados (na vila, em expedição, ferido), poder `5 + 4×nível + 3×arma + 2×armadura`, vagas da guilda `4 + 1 por nível de Taverna`. A função de Poder do combate parte dessa, com os atributos de combate acrescentados (portão 20).
+- **O que o QG acrescenta:** Mesa de Guerra, limite da tropa enviada, Alojamento persistente e, depois, treino de especialização.
+- **Alojamento:** durante o ciclo, as vagas da Taverna continuam valendo. Quem atravessa o reset passa a morar no QG (capacidade sobe com o nível dele), fora da população. Como Taverna e QG se dividem exatamente fica para o plano do portão 22.
+- **Manutenção de comida:** pequena e simbólica desde o começo e crescente com o número de aventureiros (hoje 0,08/s cada).
 - **XP** por batalha vencida (e um pouco menos por derrota). Nível sobe atributos e libera especialização.
-- **Equipamento** da Forja: liga economia e combate.
-- **Estados:** disponível, em marcha, ferido (com data de cura). Não existe estado de perda permanente.
-- **Derrota:** os guerreiros que lutaram ficam **feridos, com cooldown maior que o de uma vitória apertada**, e só voltam a ser enviados depois de curados. Cura na Enfermaria, com custo e tempo. Parte do butim em disputa se perde. O guerreiro nunca morre.
-- **Poder de cura:** o tempo de cura depende da Enfermaria (nível) e de recursos como ervas, que vêm da exploração do pântano. Os valores exatos são trabalhados no portão da Enfermaria.
-- **Ponto para discutir depois:** como não há perda permanente, a pressão da derrota vem do cooldown e do custo da cura. Se isso ficar leve demais, a **contratação** de guerreiros (custo e tempo de treino) pode ser calibrada como o principal custo de manter um exército grande.
-- **Nunca** se perde construção, vila ou progresso de fase por causa de batalha.
-
-**O que acontece ao avançar de era:**
-- **Reseta:** construções, descobertas do mapa, recursos e população da vila.
-- **Permanece:** o QG (com seu nível), os guerreiros com seus níveis e equipamentos, o progresso da campanha.
-- **Novas eras** trazem uma classe nova e equipamentos de nível maior. O poder total pode crescer muito a cada era, e os Ecos acompanham pela curva de dificuldade (1.5). Isso dá novo gás ao jogo sem apagar o que o jogador construiu nos guerreiros.
-- **Memória do Tempo** (pontos por era concluída, gastos em bônus permanentes) fica **de fora por enquanto**. Só voltamos a ela se o reset parecer só perda, e depende de qual bônus seria.
-- **Efeito colateral aceito:** como guerreiros não competem mais pela população da vila, o dilema "aldeões ou guerreiros" perde força. Ele continua existindo nos recursos de treino e na manutenção de comida.
+- **Equipamento** da Forja liga economia e combate.
+- **Estados:** disponível, em marcha (para expedição ou batalha), ferido (com data de cura). Não existe perda permanente.
+- **Derrota:** os que lutaram ficam **feridos com cooldown maior** que o de hoje (25% de chance e 60 s nas expedições) e só voltam depois de curados. Cura na Enfermaria, com custo e tempo. Parte do butim em disputa se perde. Ninguém morre.
+- **Poder de cura:** o tempo de cura depende da Enfermaria (nível) e de recursos como ervas, que vêm da exploração do pântano. Valores no portão da Enfermaria.
+- **Ponto para discutir depois:** sem perda permanente, a pressão da derrota vem do cooldown e do custo da cura. Se ficar leve demais, o custo de contratar e manter um exército grande pode ser calibrado como o principal peso.
+- **Tempo:** o servidor calcula sob demanda até o próximo acontecimento com data. Marcha, cura e treino com data de fim encaixam nesse padrão, sem tick nem servidor de tempo real.
 
 ### 1.8 Telas (todas pensadas para celular de 390 px também)
-1. **Quartel General (botão no HUD ou toque na construção):** abre duas abas, **Treino** e **Mesa de Guerra**. A Mesa de Guerra lista as fases (a próxima destacada, as já vencidas com seu melhor resultado). Nada de arrastar o mapa para lutar.
+1. **Quartel General (botão no HUD ou toque na construção):** abre duas abas, **Tropa** (aventureiros, nível, especialização, equipamento, Alojamento) e **Mesa de Guerra**. A Mesa de Guerra lista as fases (a próxima destacada, as já vencidas com seu melhor resultado). Nada de arrastar o mapa para lutar.
 2. **Cartão do Eco:** tema, nível (fácil/média/difícil/muito difícil/chefe), poder recomendado, classes favorecidas, regra do Eco, butim possível, melhor resultado seu.
 3. **Preparação:** escolher guerreiros (com estado e nível), arrastar para a formação, escolher tática, ver "Poder da tropa X / mínimo Y" (1.5b), e um aviso se algum estiver ferido. Botão "Enviar tropa" mostra o tempo de marcha.
 4. **Marcha:** contador no QG (e um indicador discreto no HUD) com o tempo restante, opção de ver o replay quando a tropa chegar. O tempo de marcha depende da fase (curto nas fáceis, maior nas difíceis), não de distância no mapa.
 5. **Replay:** canvas com o cenário procedural, os dois lados, barras de vida, números de dano discretos. Controles: velocidade 1x/2x, pular, pausar. Duração alvo de 20 a 40 s.
 6. **Resultado:** vitória ou derrota, butim, XP por guerreiro, feridos, o que a derrota custou, botão "tentar de novo" e "voltar ao mapa".
-7. **Quartel:** lista de guerreiros, treinar, subir de nível, escolher especialização, equipamento.
+7. **Tropa (no QG):** lista de aventureiros, subir de nível, escolher especialização, equipamento. A contratação continua na Taverna.
 8. **Enfermaria:** feridos, tempo de cura, custo, acelerar com recurso.
 
 Sem emojis, só Lucide. Pixel art com `image-rendering: pixelated` e escala inteira.
 
-### 1.9 Dados (rascunho de modelos)
-- `Guerreiro`: id, userId, classe, nivel, xp, estado, feridoAte, equipamento (JSON), especializacao. Pertence ao jogador e **atravessa as eras**.
-- `Batalha`: id, userId, fase, semente, formacao (JSON), tatica, resultado, logEventos (JSON compacto), marchaTerminaEm, resolvida.
-- `CampanhaProgresso`: userId, melhorFase, faseAtual, derrotasSeguidas, eraAtual.
-- `QuartelGeneral`: userId, nivel, capacidadeAlojamento, tamanhoMaxTropa (ou derivados do nível).
+### 1.9 Dados (rascunho)
+O estado do jogador é um JSON versionado salvo por jogador. Mudanças entram nele com migração de versão:
+- **Bloco persistente (novo):** o que atravessa a ascensão: QG (nível, Alojamento), aventureiros, progresso da campanha (melhor fase, derrotas seguidas), nível da Falha por era, relíquias e Crônica (já persistem).
+- **Aventureiro (evolução do atual):** classe (agora 4), atributos de combate, especialização, estado ampliado com "em marcha de batalha".
+- **Batalha:** semente (do segredo.rng já usado nas expedições), formação, tática, resultado, log de eventos compacto, fim da marcha. Pode ficar no estado ou em tabela própria, o plano do portão 23 decide pelo tamanho.
 - O Eco **não** é guardado: sai de `gerarEco(fase)`.
+- Mapa: `mapa_meta.json` ganha o campo `pontosDeInteresse` (Ruínas do QG, relíquias, lotes), o que exige mudar o esquema Zod estrito. A imagem do mapa não muda.
 
-Nota: a auditoria precisa verificar o que já existe de "expedição" e "aventureiro" no código, porque podem se sobrepor à marcha de tropas. Se já houver uma mecânica de expedição com tempo, reaproveitar em vez de duplicar.
+### 1.10 Ascensão, era e dificuldade crescente (rascunho, A CONFIRMAR)
+
+**Um único evento de reset, com dois destinos.** Em ambos a vila reseta (construções, recursos, população, descobertas do mapa) e **ficam** QG, aventureiros, relíquias, Crônica e campanha.
+
+| | **Ascensão (Recomeçar com Bônus)** | **Avançar de era** |
+|---|---|---|
+| Quando | Objetivos do ciclo cumpridos (hoje: Carta Real, Cripta vencida, 40 aldeões) | Objetivos cumpridos **e** chefe da fase 30 vencido |
+| Ganho | Relíquias (bônus permanentes) | Conteúdo novo: construções, recursos, classe, equipamentos, temas de Eco, lore |
+| Dificuldade | **A Falha sobe um nível** | **A Falha zera** |
+| Para quem | Quem quer otimizar e subir no ranking | Quem quer ver o jogo crescer |
+
+**A Falha** é a ideia de que "a cada recomeço o Relógio falha mais". É um nível por era, que começa em zero e sobe a cada Ascensão. A auditoria do código mostrou o que se pode escalar com segurança e o que não.
+
+**Escala bem (candidatos, valores de rascunho a calibrar):**
+- **Tempo de obras e pesquisas:** +3% por nível. Não mexe em custo, não toca a capacidade do armazém e não pune quem fica fora.
+- **Custo de pesquisa:** +5% por nível, **só em Estradas Reais e Carta Real** (a Cartografia abre também a Mina e o Pântano, então não encarece). **Implementado no Portão 18b.** Na Falha 10 a Carta Real passa a pedir o Armazém 2.
+- **Perigo da Cripta:** a função existe (`perigoDestino`) com acréscimo **0** e será **ligada no Portão 25**. Motivo: hoje o grupo volta ao nível 1 ao ascender, e com +10 por nível o grupo típico cairia a 5% de vitória já na Falha 4. Só faz sentido quando os aventureiros atravessarem a ascensão. O valor será calibrado então (por exemplo +3 por nível até um teto menor que o rascunho de 170). Até lá, o texto da Ascensão não menciona a Cripta.
+- **Objetivo de campanha** (depois que o combate existir): ter vencido a fase `5 × nível de Falha`. Liga a Ascensão à campanha sem mexer na dificuldade dos Ecos.
+- **Bandidos (opcional):** o nível de Muralha necessário para anulá-los sobe com a Falha (por exemplo, nível 1 mais 1 a cada 3 níveis). É decisão de preparo, e não punição, porque quem tem a Muralha certa não perde nada.
+
+**Não escala (descartado):**
+- **Custo de construção:** a Taverna 10 já custa exatamente a capacidade máxima, então qualquer fator acima de 1 recria o problema do armazém.
+- **Objetivo de 40 aldeões:** é um teto físico (um terreno de Casa, nível 10), então não pode crescer.
+- **Perdas percentuais dos eventos:** eles acontecem também offline, então aumentá-las puniria quem ficou fora, contra o princípio do jogo.
+- A **campanha de Ecos não é afetada** pela Falha.
+
+**Relíquias hoje (da auditoria):** seis tipos (Mãos Calejadas, Bênção da Colheita, Legado, Caminhos Eternos, Sabedoria Ancestral, Linhagem Heroica). Ganho por ascensão: `3 + 2 × (ciclo − 1)`, acumulado cresce como k² + 2k. Comprar todas no máximo custa 938, o que leva cerca de 30 ascensões. Depois disso, as relíquias acumulam sem ter onde gastar.
+
+**Princípios:**
+- As relíquias crescem rápido e esgotam, então as duas curvas (relíquias e Falha) precisam ser **calibradas juntas**. Com a Falha parada no teto (rascunho: nível 10) e as relíquias ainda subindo, os ciclos 11 a 30 ficariam fáceis. Respostas: **(a)** novas relíquias de combate e do QG, para as relíquias terem onde gastar (ideias: cura mais rápida, +1 vaga de Alojamento, aventureiros novos com equipamento melhor, bônus pequeno de poder); **(b)** avançar de era zera a Falha e traz conteúdo, mas a **Era II precisa existir** antes de muitos jogadores chegarem a 10 ascensões; **(c)** calibrar os valores com o ritmo real.
+- Meta de calibragem: ciclos com duração parecida (variação de uns 10%), e não cada vez mais curtos ou longos.
+- **Aplicar a Falha só a partir da próxima ascensão.** Mudar custos no meio do ciclo de quem já está jogando seria injusto.
+- Tudo em **contas inteiras no game-core**, para o cliente prever igual ao servidor, com os testes "um passo = muitos passos" e de capacidade cobrindo o fator.
+- **Avançar de era dá a vantagem real de zerar a Falha**, além do conteúdo, o que torna a escolha entre as duas significativa.
+- Como só a Era I é jogável hoje, **só a Ascensão vale agora**.
+- **Ranking:** mantém era, ciclo, relíquias e fase. Com a Falha, cada ciclo vale mais que o anterior, o que combina com o critério atual.
+
+**Achados da auditoria para o portão de tetos (18):** o **Legado** (relíquia que dá recursos iniciais) é cortado pelo teto inicial do armazém (300), então acima do nível 3 o bônus de madeira se perde e cerca de metade dos 8 níveis rende pouco ou nada. Além disso, os eventos de ganho fixo (+30 madeira, +40 comida, +20 saber) ficam irrelevantes nos níveis altos. Os dois pedem ajuste (por exemplo, ganhos proporcionais à capacidade).
+
+**Marcas do Relógio (opcional, A CONFIRMAR):** antes de recomeçar, o jogador pode aceitar modificadores voluntários ("Colheita escassa", "Chuva constante", "Bandidos ousados") em troca de relíquias extras. Dá escolha e competição de ranking, e fica de fora da primeira versão.
 
 ---
 
@@ -218,15 +268,16 @@ O mapa continua sendo o espaço de descoberta e economia. O combate saiu dele e 
 **A Névoa cobre o mapa no começo de cada era.** Explorar é recuar a Névoa. Cada região revelada oferece recursos, lotes de construção, relíquias e lore. A primeira grande descoberta é o **Quartel General**.
 
 ### 2.2 O Quartel General como marco de exploração
-- Fica numa região **próxima da vila**, alcançável na **primeira ou segunda expedição**, para o jogador liberar o combate já na primeira sessão.
+- Vira um **destino novo** no sistema de expedições que já existe (hoje são 5 destinos fixos, com pin, rótulo, trilha, perigo, duração de 30 a 300 s, saque e pesquisa exigida). Fica **perto da vila**, alcançável na primeira ou segunda expedição, para o jogador liberar o combate já na primeira sessão.
+- O soldado inicial já basta para a primeira expedição (o grupo é de até 3).
 - O Sábio dá a dica ("as pedras do norte guardam algo") se o jogador demorar.
-- Ao revelar o local, aparecem as **Ruínas do Quartel General**. O jogador paga um custo inicial baixo para **reerguer**, e a partir daí treino e Mesa de Guerra funcionam.
-- Nas eras seguintes, o QG já aparece construído, sem precisar redescobrir.
+- Ao concluir a expedição, aparecem as **Ruínas do Quartel General**. O jogador paga um custo inicial baixo para **reerguer**, e a partir daí a Mesa de Guerra funciona.
+- Depois do primeiro reset, o QG já aparece construído, sem precisar redescobrir.
 
 ### 2.3 Como a exploração funciona
-- No começo da era só a área da vila está revelada. O resto é Névoa (o Portão 9 já previa pins e névoa).
-- **Expedições** (aventureiros ou batedores) revelam regiões, com tempo proporcional à distância e algum risco. A auditoria precisa ver o que já existe de expedição no código.
-- Cada expedição tem **custo de oportunidade**: quem sai deixa de produzir.
+- **Já existe e é reaproveitado:** destinos fixos com pin, grupo de até 3 aventureiros, resultado sorteado no servidor na partida, feridos, XP e relatórios. A Névoa hoje existe só na Cripta (um círculo fixo que sai com Estradas Reais).
+- **Novo, em etapas:** primeiro só o destino das Ruínas do QG (pequeno). A **Névoa por região** e a revelação por expedição ficam para o portão de exploração completa (26).
+- Cada expedição tem **custo de oportunidade**: quem sai fica fora da vila e fora de outras expedições.
 
 ### 2.4 Regiões e o que cada uma dá
 O mapa atual tem material para isso (rios, lago, pântano, cripta, florestas, minas, pontes, estradas, montanhas e Easter eggs).
@@ -249,8 +300,8 @@ O mapa atual tem material para isso (rios, lago, pântano, cripta, florestas, mi
 - **A Névoa volta a cada era**, cobrindo de novo e com mudanças (a cripta se transforma, o pântano avança), então explorar de novo continua valendo.
 
 ### 2.6 O que isso exige do mapa atual
-- Camada de **névoa** por região.
-- Lista de **pontos de interesse** (QG, relíquias, lotes, regiões) num JSON ao lado do `mapa_meta.json`.
+- Campo `pontosDeInteresse` no `mapa_meta.json` (Ruínas do QG, relíquias, lotes) e a alteração do esquema Zod estrito.
+- Camada de **névoa** por região, reaproveitando o desenho da névoa da Cripta (textura, borda, culling).
 - Culling e desempenho com as mesmas regras das árvores.
 - Nada disso exige refazer a imagem do mapa.
 
@@ -258,21 +309,22 @@ O mapa atual tem material para isso (rios, lago, pântano, cripta, florestas, mi
 
 ## PARTE 3. COMO ISSO ENTRA NOS PORTÕES
 
-Cada um com auditoria, plano e aprovação antes de implementar:
+Cada um com auditoria, plano e aprovação antes de implementar. Os números 16 a 27 seguem a tabela já combinada.
 
-1. **Auditoria geral** (aldeões e soldado, já entregue) **mais** o que existe de expedição, aventureiro, névoa, pins, transição de era e do que fica ou reseta hoje.
-2. **16. Lore e objetivo** (Marco da era, Diário).
-3. **17. Aldeões e ofícios.**
-4. **18. Pressão** (manutenção, tetos, a Névoa como ameaça).
-5. **19. Construção com consequência** (lotes, vizinhança).
-6. **20. Núcleo de combate** (simulador puro com testes, sem tela), **função de Poder** e **script de calibragem** (inclui o fator do mínimo). Não depende de mapa nem de QG.
-7. **21. Exploração mínima e descoberta do QG:** Névoa, expedição, Ruínas do QG, reerguer. É o que libera o combate para o jogador.
-8. **22. Quartel General: Treino, Alojamento e guerreiros** (classes, XP, estados, capacidade).
-9. **23. Mesa de Guerra e Ecos:** gerarEco, cartão, **Poder mínimo e recomendado**, preparação, marcha por fase, replay, resultado.
-10. **24. Derrota e consequências** (feridos, perdas).
-11. **25. Avançar de era:** reset da vila, QG e guerreiros que permanecem, novos equipamentos e classe da era, Marco.
-12. **26. Exploração completa:** relíquias, Diário, lotes, marcos, Névoa de volta a cada era.
-13. **27. Eventos com escolha ampliados.**
+0. **Ajustes rápidos** (prompt entregue, aldeões visíveis e Ocioso no mapa): aldeões visíveis em qualquer zoom e largura, texto de ajuda sobre a guilda.
+0b. **Auditoria complementar:** concluída. Os achados estão incorporados na seção 1.10 e nos portões abaixo.
+16. **Lore e objetivo** (Marco da era, Diário).
+17. **Aldeões e ofícios:** **alocação** no lugar do rodízio automático de hoje, população e comida.
+18. **Pressão, tetos e Falha: concluído.** 18a (Legado com piso de teto, eventos de ganho proporcionais ao teto, regra do Fazendeiro pelo saldo de comida) commitada; 18b (campo `falha`, esquema 7, tempo +3% e pesquisa +5% por nível, tela de Eras e Ascensão) implementada e conferida, aguardando commit. A Cripta fica para o 25.
+19. **Construção com consequência** (lotes, vizinhança).
+20. **Núcleo de combate no game-core** (simulador puro com testes, sem tela), **função de Poder**, **script de calibragem** (inclui o fator do mínimo) e **migração das cinco classes para as quatro**.
+21. **Descoberta do QG:** destino novo no sistema de expedições, `pontosDeInteresse` no meta, reerguer.
+22. **QG e aventureiros unificados:** bloco persistente no estado, Alojamento no QG, estados e capacidade, manutenção de comida, **contratação com escolha de classe** e arte das três classes novas.
+23. **Mesa de Guerra e Ecos:** gerarEco, cartão, **Poder mínimo e recomendado**, preparação, marcha por fase, replay, resultado.
+24. **Enfermaria e derrota:** feridos com cooldown maior, custos de cura.
+25. **Ascensão com Bônus e avançar de era:** a ascensão passa a manter QG e aventureiros, **liga o perigo da Cripta na Falha** (valor calibrado), **novas relíquias de combate e do QG**; depois o avançar de era com Falha zerada e conteúdo novo (a Era II precisa existir).
+26. **Exploração completa:** Névoa por região, relíquias do mapa, Diário, lotes, marcos, temas de Eco por região.
+27. **Eventos com escolha ampliados.**
 
 O 20 vem antes das telas porque o simulador testado e calibrado é a parte mais arriscada.
 
@@ -280,14 +332,19 @@ O 20 vem antes das telas porque o simulador testado e calibrado é a parte mais 
 
 ## PARTE 4. ESTADO DAS DECISÕES
 
-**Todas as perguntas abertas foram respondidas** (ver "Decisões já fechadas" no topo, itens 1 a 15).
+**Fechadas:** as listadas no topo (itens 1 a 17).
+
+**Para você confirmar:**
+1. Seção **1.10**: os efeitos da Falha revistos depois da auditoria (tempo, pesquisa, Cripta, meta de campanha, bandidos opcionais) e o que foi descartado.
+2. **Contratação com escolha de classe** no lugar do sorteio de hoje (seção 1.7).
+3. Mapeamento das classes na seção 1.3 (ladino para Arqueiro, clérigo para Cavaleiro).
+4. Novas relíquias de combate e do QG, para as relíquias não esgotarem (portão 25).
 
 Ficam para trabalhar **dentro dos portões**, não antes:
 1. Fórmula do Poder e fator do mínimo (portão 20, por simulação).
-2. Curva da manutenção do Alojamento e capacidade por nível do QG (portão 22).
-3. Valores de cura, cooldown e custo de contratação (portão da Enfermaria e do Treino). Atenção especial ao equilíbrio sem perda permanente.
+2. Curva da manutenção de comida e capacidade do Alojamento por nível do QG (portão 22).
+3. Valores de cura, cooldown e custo (portão 24). Atenção ao equilíbrio sem perda permanente.
 4. Tempos de marcha por fase (portão 23).
-5. Atributos e habilidades das quatro classes (portão 22).
-6. Eventual retorno da Memória do Tempo, caso o reset pareça só perda.
-
-**Antes do primeiro portão de implementação:** rodar a **auditoria geral** (`PROMPT_AUDITORIA_ALDEOES.md`, ampliada), para confirmar no código o que o documento supõe.
+5. Atributos e habilidades das quatro classes (portão 20).
+6. Valores da Falha, teto e calibragem do tempo de cada ciclo (portões 18 e 25).
+7. Se a interface chama a unidade de "guerreiro" ou "aventureiro" (portão 22).

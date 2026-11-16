@@ -1,7 +1,7 @@
 # Cronarca: Visão e Decisões (rascunho para aprovação)
 
 Status: **rascunho, nada aqui está implementado.**
-> **Revisão posterior:** combate e exploração foram separados e o QG foi definido. Ao avançar de era a vila reseta, e o Quartel General e os guerreiros (com seus níveis) permanecem, com o QG tendo Alojamento próprio. Os detalhes e a nova ordem de portões estão em `CRONARCA_COMBATE_E_MAPA.md`, que vale mais que este documento onde houver diferença (seções 4.2, 4.3, 4.4 e 8).
+> **Revisão posterior:** o plano evoluiu depois da auditoria do código. Onde este documento divergir de `CRONARCA_COMBATE_E_MAPA.md`, vale o outro. Principais diferenças: aventureiro e guerreiro são a mesma unidade, o simulador fica no game-core, o reset tem dois destinos (Ascensão com Bônus e Avançar de era, com a Falha), as relíquias fazem o papel de bônus permanente, e a contratação continua na Taverna. Seções 4.1 a 4.5 e 8 estão desatualizadas.
  Este documento define o que o jogo quer ser antes de virar portões para o Claude Code. Itens marcados como DECISÃO MINHA são palpites que você precisa confirmar ou trocar.
 
 ## 1. O problema que isto resolve
