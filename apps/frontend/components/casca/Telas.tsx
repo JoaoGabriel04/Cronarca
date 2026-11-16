@@ -342,7 +342,6 @@ export function TelaEras({ estado, acoes }: { estado: VisaoCliente; acoes: Acoes
       <div className={estilos.principal}>
         <Painel
           titulo={era.titulo}
-          subtitulo={era.texto}
           extra={
             <>
               <span className={`${estilos.etiqueta} ${estilos.etiquetaCiclo}`}>{era.ciclo}</span>
@@ -353,6 +352,11 @@ export function TelaEras({ estado, acoes }: { estado: VisaoCliente; acoes: Acoes
             </>
           }
         >
+          {/* Portão 16: o lema da era é o alvo; os três objetivos abaixo são o caminho até ele. */}
+          <div className={`caixa ${estilos.cartao} ${estilos.marcoEra}`}>
+            <p className={estilos.marcoRotulo}>Marco da era</p>
+            <p className={estilos.marcoTexto}>{era.texto}</p>
+          </div>
           <div className={estilos.eraTopo}>
             <ul className={estilos.lista}>
               {era.objetivos.map((o) => (

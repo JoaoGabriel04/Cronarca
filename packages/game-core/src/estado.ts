@@ -2,6 +2,8 @@
 // Unidades: recursos em micro-unidades, tempo em ms desde a época Unix.
 import { z } from 'zod';
 import { FALHA } from '../data/falha.ts';
+import { CAPITULOS_IDS } from '../data/lore.ts';
+import { diarioDaMigracao } from './diario.ts';
 import { CONFIG_ALDEOES_INICIAL, OFICIOS_ALDEAO, POLITICAS_ALDEOES } from '../data/aldeoes.ts';
 import { CLASSES, OFICIOS } from '../data/aventureiros.ts';
 import { DESTINOS_IDS } from '../data/expedicoes.ts';
@@ -14,7 +16,7 @@ import { FORMULAS } from '../data/formulas.ts';
 import { VERSOES_MAPA } from '../data/mapa.ts';
 import { termosDoMercador } from './mercador.ts';
 
-export const VERSAO_ESQUEMA = 7;
+export const VERSAO_ESQUEMA = 8;
 
 const inteiro = z.number().int();
 const naoNegativo = inteiro.min(0);
@@ -139,6 +141,10 @@ export const esquemaEstado = z
     /** Baldes de fichas do clique (fichas em milésimos), no relógio do servidor. */
     cliques: z.strictObject({ usuario: esquemaBalde, objetos: z.record(z.string(), esquemaBalde) }),
     cronica: z.array(z.strictObject({ icone: z.string(), texto: z.string(), em: instante })),
+    /** Esquema 8 (Portão 16): capítulos do Diário liberados, na ordem; atravessa a ascensão. */
+    diario: z.array(z.enum(CAPITULOS_IDS)),
+    /** Esquema 8: o prólogo já foi visto (não abre de novo, nem noutro aparelho). */
+    prologoVisto: z.boolean(),
     /** Esquema 3: as últimas expedições que voltaram. */
     relatorios: z.array(esquemaRelatorio),
     /** Só do servidor: nunca vai para o cliente (ver visaoDoCliente). */
@@ -199,6 +205,11 @@ export function migrarEstado(bruto: unknown, versaoEsquema: number): { estado: u
     // Falha (Portão 18b): ninguém é afetado retroativamente; todos começam em 0 e sobem na próxima ascensão.
     estado = { ...estado, versao: 7, falha: 0 };
     versao = 7;
+  }
+  if (versao === 7) {
+    // Diário (Portão 16): o que já vale hoje, mais a Era I de quem já ascendeu; contas antigas não veem o prólogo de novo.
+    estado = { ...estado, versao: 8, diario: diarioDaMigracao(estado as Parameters<typeof diarioDaMigracao>[0]), prologoVisto: true };
+    versao = 8;
   }
   return { estado, versao };
 }

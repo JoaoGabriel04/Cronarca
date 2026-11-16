@@ -12,6 +12,7 @@ import { PESQUISAS } from '../data/pesquisas.ts';
 import { NOMES_RECURSOS, RECURSOS, type Recurso } from '../data/recursos.ts';
 import { SLOT_IDS, SLOTS } from '../data/slots.ts';
 import { formatarInteiro, registrar } from './cronica.ts';
+import { liberarCapitulos } from './diario.ts';
 import type { EstadoJogo, Expedicao } from './estado.ts';
 import { xpParaSubir } from './formulas.ts';
 import { abrirMercador } from './mercador.ts';
@@ -187,6 +188,9 @@ function processarVencimentos(e: EstadoJogo, s: Sorteador) {
 
   // Quem terminou o deslocamento passa a produzir no ofício novo.
   for (const a of e.aldeoes) if (a.ativoEm !== undefined && a.ativoEm <= t) delete a.ativoEm;
+
+  // Diário (Portão 16): capítulos cujas condições passaram a valer (obra, pesquisa, Cripta, aldeões).
+  liberarCapitulos(e, t);
 }
 
 /** Próximo instante em que algo muda (ou `alvo`, se nada mudar antes). */

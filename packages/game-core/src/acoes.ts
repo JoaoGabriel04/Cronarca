@@ -20,6 +20,7 @@ import {
 } from './formulas.ts';
 import { estadoInicial, sortearNome } from './inicial.ts';
 import { aplicarBonus, bp, mili, micro } from './inteiros.ts';
+import { liberarCapitulos } from './diario.ts';
 import { liquidar, receber } from './liquidar.ts';
 import { descreverTroca } from './mercador.ts';
 import { destinoAberto, nivelReliquia, objetivosEra, quantosNoOficio, vagasGuilda } from './regras.ts';
@@ -49,6 +50,7 @@ export const esquemaAcao = z.discriminatedUnion('tipo', [
   z.strictObject({ tipo: z.literal('configurar_aldeoes'), automatica: z.boolean(), politica: z.enum(POLITICAS_ALDEOES) }),
   z.strictObject({ tipo: z.literal('comprar_reliquia'), reliquia: z.enum(RELIQUIAS_IDS) }),
   z.strictObject({ tipo: z.literal('ascender') }),
+  z.strictObject({ tipo: z.literal('fechar_prologo') }),
   z.strictObject({
     tipo: z.literal('clicar'),
     objeto: idCurto,
@@ -271,6 +273,11 @@ function aplicador(acao: Acao, agora: number, opcoes: OpcoesAcao): Aplicador {
         registrar(e, 'Reliquia', `${dados.nome} chegou ao nível ${nivel + 1}.`, e.t);
       };
 
+    case 'fechar_prologo':
+      return (e) => {
+        e.prologoVisto = true;
+      };
+
     case 'ascender':
       // Tratada à parte em aplicarAcao: troca o estado inteiro.
       return () => undefined;
@@ -309,8 +316,11 @@ function ascender(e: EstadoJogo, s: Sorteador): ErroAcao | EstadoJogo {
     // A Falha sobe 1 a cada Ascensão, até o máximo, e passa para o ciclo seguinte.
     falha: Math.min(FALHA.nivelMaximo, e.falha + 1),
     cronica: e.cronica,
+    diario: e.diario,
+    prologoVisto: e.prologoVisto,
   });
   registrar(novo, 'Ascensao', `Ascensão! O reino renasce no ciclo ${novo.ciclo} com +${ganho} relíquias.`, e.t);
+  liberarCapitulos(novo, e.t);
   return novo;
 }
 

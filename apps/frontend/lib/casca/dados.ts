@@ -178,6 +178,8 @@ export interface LinhaCronica {
 const ICONE: Record<IconeCronica, string> = {
   Check: 'check', Construir: 'construir', Expedicao: 'expedicao', Evento: 'evento', Aldeao: 'aldeao', Aventureiro: 'aventureiro',
   Reliquia: 'reliquia', Ascensao: 'ascensao', Alerta: 'alerta', Tempo: 'tempo', Saber: 'saber', Ouro: 'ouro',
+  // Portão 16: página nova no Diário usa o ícone do saber (os livros do Sábio).
+  Diario: 'saber',
 };
 
 /** As `n` linhas mais recentes, da mais nova para a mais velha. */

@@ -5,8 +5,8 @@
 // as telas (Portão 12) e os modais (Portão 13). Carregando: tela de carregamento.
 
 import {
-  construiveis, CONSTRUCOES, DESTINOS, linhasCatalogo, mapaDaVersao, NOMES_RECURSOS, PALAVRA_APAGAR, PESQUISAS, preverEstado, recursoDoObjeto, SLOTS,
-  type Acao, type DestinoId, type PesquisaId, type Recurso, type SlotId,
+  construiveis, CONSTRUCOES, DESTINOS, linhasCatalogo, mapaDaVersao, NOMES_RECURSOS, PALAVRA_APAGAR, PESQUISAS, preverEstado, proximoPasso, recursoDoObjeto, SLOTS,
+  type Acao, type CapituloId, type DestinoId, type PesquisaId, type Recurso, type SlotId,
 } from '@cronarca/game-core';
 import { gsap } from 'gsap';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
@@ -35,6 +35,8 @@ import { Hud } from '../casca/Hud';
 import { Catalogo } from '../casca/Catalogo';
 import { ModalAscensao, ModalConfiguracoes, ModalObra, ModalPesquisa } from '../casca/Modais';
 import { ModalRanking } from '../casca/Ranking';
+import { ChipObjetivo, FaixaObjetivo, ModalDiario, ModalObjetivo, ModalPrologo } from '../casca/Objetivo';
+import { deveAbrirPrologo, gravarLidos, lerLidos, linhasDiario, marcarPrologoNoNavegador, novosNoDiario, prologoVistoNoNavegador } from '../../lib/casca/diario';
 import { CartaoAldeoes, PainelLateral, type EventoCasca } from '../casca/Paineis';
 import { TelaEras, TelaExpedicoes, TelaHerois, type AcoesTela } from '../casca/Telas';
 import { AlternarVisao, BotaoConstruirFlutuante, ChipEvento, ControleZoom, Minimapa, PopupMercador, type Visao } from '../casca/SobreMapa';
@@ -56,6 +58,10 @@ type ModalAberto =
   | { tipo: 'pesquisa' }
   | { tipo: 'configuracoes' }
   | { tipo: 'ranking' }
+  /** Portão 16: painel dos objetivos, Diário e prólogo. */
+  | { tipo: 'objetivo' }
+  | { tipo: 'diario' }
+  | { tipo: 'prologo' }
   | null;
 
 /** Baixa a cópia somente leitura do reino (Configurações): o estado visível, sem a parte secreta. */
@@ -158,6 +164,18 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
     if (coluna.current) gsap.fromTo(coluna.current, { opacity: 0, x: 12 }, { opacity: 1, x: 0, duration: 0.25, ease: 'power2.out' });
   }, [visao]);
 
+  // Portão 16: capítulos já abertos neste navegador (ponto de "novo") e o prólogo na primeira entrada.
+  const [lidos, setLidos] = useState<ReadonlySet<string>>(() => new Set());
+  useEffect(() => setLidos(lerLidos()), []);
+  const prologoPedido = useRef(false);
+  useEffect(() => {
+    if (prologoPedido.current || !visivel || !quadrosProntos || modal || visivel.mercador) return;
+    if (deveAbrirPrologo(visivel, prologoVistoNoNavegador())) {
+      prologoPedido.current = true;
+      setModal({ tipo: 'prologo' });
+    }
+  }, [visivel, quadrosProntos, modal]);
+
   if (!visivel || !mundo || !quadrosProntos) return <CarregandoReino erro={Boolean(jogo.erro)} aoTentarDeNovo={jogo.recarregar} />;
 
   const agora = relogio();
@@ -166,6 +184,19 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
   const destinos = cartasDestinos(visivel, agora);
   const sincronia: Sincronia = { ...jogo.sinc.sincronia(), semConexao: jogo.sinc.sincronia().semConexao || Boolean(jogo.erro) };
   const selo = seloConstruir(visivel, vistos);
+  const passo = proximoPasso(visivel);
+  const novosDiario = novosNoDiario(visivel, lidos);
+  const abrirCapitulo = (id: CapituloId) => {
+    if (lidos.has(id)) return;
+    const novos = new Set([...lidos, id]);
+    setLidos(novos);
+    gravarLidos(novos);
+  };
+  const fecharPrologo = () => {
+    marcarPrologoNoNavegador();
+    setModal(null);
+    if (!visivel.prologoVisto) void enviarPrevista({ tipo: 'fechar_prologo' });
+  };
 
   // Enviar/Ver (painel Destinos) e pin aberto no mapa levam à aba Expedições no
   // destino. Melhorar (painel), slot vazio e construção no mapa abrem o modal
@@ -351,7 +382,10 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
         selo={selo}
         aoPesquisar={() => setModal({ tipo: 'pesquisa' })}
         seloPesquisa={seloPesquisa(visivel)}
+        aoDiario={() => setModal({ tipo: 'diario' })}
+        novosDiario={novosDiario}
       />
+      <FaixaObjetivo texto={passo.principal} novos={novosDiario} aoAbrir={() => setModal({ tipo: 'objetivo' })} aoDiario={() => setModal({ tipo: 'diario' })} />
       <Abas
         ativa={aba}
         aoTrocar={(a) => {
@@ -359,6 +393,9 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
           setDestaque(null);
         }}
       >
+        <div className={estilos.objetivoAbas}>
+          <ChipObjetivo texto={passo.principal} aoAbrir={() => setModal({ tipo: 'objetivo' })} />
+        </div>
         <IndicadorSalvo sincronia={sincronia} agoraLocal={Date.now()} />
       </Abas>
 
@@ -499,6 +536,20 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
         />
       )}
       {modal?.tipo === 'ranking' && <ModalRanking eraDoJogador={visivel.era} aoFechar={() => setModal(null)} />}
+      {modal?.tipo === 'objetivo' && (
+        <ModalObjetivo
+          passo={passo}
+          aoEras={() => {
+            setModal(null);
+            setAba('eras');
+          }}
+          aoFechar={() => setModal(null)}
+        />
+      )}
+      {modal?.tipo === 'diario' && (
+        <ModalDiario linhas={linhasDiario(visivel, lidos)} aoAbrir={abrirCapitulo} aoPrologo={() => setModal({ tipo: 'prologo' })} aoFechar={() => setModal(null)} />
+      )}
+      {modal?.tipo === 'prologo' && <ModalPrologo aoFechar={fecharPrologo} />}
       {confirmacao.pedido?.tipo === 'ascender' && (
         <ModalAscensao dados={dadosAscensao(visivel)} enviando={false} aoConfirmar={() => confirmacao.responder(true)} aoFechar={() => confirmacao.responder(false)} />
       )}

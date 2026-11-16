@@ -2693,3 +2693,105 @@
     min-height: 44px;
   }
 }
+
+/* ---------- Portão 16: Objetivo (chip na linha das abas; faixa abaixo de 1024 px) e Diário ---------- */
+.objetivoAbas {
+  min-width: 0;
+  flex: 0 1 520px;
+  margin-left: 16px;
+}
+.chipObjetivo {
+  --borda: #2a1c12;
+  --fundo: #3a2a1c;
+  --realce: #5a4030;
+  --sombra: #2a1c12;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 15px;
+  color: #f0d890;
+  cursor: pointer;
+}
+.chipObjetivo svg {
+  flex: none;
+}
+.chipObjetivo:hover {
+  filter: brightness(1.15);
+}
+.chipObjetivo:focus-visible {
+  outline: 3px solid var(--ouro-claro);
+  outline-offset: 2px;
+}
+.chipObjetivoRotulo {
+  flex: none;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #c8a860;
+}
+.chipObjetivoTexto {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: #f6efdc;
+}
+.faixaObjetivo {
+  display: none;
+}
+.pontoNovo {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #2a1c12;
+  background: #e05a3a;
+  pointer-events: none;
+}
+@media (max-width: 1023px) {
+  .objetivoAbas,
+  .botoesHud .diarioHud {
+    display: none;
+  }
+  .faixaObjetivo {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 0 12px 8px;
+  }
+  .faixaObjetivo > .chipObjetivo {
+    flex: 1 1 auto;
+  }
+  .chipObjetivoRotulo {
+    display: none;
+  }
+}
+
+/* Portão 16: Marco da era (lema da era) acima dos objetivos. */
+.cartao.marcoEra {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-content: start;
+  gap: 2px;
+  height: auto;
+  margin-bottom: 12px;
+  padding: 10px 16px;
+}
+.marcoRotulo {
+  margin: 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8a6a48;
+}
+.marcoTexto {
+  margin: 0;
+  font-size: 17px;
+  color: #3a261c;
+}

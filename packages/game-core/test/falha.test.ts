@@ -151,13 +151,13 @@ describe('previsão e liquidação', () => {
   });
 });
 
-describe('esquema 7', () => {
+describe('esquema 7 (Falha)', () => {
   it('save do esquema 6 migra com falha 0 (ninguém é afetado retroativamente)', () => {
     const atual = liquidar(novo(), T0 + 10 * MIN);
-    const { falha: _f, ...v6 } = { ...atual, versao: 6 };
+    const { falha: _f, diario: _d, prologoVisto: _p, ...v6 } = { ...atual, versao: 6 };
     const carregado = carregarEstado(JSON.parse(JSON.stringify(v6)), 6);
-    expect(VERSAO_ESQUEMA).toBe(7);
-    expect(carregado).toEqual({ ...atual, falha: 0 });
+    expect(VERSAO_ESQUEMA).toBeGreaterThanOrEqual(7);
+    expect(carregado).toEqual({ ...atual, versao: VERSAO_ESQUEMA, falha: 0, prologoVisto: true });
     // Mesmo quem já ascendeu (ciclo 5) começa na Falha 0.
     const ciclo5 = carregarEstado(JSON.parse(JSON.stringify({ ...v6, ciclo: 5 })), 6);
     expect(ciclo5.falha).toBe(0);

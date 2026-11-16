@@ -71,7 +71,8 @@ describe('visão do cliente', () => {
 describe('migração de saves', () => {
   const antigo = async () => {
     const { estadoInicial } = await import('../src/inicial.ts');
-    const atual = estadoInicial({ semente: 1, agora: Date.UTC(2026, 5, 1) });
+    // Save antigo migra com o prólogo já visto (esquema 8): o estado atual equivalente também.
+    const atual = { ...estadoInicial({ semente: 1, agora: Date.UTC(2026, 5, 1) }), prologoVisto: true };
     // Esquema 3: mundo por semente (Portão 7b, cancelado pela A13).
     const v3 = { ...atual, versao: 3, mundo: { semente: 123456, versaoGerador: 1 } };
     return { atual, v3 };

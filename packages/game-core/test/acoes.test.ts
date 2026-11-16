@@ -291,7 +291,9 @@ describe('relíquias e ascensão', () => {
     expect(d.aventureiros).toHaveLength(1);
     expect(d.pesquisas.concluidas).toEqual([]);
     expect(d.objetivos.criptaVencida).toBe(false);
-    expect(d.cronica.at(-1)?.icone).toBe('Ascensao');
+    // A linha da ascensão, seguida da página nova do Diário (Portão 16).
+    expect(d.cronica.at(-2)?.icone).toBe('Ascensao');
+    expect(d.cronica.at(-1)?.texto).toBe('Nova página no Diário: O Relógio gira de volta.');
     expect(() => esquemaEstado.parse(d)).not.toThrow();
   });
 });

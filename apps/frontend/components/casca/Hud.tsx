@@ -12,6 +12,7 @@ import { useEffect, useRef } from 'react';
 import type { ChipRecurso } from '../../lib/casca/dados';
 import estilos from './casca.module.css';
 import { Icone } from './Icone';
+import { BotaoDiario } from './Objetivo';
 import { MARCA } from '../../lib/marca';
 
 /** Riscos de textura do fundo do HUD (posições do Figma). */
@@ -37,6 +38,9 @@ export interface PropsHud {
   /** Botão Pesquisa (e o chip de Saber): abre o modal de Pesquisa; o selo conta as que dá para começar. */
   aoPesquisar: () => void;
   seloPesquisa: number;
+  /** Diário (Portão 16): no HUD do desktop; abaixo de 1024 px fica na faixa do Objetivo. */
+  aoDiario: () => void;
+  novosDiario: number;
 }
 
 function Valor({ texto }: { texto: string }) {
@@ -86,7 +90,7 @@ export function SeloNumero({ n }: { n: number }) {
   );
 }
 
-export function Hud({ era, chips, pulso, aoSalvar, salvando, aoConfigurar, aoRanking, aoConstruir, selo, aoPesquisar, seloPesquisa }: PropsHud) {
+export function Hud({ era, chips, pulso, aoSalvar, salvando, aoConfigurar, aoRanking, aoConstruir, selo, aoPesquisar, seloPesquisa, aoDiario, novosDiario }: PropsHud) {
   const refs = useRef<Partial<Record<Recurso, HTMLElement | null>>>({});
 
   useEffect(() => {
@@ -157,6 +161,7 @@ export function Hud({ era, chips, pulso, aoSalvar, salvando, aoConfigurar, aoRan
           </button>
           {seloPesquisa > 0 && <SeloNumero n={seloPesquisa} />}
         </span>
+        <BotaoDiario novos={novosDiario} aoAbrir={aoDiario} classe={estilos.diarioHud} />
         <button type="button" className={`caixa ${estilos.botaoHud} ${estilos.rankingHud}`} onClick={aoRanking} aria-label="Ranking" title="Ranking">
           <Icone nome="icone-ranking" />
         </button>

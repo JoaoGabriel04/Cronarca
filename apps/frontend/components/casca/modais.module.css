@@ -1116,3 +1116,120 @@
   font-style: italic;
   color: #6a5a40;
 }
+
+/* ---------- Portão 16: objetivos, Diário e prólogo ---------- */
+.trilhas,
+.diario {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.trilha {
+  display: grid;
+  gap: 4px;
+}
+.trilhaTitulo,
+.capituloTitulo {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+.trilhaCumprida .trilhaTitulo::after {
+  content: ' (cumprido)';
+  font-weight: 400;
+  color: #4a8a52;
+}
+.trilhaCumprida {
+  opacity: 0.75;
+}
+.trilhaPasso {
+  margin: 0;
+  font-size: 15px;
+}
+.trilhaMotivo,
+.capituloDica {
+  margin: 0;
+  font-size: 14px;
+  color: #6e5a40;
+}
+.sabio {
+  margin: 14px 0 0;
+  font-size: 15px;
+  font-style: italic;
+  color: #5a3e24;
+}
+.botaoEras {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: auto;
+  min-width: 200px;
+  margin-top: 14px;
+  padding: 0 14px;
+}
+.capitulo summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 32px;
+  cursor: pointer;
+  list-style: none;
+}
+.capitulo summary::-webkit-details-marker {
+  display: none;
+}
+.capitulo summary:focus-visible {
+  outline: 3px solid var(--ouro-claro);
+  outline-offset: 2px;
+}
+.capituloTexto {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.capituloBloqueado {
+  opacity: 0.6;
+}
+.novo {
+  flex: none;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #f6efdc;
+  background: #8a2420;
+}
+.prologo {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+.seloPrologo {
+  image-rendering: pixelated;
+}
+.prologoTexto {
+  margin: 0;
+  min-height: 4.5em;
+  font-size: 18px;
+  line-height: 1.5;
+  text-align: center;
+}
+.prologoBotoes {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+@media (max-width: 600px) {
+  .capitulo summary {
+    min-height: 44px;
+  }
+  .prologoBotoes .botao {
+    flex: 1 1 0;
+    width: auto;
+  }
+}

@@ -22,6 +22,9 @@ export interface OpcoesInicio {
   reliquias?: EstadoJogo['reliquias'];
   /** Falha do ciclo (Portão 18b); 0 numa conta nova. */
   falha?: number;
+  /** Diário e prólogo (Portão 16): atravessam a ascensão. Conta nova: só o prólogo, ainda não visto. */
+  diario?: EstadoJogo['diario'];
+  prologoVisto?: boolean;
   cronica?: EstadoJogo['cronica'];
 }
 
@@ -73,6 +76,9 @@ export function estadoInicial(op: OpcoesInicio): EstadoJogo {
     reliquias,
     cliques: { usuario: { fichas: FORMULAS.clique.porSegundoUsuario * 1000, em: op.agora }, objetos: {} },
     cronica: structuredClone(op.cronica ?? []),
+    // O prólogo vale desde a conta criada: entra sem linha na Crônica.
+    diario: [...(op.diario ?? ['prologo'])],
+    prologoVisto: op.prologoVisto ?? false,
     relatorios: [],
     segredo: { rng: 0, proximoEventoEm: 0, resultados: {} },
   };

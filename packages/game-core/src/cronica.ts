@@ -5,7 +5,7 @@ import type { EstadoJogo } from './estado.ts';
 /** Ícones da Crônica: nomes do component set Sprite/Icone do Figma. */
 export type IconeCronica =
   | 'Check' | 'Construir' | 'Expedicao' | 'Evento' | 'Aldeao' | 'Aventureiro'
-  | 'Reliquia' | 'Ascensao' | 'Alerta' | 'Tempo' | 'Saber' | 'Ouro';
+  | 'Reliquia' | 'Ascensao' | 'Alerta' | 'Tempo' | 'Saber' | 'Ouro' | 'Diario';
 
 /** Acrescenta uma linha (a mais nova fica no fim) e descarta as mais antigas. */
 export function registrar(e: EstadoJogo, icone: IconeCronica, texto: string, em: number) {
