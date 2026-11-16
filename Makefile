@@ -8,7 +8,7 @@ COMPOSE := docker compose
 MOUNT_DIRS := packages/game-core/node_modules apps/backend/node_modules \
 	apps/frontend/node_modules apps/frontend/.next
 
-.PHONY: help up down logs ps migrate seed reset-db test typecheck conferir-mapa conferir-mobile conferir-inicio conferir-mercador conferir-teto conferir-falha conferir-aldeoes conferir-lore calibrar-combate gerar-frente evento-mercador shell-backend shell-db env-check
+.PHONY: help up down logs ps migrate seed reset-db test typecheck conferir-mapa conferir-mobile conferir-inicio conferir-mercador conferir-teto conferir-falha conferir-aldeoes conferir-lore calibrar-combate conferir-migracao gerar-frente evento-mercador shell-backend shell-db env-check
 
 help: ## Lista os comandos
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-14s\033[0m %s\n", $$1, $$2}'
@@ -93,6 +93,9 @@ conferir-lore: ## Portão 16: prólogo, chip Objetivo, painel dos objetivos, Di�
 
 calibrar-combate: ## Portão 20c: calibragem do combate em lote (sementes fixas, reproduzível); gera docs/CALIBRACAO_COMBATE.md
 	$(COMPOSE) run --rm --no-deps backend node scripts/calibrar-combate.ts
+
+conferir-migracao: ## Portão 20d-3: verificação offline da migração 8 para 9 (em memória; nada é gravado). Sem ARQ usa saves SINTÉTICOS; com ARQ=dumps/saves_producao.json, o dump real
+	$(COMPOSE) run --rm --no-deps backend node scripts/conferir-migracao.ts $(ARQ)
 
 conferir-mercador: evento-mercador ## Negociação do Mercador no Chromium em 1440, 601, 600, 390 e 360 px: termos do servidor, botões e prazo visíveis; capturas em docs/referencia/mercador
 	docker run --rm --network host --user $$(id -u):$$(id -g) -e HOME=/tmp \

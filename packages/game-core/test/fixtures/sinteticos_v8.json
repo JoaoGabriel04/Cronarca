@@ -1,0 +1,1950 @@
+{
+ "sintetico": true,
+ "aviso": "SAVES SINTÉTICOS: gerados pelo código antigo (esquema 8, commit 82a7407) com sementes fixas; não são dados de usuários e NÃO substituem o dump real de produção.",
+ "saves": [
+  {
+   "id": "sint-01-conta-nova",
+   "rev": 7,
+   "versao_esquema": 8,
+   "estado": {
+    "versao": 8,
+    "era": 1,
+    "ciclo": 1,
+    "mundo": {
+     "versaoMapa": 2
+    },
+    "t": 1780315200000,
+    "recursos": {
+     "madeira": 100000000,
+     "pedra": 50000000,
+     "comida": 80000000,
+     "ferro": 15000000,
+     "ouro": 40000000,
+     "saber": 0
+    },
+    "slots": {
+     "casa_1": {
+      "tipo": "casa",
+      "nivel": 1,
+      "obraAte": null
+     },
+     "scriptorium_1": {
+      "tipo": "scriptorium",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "mercado_1": {
+      "tipo": "mercado",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "taverna_1": {
+      "tipo": "taverna",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "armazem_1": {
+      "tipo": "armazem",
+      "nivel": 1,
+      "obraAte": null
+     },
+     "forja_1": {
+      "tipo": "forja",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "serraria_1": {
+      "tipo": "serraria",
+      "nivel": 1,
+      "obraAte": null
+     },
+     "serraria_2": {
+      "tipo": "serraria",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "celeiro_1": {
+      "tipo": "celeiro",
+      "nivel": 1,
+      "obraAte": null
+     },
+     "muralha_1": {
+      "tipo": "muralha",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "pedreira_1": {
+      "tipo": "pedreira",
+      "nivel": 0,
+      "obraAte": null
+     }
+    },
+    "aldeoes": [
+     {
+      "oficio": "fazendeiro"
+     },
+     {
+      "oficio": "lenhador"
+     }
+    ],
+    "aldeoesConfig": {
+     "automatica": true,
+     "politica": "equilibrada"
+    },
+    "progressoAldeaoMs": 0,
+    "aventureiros": [
+     {
+      "id": "a1",
+      "nome": "Brenna",
+      "classe": "guerreiro",
+      "nivel": 1,
+      "xp": 0,
+      "arma": 0,
+      "armadura": 0,
+      "estado": "na_vila",
+      "feridoAte": null
+     }
+    ],
+    "contratacoes": 0,
+    "proximoId": 2,
+    "expedicoes": [],
+    "pesquisas": {
+     "concluidas": [],
+     "atual": null
+    },
+    "objetivos": {
+     "criptaVencida": false
+    },
+    "mercador": null,
+    "falha": 0,
+    "reliquias": {
+     "total": 0,
+     "gastas": 0,
+     "niveis": {}
+    },
+    "cliques": {
+     "usuario": {
+      "fichas": 10000,
+      "em": 1780315200000
+     },
+     "objetos": {}
+    },
+    "cronica": [
+     {
+      "icone": "Check",
+      "texto": "Uma fogueira acesa. Começa a crônica da aldeia.",
+      "em": 1780315200000
+     }
+    ],
+    "diario": [
+     "prologo"
+    ],
+    "prologoVisto": false,
+    "relatorios": [],
+    "segredo": {
+     "rng": 3663131727,
+     "proximoEventoEm": 1780316193889,
+     "resultados": {}
+    }
+   }
+  },
+  {
+   "id": "sint-02-cinco-classes",
+   "rev": 7,
+   "versao_esquema": 8,
+   "estado": {
+    "versao": 8,
+    "era": 1,
+    "ciclo": 1,
+    "mundo": {
+     "versaoMapa": 2
+    },
+    "t": 1780315800000,
+    "recursos": {
+     "madeira": 300000000,
+     "pedra": 50000000,
+     "comida": 136000000,
+     "ferro": 15000000,
+     "ouro": 40000000,
+     "saber": 0
+    },
+    "slots": {
+     "casa_1": {
+      "tipo": "casa",
+      "nivel": 1,
+      "obraAte": null
+     },
+     "scriptorium_1": {
+      "tipo": "scriptorium",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "mercado_1": {
+      "tipo": "mercado",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "taverna_1": {
+      "tipo": "taverna",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "armazem_1": {
+      "tipo": "armazem",
+      "nivel": 1,
+      "obraAte": null
+     },
+     "forja_1": {
+      "tipo": "forja",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "serraria_1": {
+      "tipo": "serraria",
+      "nivel": 1,
+      "obraAte": null
+     },
+     "serraria_2": {
+      "tipo": "serraria",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "celeiro_1": {
+      "tipo": "celeiro",
+      "nivel": 1,
+      "obraAte": null
+     },
+     "muralha_1": {
+      "tipo": "muralha",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "pedreira_1": {
+      "tipo": "pedreira",
+      "nivel": 0,
+      "obraAte": null
+     }
+    },
+    "aldeoes": [
+     {
+      "oficio": "fazendeiro"
+     },
+     {
+      "oficio": "lenhador"
+     },
+     {
+      "oficio": "fazendeiro"
+     },
+     {
+      "oficio": "mineiro"
+     }
+    ],
+    "aldeoesConfig": {
+     "automatica": true,
+     "politica": "equilibrada"
+    },
+    "progressoAldeaoMs": 0,
+    "aventureiros": [
+     {
+      "id": "a100",
+      "nome": "Sintetico0",
+      "classe": "guerreiro",
+      "nivel": 1,
+      "xp": 0,
+      "arma": 0,
+      "armadura": 0,
+      "estado": "na_vila",
+      "feridoAte": null
+     },
+     {
+      "id": "a101",
+      "nome": "Sintetico1",
+      "classe": "arqueiro",
+      "nivel": 4,
+      "xp": 3,
+      "arma": 1,
+      "armadura": 2,
+      "estado": "na_vila",
+      "feridoAte": null
+     },
+     {
+      "id": "a102",
+      "nome": "Sintetico2",
+      "classe": "mago",
+      "nivel": 9,
+      "xp": 11,
+      "arma": 3,
+      "armadura": 3,
+      "estado": "na_vila",
+      "feridoAte": null
+     },
+     {
+      "id": "a103",
+      "nome": "Sintetico3",
+      "classe": "ladino",
+      "nivel": 14,
+      "xp": 25,
+      "arma": 5,
+      "armadura": 4,
+      "estado": "ferido",
+      "feridoAte": 1780317600000
+     },
+     {
+      "id": "a104",
+      "nome": "Sintetico4",
+      "classe": "clerigo",
+      "nivel": 20,
+      "xp": 0,
+      "arma": 6,
+      "armadura": 6,
+      "estado": "na_vila",
+      "feridoAte": null
+     }
+    ],
+    "contratacoes": 0,
+    "proximoId": 105,
+    "expedicoes": [],
+    "pesquisas": {
+     "concluidas": [],
+     "atual": null
+    },
+    "objetivos": {
+     "criptaVencida": false
+    },
+    "mercador": null,
+    "falha": 0,
+    "reliquias": {
+     "total": 0,
+     "gastas": 0,
+     "niveis": {}
+    },
+    "cliques": {
+     "usuario": {
+      "fichas": 10000,
+      "em": 1780315200000
+     },
+     "objetos": {}
+    },
+    "cronica": [
+     {
+      "icone": "Check",
+      "texto": "Uma fogueira acesa. Começa a crônica da aldeia.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um fazendeiro chegou à vila.",
+      "em": 1780315220000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um mineiro chegou à vila.",
+      "em": 1780315240000
+     }
+    ],
+    "diario": [
+     "prologo"
+    ],
+    "prologoVisto": false,
+    "relatorios": [],
+    "segredo": {
+     "rng": 3663131728,
+     "proximoEventoEm": 1780316335080,
+     "resultados": {}
+    }
+   }
+  },
+  {
+   "id": "sint-03-expedicoes-em-andamento",
+   "rev": 7,
+   "versao_esquema": 8,
+   "estado": {
+    "versao": 8,
+    "era": 1,
+    "ciclo": 1,
+    "mundo": {
+     "versaoMapa": 2
+    },
+    "t": 1780315200000,
+    "recursos": {
+     "madeira": 9000000000,
+     "pedra": 9000000000,
+     "comida": 9000000000,
+     "ferro": 9000000000,
+     "ouro": 9000000000,
+     "saber": 9000000000
+    },
+    "slots": {
+     "casa_1": {
+      "tipo": "casa",
+      "nivel": 1,
+      "obraAte": null
+     },
+     "scriptorium_1": {
+      "tipo": "scriptorium",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "mercado_1": {
+      "tipo": "mercado",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "taverna_1": {
+      "tipo": "taverna",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "armazem_1": {
+      "tipo": "armazem",
+      "nivel": 10,
+      "obraAte": null
+     },
+     "forja_1": {
+      "tipo": "forja",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "serraria_1": {
+      "tipo": "serraria",
+      "nivel": 1,
+      "obraAte": null
+     },
+     "serraria_2": {
+      "tipo": "serraria",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "celeiro_1": {
+      "tipo": "celeiro",
+      "nivel": 10,
+      "obraAte": null
+     },
+     "muralha_1": {
+      "tipo": "muralha",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "pedreira_1": {
+      "tipo": "pedreira",
+      "nivel": 0,
+      "obraAte": null
+     }
+    },
+    "aldeoes": [
+     {
+      "oficio": "fazendeiro"
+     },
+     {
+      "oficio": "lenhador"
+     }
+    ],
+    "aldeoesConfig": {
+     "automatica": true,
+     "politica": "equilibrada"
+    },
+    "progressoAldeaoMs": 0,
+    "aventureiros": [
+     {
+      "id": "a100",
+      "nome": "Sintetico0",
+      "classe": "guerreiro",
+      "nivel": 3,
+      "xp": 0,
+      "arma": 0,
+      "armadura": 0,
+      "estado": "em_expedicao",
+      "feridoAte": null
+     },
+     {
+      "id": "a101",
+      "nome": "Sintetico1",
+      "classe": "arqueiro",
+      "nivel": 4,
+      "xp": 0,
+      "arma": 1,
+      "armadura": 1,
+      "estado": "em_expedicao",
+      "feridoAte": null
+     },
+     {
+      "id": "a102",
+      "nome": "Sintetico2",
+      "classe": "mago",
+      "nivel": 5,
+      "xp": 0,
+      "arma": 2,
+      "armadura": 2,
+      "estado": "em_expedicao",
+      "feridoAte": null
+     },
+     {
+      "id": "a103",
+      "nome": "Sintetico3",
+      "classe": "ladino",
+      "nivel": 6,
+      "xp": 0,
+      "arma": 3,
+      "armadura": 3,
+      "estado": "em_expedicao",
+      "feridoAte": null
+     },
+     {
+      "id": "a104",
+      "nome": "Sintetico4",
+      "classe": "clerigo",
+      "nivel": 7,
+      "xp": 0,
+      "arma": 4,
+      "armadura": 4,
+      "estado": "em_expedicao",
+      "feridoAte": null
+     }
+    ],
+    "contratacoes": 0,
+    "proximoId": 107,
+    "expedicoes": [
+     {
+      "id": "x105",
+      "destino": "floresta_lobos",
+      "grupo": [
+       "a100",
+       "a101"
+      ],
+      "inicio": 1780315200000,
+      "fim": 1780315230000
+     },
+     {
+      "id": "x106",
+      "destino": "ruinas",
+      "grupo": [
+       "a102",
+       "a103",
+       "a104"
+      ],
+      "inicio": 1780315200000,
+      "fim": 1780315255000
+     }
+    ],
+    "pesquisas": {
+     "concluidas": [],
+     "atual": null
+    },
+    "objetivos": {
+     "criptaVencida": false
+    },
+    "mercador": null,
+    "falha": 0,
+    "reliquias": {
+     "total": 0,
+     "gastas": 0,
+     "niveis": {}
+    },
+    "cliques": {
+     "usuario": {
+      "fichas": 10000,
+      "em": 1780315200000
+     },
+     "objetos": {}
+    },
+    "cronica": [
+     {
+      "icone": "Check",
+      "texto": "Uma fogueira acesa. Começa a crônica da aldeia.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Expedicao",
+      "texto": "Um grupo partiu para Floresta dos Lobos.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Expedicao",
+      "texto": "Um grupo partiu para Ruínas Esquecidas.",
+      "em": 1780315200000
+     }
+    ],
+    "diario": [
+     "prologo"
+    ],
+    "prologoVisto": false,
+    "relatorios": [],
+    "segredo": {
+     "rng": 503953379,
+     "proximoEventoEm": 1780315862940,
+     "resultados": {
+      "x105": {
+       "vitoria": true,
+       "saque": {
+        "madeira": 46249500,
+        "comida": 28953100,
+        "ferro": 7767100,
+        "ouro": 1002100
+       },
+       "feridos": []
+      },
+      "x106": {
+       "vitoria": true,
+       "saque": {
+        "pedra": 17302800,
+        "ferro": 8521200,
+        "ouro": 10982400,
+        "saber": 2449200
+       },
+       "feridos": []
+      }
+     }
+    }
+   }
+  },
+  {
+   "id": "sint-04-meio-de-jogo",
+   "rev": 7,
+   "versao_esquema": 8,
+   "estado": {
+    "versao": 8,
+    "era": 1,
+    "ciclo": 1,
+    "mundo": {
+     "versaoMapa": 2
+    },
+    "t": 1780324380000,
+    "recursos": {
+     "madeira": 15492000000,
+     "pedra": 15492000000,
+     "comida": 11092041843,
+     "ferro": 8973000000,
+     "ouro": 7477450000,
+     "saber": 11022228000
+    },
+    "slots": {
+     "casa_1": {
+      "tipo": "casa",
+      "nivel": 2,
+      "obraAte": null
+     },
+     "scriptorium_1": {
+      "tipo": "scriptorium",
+      "nivel": 1,
+      "obraAte": null
+     },
+     "mercado_1": {
+      "tipo": "mercado",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "taverna_1": {
+      "tipo": "taverna",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "armazem_1": {
+      "tipo": "armazem",
+      "nivel": 10,
+      "obraAte": null
+     },
+     "forja_1": {
+      "tipo": "forja",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "serraria_1": {
+      "tipo": "serraria",
+      "nivel": 2,
+      "obraAte": null
+     },
+     "serraria_2": {
+      "tipo": "serraria",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "celeiro_1": {
+      "tipo": "celeiro",
+      "nivel": 10,
+      "obraAte": null
+     },
+     "muralha_1": {
+      "tipo": "muralha",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "pedreira_1": {
+      "tipo": "pedreira",
+      "nivel": 1,
+      "obraAte": null
+     }
+    },
+    "aldeoes": [
+     {
+      "oficio": "fazendeiro"
+     },
+     {
+      "oficio": "lenhador"
+     },
+     {
+      "oficio": "fazendeiro"
+     },
+     {
+      "oficio": "mineiro"
+     },
+     {
+      "oficio": "sabio"
+     },
+     {
+      "oficio": "ferreiro"
+     },
+     {
+      "oficio": "lenhador"
+     },
+     {
+      "oficio": "ocioso"
+     }
+    ],
+    "aldeoesConfig": {
+     "automatica": true,
+     "politica": "manter",
+     "proporcao": {
+      "fazendeiro": 2,
+      "lenhador": 2,
+      "mineiro": 1,
+      "sabio": 1,
+      "ferreiro": 1
+     }
+    },
+    "progressoAldeaoMs": 0,
+    "aventureiros": [
+     {
+      "id": "a1",
+      "nome": "Gaspar",
+      "classe": "guerreiro",
+      "nivel": 1,
+      "xp": 0,
+      "arma": 0,
+      "armadura": 0,
+      "estado": "na_vila",
+      "feridoAte": null
+     },
+     {
+      "id": "a2",
+      "nome": "Violante",
+      "classe": "ladino",
+      "nivel": 1,
+      "xp": 0,
+      "arma": 0,
+      "armadura": 0,
+      "estado": "na_vila",
+      "feridoAte": null
+     },
+     {
+      "id": "a3",
+      "nome": "Percival",
+      "classe": "ladino",
+      "nivel": 1,
+      "xp": 0,
+      "arma": 0,
+      "armadura": 0,
+      "estado": "na_vila",
+      "feridoAte": null
+     },
+     {
+      "id": "a4",
+      "nome": "Fiona",
+      "classe": "ladino",
+      "nivel": 1,
+      "xp": 0,
+      "arma": 0,
+      "armadura": 0,
+      "estado": "na_vila",
+      "feridoAte": null
+     }
+    ],
+    "contratacoes": 3,
+    "proximoId": 5,
+    "expedicoes": [],
+    "pesquisas": {
+     "concluidas": [
+      "cartografia"
+     ],
+     "atual": null
+    },
+    "objetivos": {
+     "criptaVencida": false
+    },
+    "mercador": null,
+    "falha": 0,
+    "reliquias": {
+     "total": 0,
+     "gastas": 0,
+     "niveis": {}
+    },
+    "cliques": {
+     "usuario": {
+      "fichas": 10000,
+      "em": 1780315200000
+     },
+     "objetos": {}
+    },
+    "cronica": [
+     {
+      "icone": "Check",
+      "texto": "Uma fogueira acesa. Começa a crônica da aldeia.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Aventureiro",
+      "texto": "Violante entrou para a guilda.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Aventureiro",
+      "texto": "Percival entrou para a guilda.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Aventureiro",
+      "texto": "Fiona entrou para a guilda.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Obra iniciada: Casa nível 2.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Obra iniciada: Serraria nível 2.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Obra iniciada: Pedreira.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Obra iniciada: Scriptorium.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um fazendeiro chegou à vila.",
+      "em": 1780315220000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Scriptorium construída.",
+      "em": 1780315230000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Pedreira construída.",
+      "em": 1780315230000
+     },
+     {
+      "icone": "Diario",
+      "texto": "Nova página no Diário: Os livros do Sábio.",
+      "em": 1780315230000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um mineiro chegou à vila.",
+      "em": 1780315240000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Casa chegou ao nível 2.",
+      "em": 1780315242000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Serraria chegou ao nível 2.",
+      "em": 1780315242000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um sábio chegou à vila.",
+      "em": 1780315262000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um ferreiro chegou à vila.",
+      "em": 1780315282000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um lenhador chegou à vila.",
+      "em": 1780315302000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um fazendeiro chegou à vila.",
+      "em": 1780315322000
+     },
+     {
+      "icone": "Evento",
+      "texto": "Mercador Viajante: troca 100 madeira por 15 ouro.",
+      "em": 1780316307089
+     },
+     {
+      "icone": "Evento",
+      "texto": "O Mercador Viajante seguiu viagem.",
+      "em": 1780316427089
+     },
+     {
+      "icone": "Saber",
+      "texto": "Pesquisa iniciada: Cartografia.",
+      "em": 1780317000000
+     },
+     {
+      "icone": "Alerta",
+      "texto": "Bandidos na Estrada: levaram 1.320 ouro e 1.427 comida.",
+      "em": 1780317032387
+     },
+     {
+      "icone": "Saber",
+      "texto": "Pesquisa concluída: Cartografia.",
+      "em": 1780317090000
+     },
+     {
+      "icone": "Diario",
+      "texto": "Nova página no Diário: O que o mapa esconde.",
+      "em": 1780317090000
+     },
+     {
+      "icone": "Evento",
+      "texto": "Festival da Colheita: 1.549 comida.",
+      "em": 1780318070498
+     },
+     {
+      "icone": "Evento",
+      "texto": "Festival da Colheita: 1.549 comida.",
+      "em": 1780318974941
+     },
+     {
+      "icone": "Evento",
+      "texto": "Cometa: 465 saber.",
+      "em": 1780319664109
+     },
+     {
+      "icone": "Evento",
+      "texto": "Cometa: 465 saber.",
+      "em": 1780320485013
+     },
+     {
+      "icone": "Evento",
+      "texto": "Tempestade: nada (armazém cheio).",
+      "em": 1780321646770
+     },
+     {
+      "icone": "Alerta",
+      "texto": "Incêndio: queimaram 1.549 madeira.",
+      "em": 1780322326166
+     },
+     {
+      "icone": "Evento",
+      "texto": "Tempestade: nada (armazém cheio).",
+      "em": 1780323046651
+     },
+     {
+      "icone": "Evento",
+      "texto": "Mercador Viajante: troca 100 madeira por 15 ouro.",
+      "em": 1780324183822
+     },
+     {
+      "icone": "Evento",
+      "texto": "O Mercador Viajante seguiu viagem.",
+      "em": 1780324303822
+     }
+    ],
+    "diario": [
+     "prologo",
+     "scriptorium",
+     "cartografia"
+    ],
+    "prologoVisto": false,
+    "relatorios": [],
+    "segredo": {
+     "rng": 4039202612,
+     "proximoEventoEm": 1780324928932,
+     "resultados": {}
+    }
+   }
+  },
+  {
+   "id": "sint-05-pos-ascensao",
+   "rev": 31,
+   "versao_esquema": 8,
+   "estado": {
+    "versao": 8,
+    "era": 1,
+    "ciclo": 2,
+    "mundo": {
+     "versaoMapa": 2
+    },
+    "t": 1780317900000,
+    "recursos": {
+     "madeira": 300000000,
+     "pedra": 50000000,
+     "comida": 300000000,
+     "ferro": 15000000,
+     "ouro": 40000000,
+     "saber": 0
+    },
+    "slots": {
+     "casa_1": {
+      "tipo": "casa",
+      "nivel": 1,
+      "obraAte": null
+     },
+     "scriptorium_1": {
+      "tipo": "scriptorium",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "mercado_1": {
+      "tipo": "mercado",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "taverna_1": {
+      "tipo": "taverna",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "armazem_1": {
+      "tipo": "armazem",
+      "nivel": 1,
+      "obraAte": null
+     },
+     "forja_1": {
+      "tipo": "forja",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "serraria_1": {
+      "tipo": "serraria",
+      "nivel": 1,
+      "obraAte": null
+     },
+     "serraria_2": {
+      "tipo": "serraria",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "celeiro_1": {
+      "tipo": "celeiro",
+      "nivel": 1,
+      "obraAte": null
+     },
+     "muralha_1": {
+      "tipo": "muralha",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "pedreira_1": {
+      "tipo": "pedreira",
+      "nivel": 0,
+      "obraAte": null
+     }
+    },
+    "aldeoes": [
+     {
+      "oficio": "fazendeiro"
+     },
+     {
+      "oficio": "lenhador"
+     },
+     {
+      "oficio": "mineiro"
+     },
+     {
+      "oficio": "sabio"
+     }
+    ],
+    "aldeoesConfig": {
+     "automatica": true,
+     "politica": "equilibrada"
+    },
+    "progressoAldeaoMs": 0,
+    "aventureiros": [
+     {
+      "id": "a1",
+      "nome": "Cedric",
+      "classe": "guerreiro",
+      "nivel": 1,
+      "xp": 0,
+      "arma": 0,
+      "armadura": 0,
+      "estado": "na_vila",
+      "feridoAte": null
+     }
+    ],
+    "contratacoes": 0,
+    "proximoId": 2,
+    "expedicoes": [],
+    "pesquisas": {
+     "concluidas": [],
+     "atual": null
+    },
+    "objetivos": {
+     "criptaVencida": false
+    },
+    "mercador": null,
+    "falha": 1,
+    "reliquias": {
+     "total": 3,
+     "gastas": 0,
+     "niveis": {}
+    },
+    "cliques": {
+     "usuario": {
+      "fichas": 10000,
+      "em": 1780315200000
+     },
+     "objetos": {}
+    },
+    "cronica": [
+     {
+      "icone": "Check",
+      "texto": "Uma fogueira acesa. Começa a crônica da aldeia.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Diario",
+      "texto": "Nova página no Diário: O que o mapa esconde.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Diario",
+      "texto": "Nova página no Diário: Caminhos até a Cripta.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Diario",
+      "texto": "Nova página no Diário: A Carta.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Diario",
+      "texto": "Nova página no Diário: O Rei Cinzento.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Diario",
+      "texto": "Nova página no Diário: A aldeia cheia.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Aventureiro",
+      "texto": "Afonso entrou para a guilda.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Aventureiro",
+      "texto": "Edmundo entrou para a guilda.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Aventureiro",
+      "texto": "Helena entrou para a guilda.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Check",
+      "texto": "Começa o ciclo 2.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Ascensao",
+      "texto": "Ascensão! O reino renasce no ciclo 2 com +3 relíquias.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Diario",
+      "texto": "Nova página no Diário: O Relógio gira de volta.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um mineiro chegou à vila.",
+      "em": 1780315220000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um sábio chegou à vila.",
+      "em": 1780315240000
+     },
+     {
+      "icone": "Evento",
+      "texto": "Tempestade: nada (armazém cheio).",
+      "em": 1780315991972
+     },
+     {
+      "icone": "Evento",
+      "texto": "Mercador Viajante: troca 100 madeira por 15 ouro.",
+      "em": 1780316985803
+     },
+     {
+      "icone": "Evento",
+      "texto": "O Mercador Viajante seguiu viagem.",
+      "em": 1780317105803
+     },
+     {
+      "icone": "Evento",
+      "texto": "Festival da Colheita: 40 comida.",
+      "em": 1780317695146
+     }
+    ],
+    "diario": [
+     "prologo",
+     "cartografia",
+     "estradas_reais",
+     "carta_real",
+     "cripta_vencida",
+     "aldeoes_40",
+     "primeira_ascensao"
+    ],
+    "prologoVisto": false,
+    "relatorios": [],
+    "segredo": {
+     "rng": 4275871520,
+     "proximoEventoEm": 1780318876734,
+     "resultados": {}
+    }
+   }
+  },
+  {
+   "id": "sint-06-esquema-7",
+   "rev": 12,
+   "versao_esquema": 7,
+   "estado": {
+    "versao": 7,
+    "era": 1,
+    "ciclo": 1,
+    "mundo": {
+     "versaoMapa": 2
+    },
+    "t": 1780324380000,
+    "recursos": {
+     "madeira": 15492000000,
+     "pedra": 15492000000,
+     "comida": 11092041843,
+     "ferro": 8973000000,
+     "ouro": 7477450000,
+     "saber": 11022228000
+    },
+    "slots": {
+     "casa_1": {
+      "tipo": "casa",
+      "nivel": 2,
+      "obraAte": null
+     },
+     "scriptorium_1": {
+      "tipo": "scriptorium",
+      "nivel": 1,
+      "obraAte": null
+     },
+     "mercado_1": {
+      "tipo": "mercado",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "taverna_1": {
+      "tipo": "taverna",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "armazem_1": {
+      "tipo": "armazem",
+      "nivel": 10,
+      "obraAte": null
+     },
+     "forja_1": {
+      "tipo": "forja",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "serraria_1": {
+      "tipo": "serraria",
+      "nivel": 2,
+      "obraAte": null
+     },
+     "serraria_2": {
+      "tipo": "serraria",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "celeiro_1": {
+      "tipo": "celeiro",
+      "nivel": 10,
+      "obraAte": null
+     },
+     "muralha_1": {
+      "tipo": "muralha",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "pedreira_1": {
+      "tipo": "pedreira",
+      "nivel": 1,
+      "obraAte": null
+     }
+    },
+    "aldeoes": [
+     {
+      "oficio": "fazendeiro"
+     },
+     {
+      "oficio": "lenhador"
+     },
+     {
+      "oficio": "fazendeiro"
+     },
+     {
+      "oficio": "mineiro"
+     },
+     {
+      "oficio": "sabio"
+     },
+     {
+      "oficio": "ferreiro"
+     },
+     {
+      "oficio": "lenhador"
+     },
+     {
+      "oficio": "ocioso"
+     }
+    ],
+    "aldeoesConfig": {
+     "automatica": true,
+     "politica": "manter",
+     "proporcao": {
+      "fazendeiro": 2,
+      "lenhador": 2,
+      "mineiro": 1,
+      "sabio": 1,
+      "ferreiro": 1
+     }
+    },
+    "progressoAldeaoMs": 0,
+    "aventureiros": [
+     {
+      "id": "a1",
+      "nome": "Gaspar",
+      "classe": "guerreiro",
+      "nivel": 1,
+      "xp": 0,
+      "arma": 0,
+      "armadura": 0,
+      "estado": "na_vila",
+      "feridoAte": null
+     },
+     {
+      "id": "a2",
+      "nome": "Violante",
+      "classe": "ladino",
+      "nivel": 1,
+      "xp": 0,
+      "arma": 0,
+      "armadura": 0,
+      "estado": "na_vila",
+      "feridoAte": null
+     },
+     {
+      "id": "a3",
+      "nome": "Percival",
+      "classe": "ladino",
+      "nivel": 1,
+      "xp": 0,
+      "arma": 0,
+      "armadura": 0,
+      "estado": "na_vila",
+      "feridoAte": null
+     },
+     {
+      "id": "a4",
+      "nome": "Fiona",
+      "classe": "ladino",
+      "nivel": 1,
+      "xp": 0,
+      "arma": 0,
+      "armadura": 0,
+      "estado": "na_vila",
+      "feridoAte": null
+     }
+    ],
+    "contratacoes": 3,
+    "proximoId": 5,
+    "expedicoes": [],
+    "pesquisas": {
+     "concluidas": [
+      "cartografia"
+     ],
+     "atual": null
+    },
+    "objetivos": {
+     "criptaVencida": false
+    },
+    "mercador": null,
+    "falha": 0,
+    "reliquias": {
+     "total": 0,
+     "gastas": 0,
+     "niveis": {}
+    },
+    "cliques": {
+     "usuario": {
+      "fichas": 10000,
+      "em": 1780315200000
+     },
+     "objetos": {}
+    },
+    "cronica": [
+     {
+      "icone": "Check",
+      "texto": "Uma fogueira acesa. Começa a crônica da aldeia.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Aventureiro",
+      "texto": "Violante entrou para a guilda.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Aventureiro",
+      "texto": "Percival entrou para a guilda.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Aventureiro",
+      "texto": "Fiona entrou para a guilda.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Obra iniciada: Casa nível 2.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Obra iniciada: Serraria nível 2.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Obra iniciada: Pedreira.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Obra iniciada: Scriptorium.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um fazendeiro chegou à vila.",
+      "em": 1780315220000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Scriptorium construída.",
+      "em": 1780315230000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Pedreira construída.",
+      "em": 1780315230000
+     },
+     {
+      "icone": "Diario",
+      "texto": "Nova página no Diário: Os livros do Sábio.",
+      "em": 1780315230000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um mineiro chegou à vila.",
+      "em": 1780315240000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Casa chegou ao nível 2.",
+      "em": 1780315242000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Serraria chegou ao nível 2.",
+      "em": 1780315242000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um sábio chegou à vila.",
+      "em": 1780315262000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um ferreiro chegou à vila.",
+      "em": 1780315282000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um lenhador chegou à vila.",
+      "em": 1780315302000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um fazendeiro chegou à vila.",
+      "em": 1780315322000
+     },
+     {
+      "icone": "Evento",
+      "texto": "Mercador Viajante: troca 100 madeira por 15 ouro.",
+      "em": 1780316307089
+     },
+     {
+      "icone": "Evento",
+      "texto": "O Mercador Viajante seguiu viagem.",
+      "em": 1780316427089
+     },
+     {
+      "icone": "Saber",
+      "texto": "Pesquisa iniciada: Cartografia.",
+      "em": 1780317000000
+     },
+     {
+      "icone": "Alerta",
+      "texto": "Bandidos na Estrada: levaram 1.320 ouro e 1.427 comida.",
+      "em": 1780317032387
+     },
+     {
+      "icone": "Saber",
+      "texto": "Pesquisa concluída: Cartografia.",
+      "em": 1780317090000
+     },
+     {
+      "icone": "Diario",
+      "texto": "Nova página no Diário: O que o mapa esconde.",
+      "em": 1780317090000
+     },
+     {
+      "icone": "Evento",
+      "texto": "Festival da Colheita: 1.549 comida.",
+      "em": 1780318070498
+     },
+     {
+      "icone": "Evento",
+      "texto": "Festival da Colheita: 1.549 comida.",
+      "em": 1780318974941
+     },
+     {
+      "icone": "Evento",
+      "texto": "Cometa: 465 saber.",
+      "em": 1780319664109
+     },
+     {
+      "icone": "Evento",
+      "texto": "Cometa: 465 saber.",
+      "em": 1780320485013
+     },
+     {
+      "icone": "Evento",
+      "texto": "Tempestade: nada (armazém cheio).",
+      "em": 1780321646770
+     },
+     {
+      "icone": "Alerta",
+      "texto": "Incêndio: queimaram 1.549 madeira.",
+      "em": 1780322326166
+     },
+     {
+      "icone": "Evento",
+      "texto": "Tempestade: nada (armazém cheio).",
+      "em": 1780323046651
+     },
+     {
+      "icone": "Evento",
+      "texto": "Mercador Viajante: troca 100 madeira por 15 ouro.",
+      "em": 1780324183822
+     },
+     {
+      "icone": "Evento",
+      "texto": "O Mercador Viajante seguiu viagem.",
+      "em": 1780324303822
+     }
+    ],
+    "relatorios": [],
+    "segredo": {
+     "rng": 4039202612,
+     "proximoEventoEm": 1780324928932,
+     "resultados": {}
+    }
+   }
+  },
+  {
+   "id": "sint-07-esquema-6",
+   "rev": 9,
+   "versao_esquema": 6,
+   "estado": {
+    "versao": 6,
+    "era": 1,
+    "ciclo": 1,
+    "mundo": {
+     "versaoMapa": 2
+    },
+    "t": 1780324380000,
+    "recursos": {
+     "madeira": 15492000000,
+     "pedra": 15492000000,
+     "comida": 11092041843,
+     "ferro": 8973000000,
+     "ouro": 7477450000,
+     "saber": 11022228000
+    },
+    "slots": {
+     "casa_1": {
+      "tipo": "casa",
+      "nivel": 2,
+      "obraAte": null
+     },
+     "scriptorium_1": {
+      "tipo": "scriptorium",
+      "nivel": 1,
+      "obraAte": null
+     },
+     "mercado_1": {
+      "tipo": "mercado",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "taverna_1": {
+      "tipo": "taverna",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "armazem_1": {
+      "tipo": "armazem",
+      "nivel": 10,
+      "obraAte": null
+     },
+     "forja_1": {
+      "tipo": "forja",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "serraria_1": {
+      "tipo": "serraria",
+      "nivel": 2,
+      "obraAte": null
+     },
+     "serraria_2": {
+      "tipo": "serraria",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "celeiro_1": {
+      "tipo": "celeiro",
+      "nivel": 10,
+      "obraAte": null
+     },
+     "muralha_1": {
+      "tipo": "muralha",
+      "nivel": 0,
+      "obraAte": null
+     },
+     "pedreira_1": {
+      "tipo": "pedreira",
+      "nivel": 1,
+      "obraAte": null
+     }
+    },
+    "aldeoes": [
+     {
+      "oficio": "fazendeiro"
+     },
+     {
+      "oficio": "lenhador"
+     },
+     {
+      "oficio": "fazendeiro"
+     },
+     {
+      "oficio": "mineiro"
+     },
+     {
+      "oficio": "sabio"
+     },
+     {
+      "oficio": "ferreiro"
+     },
+     {
+      "oficio": "lenhador"
+     },
+     {
+      "oficio": "ocioso"
+     }
+    ],
+    "aldeoesConfig": {
+     "automatica": true,
+     "politica": "manter",
+     "proporcao": {
+      "fazendeiro": 2,
+      "lenhador": 2,
+      "mineiro": 1,
+      "sabio": 1,
+      "ferreiro": 1
+     }
+    },
+    "progressoAldeaoMs": 0,
+    "aventureiros": [
+     {
+      "id": "a1",
+      "nome": "Gaspar",
+      "classe": "guerreiro",
+      "nivel": 1,
+      "xp": 0,
+      "arma": 0,
+      "armadura": 0,
+      "estado": "na_vila",
+      "feridoAte": null
+     },
+     {
+      "id": "a2",
+      "nome": "Violante",
+      "classe": "ladino",
+      "nivel": 1,
+      "xp": 0,
+      "arma": 0,
+      "armadura": 0,
+      "estado": "na_vila",
+      "feridoAte": null
+     },
+     {
+      "id": "a3",
+      "nome": "Percival",
+      "classe": "ladino",
+      "nivel": 1,
+      "xp": 0,
+      "arma": 0,
+      "armadura": 0,
+      "estado": "na_vila",
+      "feridoAte": null
+     },
+     {
+      "id": "a4",
+      "nome": "Fiona",
+      "classe": "ladino",
+      "nivel": 1,
+      "xp": 0,
+      "arma": 0,
+      "armadura": 0,
+      "estado": "na_vila",
+      "feridoAte": null
+     }
+    ],
+    "contratacoes": 3,
+    "proximoId": 5,
+    "expedicoes": [],
+    "pesquisas": {
+     "concluidas": [
+      "cartografia"
+     ],
+     "atual": null
+    },
+    "objetivos": {
+     "criptaVencida": false
+    },
+    "mercador": null,
+    "reliquias": {
+     "total": 0,
+     "gastas": 0,
+     "niveis": {}
+    },
+    "cliques": {
+     "usuario": {
+      "fichas": 10000,
+      "em": 1780315200000
+     },
+     "objetos": {}
+    },
+    "cronica": [
+     {
+      "icone": "Check",
+      "texto": "Uma fogueira acesa. Começa a crônica da aldeia.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Aventureiro",
+      "texto": "Violante entrou para a guilda.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Aventureiro",
+      "texto": "Percival entrou para a guilda.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Aventureiro",
+      "texto": "Fiona entrou para a guilda.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Obra iniciada: Casa nível 2.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Obra iniciada: Serraria nível 2.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Obra iniciada: Pedreira.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Obra iniciada: Scriptorium.",
+      "em": 1780315200000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um fazendeiro chegou à vila.",
+      "em": 1780315220000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Scriptorium construída.",
+      "em": 1780315230000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Pedreira construída.",
+      "em": 1780315230000
+     },
+     {
+      "icone": "Diario",
+      "texto": "Nova página no Diário: Os livros do Sábio.",
+      "em": 1780315230000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um mineiro chegou à vila.",
+      "em": 1780315240000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Casa chegou ao nível 2.",
+      "em": 1780315242000
+     },
+     {
+      "icone": "Construir",
+      "texto": "Serraria chegou ao nível 2.",
+      "em": 1780315242000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um sábio chegou à vila.",
+      "em": 1780315262000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um ferreiro chegou à vila.",
+      "em": 1780315282000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um lenhador chegou à vila.",
+      "em": 1780315302000
+     },
+     {
+      "icone": "Aldeao",
+      "texto": "Um fazendeiro chegou à vila.",
+      "em": 1780315322000
+     },
+     {
+      "icone": "Evento",
+      "texto": "Mercador Viajante: troca 100 madeira por 15 ouro.",
+      "em": 1780316307089
+     },
+     {
+      "icone": "Evento",
+      "texto": "O Mercador Viajante seguiu viagem.",
+      "em": 1780316427089
+     },
+     {
+      "icone": "Saber",
+      "texto": "Pesquisa iniciada: Cartografia.",
+      "em": 1780317000000
+     },
+     {
+      "icone": "Alerta",
+      "texto": "Bandidos na Estrada: levaram 1.320 ouro e 1.427 comida.",
+      "em": 1780317032387
+     },
+     {
+      "icone": "Saber",
+      "texto": "Pesquisa concluída: Cartografia.",
+      "em": 1780317090000
+     },
+     {
+      "icone": "Diario",
+      "texto": "Nova página no Diário: O que o mapa esconde.",
+      "em": 1780317090000
+     },
+     {
+      "icone": "Evento",
+      "texto": "Festival da Colheita: 1.549 comida.",
+      "em": 1780318070498
+     },
+     {
+      "icone": "Evento",
+      "texto": "Festival da Colheita: 1.549 comida.",
+      "em": 1780318974941
+     },
+     {
+      "icone": "Evento",
+      "texto": "Cometa: 465 saber.",
+      "em": 1780319664109
+     },
+     {
+      "icone": "Evento",
+      "texto": "Cometa: 465 saber.",
+      "em": 1780320485013
+     },
+     {
+      "icone": "Evento",
+      "texto": "Tempestade: nada (armazém cheio).",
+      "em": 1780321646770
+     },
+     {
+      "icone": "Alerta",
+      "texto": "Incêndio: queimaram 1.549 madeira.",
+      "em": 1780322326166
+     },
+     {
+      "icone": "Evento",
+      "texto": "Tempestade: nada (armazém cheio).",
+      "em": 1780323046651
+     },
+     {
+      "icone": "Evento",
+      "texto": "Mercador Viajante: troca 100 madeira por 15 ouro.",
+      "em": 1780324183822
+     },
+     {
+      "icone": "Evento",
+      "texto": "O Mercador Viajante seguiu viagem.",
+      "em": 1780324303822
+     }
+    ],
+    "relatorios": [],
+    "segredo": {
+     "rng": 4039202612,
+     "proximoEventoEm": 1780324928932,
+     "resultados": {}
+    }
+   }
+  }
+ ]
+}

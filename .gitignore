@@ -19,3 +19,4 @@ dumps/
 *.sql.gz
 saves_*.sql
 saves_*.json
+backups/
