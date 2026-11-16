@@ -182,6 +182,72 @@ L('| Poder do Eco | Razoável | Melhor |');
 L('|---|---|---|');
 for (const e of escalas) L(`| ${e.p} | ${r2(e.razoavel)} | ${r2(e.melhor)} |`);
 L();
+// ---------- 1b. Curva de vitória pela razão de poder ----------
+const RAZOES = [70, 80, 85, 90, 95, 100, 105, 110, 120, 140, 160, 180, 200].map((x) => x * 10);
+L('## 1b. Curva de vitória pela razão de poder (tropa / Eco)');
+L();
+L('Quantas das ' + SEMENTES.length + ' sementes cada tropa vence, conforme a razão entre o poder da tropa e o do Eco (tropa de 3 e de 6; Eco com a composição padrão). A curva é um degrau: a vitória vira numa faixa estreita de razão, e **onde vira depende da composição** (o limiar), não do poder.');
+L();
+for (const n of [3, 6]) {
+  const x = porTamanho.find((t) => t.n === n)!;
+  const eco = gerarEcoComPoder(n, ESCALA_LIMIAR);
+  const linha = (c: Config) => RAZOES.map((r) => `${vitorias(c, Math.round((ESCALA_LIMIAR * r) / 1000), eco)}/${SEMENTES.length}`).join(' | ');
+  L(`Tropa de ${n}:`);
+  L();
+  L('| Razão | ' + RAZOES.map(r2).join(' | ') + ' |');
+  L('|---|' + RAZOES.map(() => '---').join('|') + '|');
+  L(`| Melhor (${x.melhor.c.nome}) | ${linha(x.melhor.c)} |`);
+  L(`| Razoável | ${linha(x.arq[0]!.c)} |`);
+  L(`| Pior (${x.pior.c.nome}) | ${linha(x.pior.c)} |`);
+  L();
+}
+/** Largura do degrau da razoável: razão em que passa de 0 a todas as sementes (varredura em milésimos). */
+const degrau = (c: Config, eco: UnidadeCombate[]) => {
+  let primeira = -1, todas = -1;
+  for (let r = 500; r <= 2_500; r += 10) {
+    const v = vitorias(c, Math.round((ESCALA_LIMIAR * r) / 1000), eco);
+    if (v > 0 && primeira < 0) primeira = r;
+    if (v === SEMENTES.length && todas < 0) todas = r;
+  }
+  return { primeira, todas };
+};
+const larguras = porTamanho.map((x) => ({ n: x.n, ...degrau(x.arq[0]!.c, gerarEcoComPoder(x.n, ESCALA_LIMIAR)) }));
+L('Largura do degrau da composição razoável (a vitória vai de 0 a ' + SEMENTES.length + '/' + SEMENTES.length + ' sementes quando a razão sobe de... a...):');
+L();
+L('| Tropa | De (razão) | Até (razão) | Largura |');
+L('|---|---|---|---|');
+for (const l of larguras) L(`| ${l.n} | ${r2(l.primeira)} | ${r2(l.todas)} | ${r2(l.todas - l.primeira)} |`);
+L();
+L('Com sementes diferentes o resultado de uma mesma tropa quase não muda: a sorte (variação de dano de ±10%) pesa pouco perto do que a composição e a formação mudam. Por isso o planejamento decide, e a fase se vence com o preparo certo, não por azar.');
+L();
+
+// ---------- 1c. Onde o Poder engana ----------
+const mediaDe = (f: (x: PorTamanho) => number) => porTamanho.reduce((t, x) => t + f(x), 0) / porTamanho.length;
+const lim = (k: number) => mediaDe((x) => x.arq[k]!.l);
+const dispersao = porTamanho.map((x) => ({ n: x.n, p10: quantil(x.limiares, 0.1), p50: quantil(x.limiares, 0.5), p90: quantil(x.limiares, 0.9) }));
+const fora10 = porTamanho.map((x) => x.limiares.filter((l) => Math.abs(l - 1_000) > 100).length / x.limiares.length);
+L('## 1c. Onde o Poder engana');
+L();
+L('O Poder (`poderCombate`) é a raiz de vida efetiva × dano por segundo. Se ele previsse bem, toda tropa de poder igual ao do Eco teria limiar perto de 1,00. Não tem: ele **não enxerga classe nem formação**, e erra assim (média entre as tropas de 3 a 8):');
+L();
+L('| Arquétipo (mesmo poder do Eco) | Limiar médio | Leitura |');
+L('|---|---|---|');
+const LEITURAS = [
+  'o Poder acerta (é a referência: a composição do Eco)',
+  // Limiares em milésimos: acima de 1,05 o Poder superestima; abaixo de 0,95, subestima.
+  ...[1, 2, 3].map((k) => (lim(k) > 1_050 ? 'o Poder **superestima**: parece forte e precisa de mais poder para vencer' : lim(k) < 950 ? 'o Poder **subestima**: parece fraco e vence com menos poder' : 'o Poder acerta')),
+];
+arquetipos(3).forEach((a, k) => L(`| ${a.nome} | ${r2(lim(k))} | ${LEITURAS[k]} |`));
+L();
+L('Entre as tropas plausíveis do mesmo poder, o limiar se espalha:');
+L();
+L('| Tropa | 10% das tropas vencem com razão ≤ | Mediana | 90% das tropas só vencem com razão ≥ | Tropas a mais de 10% do esperado (1,00) |');
+L('|---|---|---|---|---|');
+dispersao.forEach((d, i) => L(`| ${d.n} | ${r2(d.p10)} | ${r2(d.p50)} | ${r2(d.p90)} | ${pct(fora10[i]!)} |`));
+L();
+L('O que isso significa para o jogo: o poder mínimo e o recomendado (seção 5) valem como **faixa**, não como previsão. Quem monta a tropa com Arqueiros atrás e Lanceiro na frente passa com menos poder; quem põe só Lanceiros e Cavaleiros ou erra a formação precisa de bem mais. Um peso por classe no Poder (decisão em aberto) aproximaria o número da realidade, mas a diferença de formação continuaria fora dele.');
+L();
+
 L('## 2. Jogador tipo em E(n): % de tropas plausíveis que vencem, por nível');
 L();
 L('Fases 1 a 120 (todas), amostra fixa de cerca de 60 tropas plausíveis por fase.');
@@ -233,7 +299,8 @@ L('| Nível | Meta | O que significa | Multiplicador pelos limiares | No código
 L('|---|---|---|---|---|');
 const ATUAL = NIVEIS.map((nv) => MULTS[nv]);
 METAS.forEach(([nome, alvo, txt], i) => {
-  const m = nome === 'Chefe' ? Math.min(...CANDIDATOS.filter((c) => fracao(c) === 0)) : multPara(alvo);
+  // Chefe: o menor multiplicador em que a fração arredonda para 0% (a 1,30 ainda vence 0,4%; só a 1,45 dá 0 exato).
+  const m = nome === 'Chefe' ? Math.min(...CANDIDATOS.filter((c) => Math.round(fracao(c) * 100) === 0)) : multPara(alvo);
   L(`| ${nome} | ${nome === 'Chefe' ? '0% em E(n)' : `cerca de ${pct(alvo)}`} | ${txt} | ${r2(m * 10)} (${pct(fracao(m))}) | ${ATUAL[i]} |`);
 });
 L();

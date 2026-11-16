@@ -49,6 +49,63 @@ Escala (tropa de 3): o limiar quase não depende do tamanho do poder; só no com
 | 2000 | 1,01 | 0,88 |
 | 20000 | 1,01 | 0,88 |
 
+## 1b. Curva de vitória pela razão de poder (tropa / Eco)
+
+Quantas das 5 sementes cada tropa vence, conforme a razão entre o poder da tropa e o do Eco (tropa de 3 e de 6; Eco com a composição padrão). A curva é um degrau: a vitória vira numa faixa estreita de razão, e **onde vira depende da composição** (o limiar), não do poder.
+
+Tropa de 3:
+
+| Razão | 0,70 | 0,80 | 0,85 | 0,90 | 0,95 | 1,00 | 1,05 | 1,10 | 1,20 | 1,40 | 1,60 | 1,80 | 2,00 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Melhor (1 Arq@1 + 2 Mag@2) | 0/5 | 0/5 | 0/5 | 3/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 |
+| Razoável | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 1/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 |
+| Pior (1 Lan@1 + 2 Cav@0) | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 5/5 | 5/5 | 5/5 |
+
+Tropa de 6:
+
+| Razão | 0,70 | 0,80 | 0,85 | 0,90 | 0,95 | 1,00 | 1,05 | 1,10 | 1,20 | 1,40 | 1,60 | 1,80 | 2,00 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Melhor (3 Arq@1 + 1 Cav@0 + 2 Mag@2) | 0/5 | 4/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 |
+| Razoável | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 1/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 |
+| Pior (4 Lan@1 + 2 Cav@0) | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 0/5 | 1/5 | 5/5 |
+
+Largura do degrau da composição razoável (a vitória vai de 0 a 5/5 sementes quando a razão sobe de... a...):
+
+| Tropa | De (razão) | Até (razão) | Largura |
+|---|---|---|---|
+| 3 | 0,97 | 1,04 | 0,07 |
+| 4 | 0,97 | 1,04 | 0,07 |
+| 5 | 1,00 | 1,09 | 0,09 |
+| 6 | 0,92 | 1,03 | 0,11 |
+| 7 | 0,91 | 1,00 | 0,09 |
+| 8 | 0,95 | 1,01 | 0,06 |
+
+Com sementes diferentes o resultado de uma mesma tropa quase não muda: a sorte (variação de dano de ±10%) pesa pouco perto do que a composição e a formação mudam. Por isso o planejamento decide, e a fase se vence com o preparo certo, não por azar.
+
+## 1c. Onde o Poder engana
+
+O Poder (`poderCombate`) é a raiz de vida efetiva × dano por segundo. Se ele previsse bem, toda tropa de poder igual ao do Eco teria limiar perto de 1,00. Não tem: ele **não enxerga classe nem formação**, e erra assim (média entre as tropas de 3 a 8):
+
+| Arquétipo (mesmo poder do Eco) | Limiar médio | Leitura |
+|---|---|---|
+| Razoável (composição do Eco, linhas padrão) | 1,01 | o Poder acerta (é a referência: a composição do Eco) |
+| Só corpo a corpo (Lanceiros e Cavaleiros na frente) | 1,31 | o Poder **superestima**: parece forte e precisa de mais poder para vencer |
+| Só Arqueiros (atrás) | 0,93 | o Poder **subestima**: parece fraco e vence com menos poder |
+| Mago pesado (metade Magos no meio, Lanceiros na frente) | 1,01 | o Poder acerta |
+
+Entre as tropas plausíveis do mesmo poder, o limiar se espalha:
+
+| Tropa | 10% das tropas vencem com razão ≤ | Mediana | 90% das tropas só vencem com razão ≥ | Tropas a mais de 10% do esperado (1,00) |
+|---|---|---|---|---|
+| 3 | 0,90 | 1,00 | 1,18 | 34% |
+| 4 | 0,91 | 1,05 | 1,28 | 46% |
+| 5 | 0,86 | 1,02 | 1,30 | 51% |
+| 6 | 0,89 | 1,04 | 1,30 | 48% |
+| 7 | 0,88 | 1,00 | 1,25 | 47% |
+| 8 | 0,85 | 0,99 | 1,26 | 55% |
+
+O que isso significa para o jogo: o poder mínimo e o recomendado (seção 5) valem como **faixa**, não como previsão. Quem monta a tropa com Arqueiros atrás e Lanceiro na frente passa com menos poder; quem põe só Lanceiros e Cavaleiros ou erra a formação precisa de bem mais. Um peso por classe no Poder (decisão em aberto) aproximaria o número da realidade, mas a diferença de formação continuaria fora dele.
+
 ## 2. Jogador tipo em E(n): % de tropas plausíveis que vencem, por nível
 
 Fases 1 a 120 (todas), amostra fixa de cerca de 60 tropas plausíveis por fase.
@@ -90,7 +147,7 @@ Metas em % das tropas plausíveis que vencem com o jogador tipo em E(n) (sem end
 | Média | cerca de 60% | a composição razoável vence; tropas mal montadas, não | 0,95 (62%) | 0,95 |
 | Difícil | cerca de 30% | só tropas bem montadas (contra-escalação ou formação boa) | 1,05 (30%) | 1,05 |
 | Muito difícil | cerca de 10% | só as melhores contra-escalações | 1,10 (20%) | 1,10 |
-| Chefe | 0% em E(n) | nem a melhor tropa vence em E(n): pede poder acima do esperado ("com preparo, sobe") | 1,45 (0%) | 1,30 |
+| Chefe | 0% em E(n) | nem a melhor tropa vence em E(n): pede poder acima do esperado ("com preparo, sobe") | 1,30 (0%) | 1,30 |
 
 ## 5. Poder mínimo e recomendado
 
