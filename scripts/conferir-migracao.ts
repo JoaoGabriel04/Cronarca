@@ -4,16 +4,19 @@
 //   make conferir-migracao                       # saves SINTÉTICOS (fixture do código antigo), só para validar o script
 //   make conferir-migracao ARQ=dumps/saves_producao.json   # o dump real de produção
 //
-// Como gerar o dump (no seu computador, somente leitura, só a tabela de saves,
-// sem e-mail nem nome: só um identificador anônimo, a revisão, a versão e o estado):
+// Como gerar o dump (no seu computador, somente leitura, só a tabela de saves, sem e-mail nem
+// nome: só um identificador anônimo, a revisão, a versão e o estado). Use a URL de conexão do
+// banco de produção do jeito que o provedor entrega (o Neon já traz ?sslmode=...: não acrescente
+// nada nem tire as aspas; digitada com read -s ela não aparece na tela nem fica no histórico):
 //
 //   mkdir -p dumps
-//   export URL_RENDER='cole_a_external_database_url_aqui'
+//   read -rs -p 'URL de conexão do banco (não aparece na tela): ' URL_DB; echo
 //   docker run --rm -e PGOPTIONS='-c default_transaction_read_only=on' postgres:17-alpine \
-//     psql "$URL_RENDER?sslmode=require" -At \
+//     psql "$URL_DB" -At \
 //     -c "select coalesce(json_agg(t), '[]'::json) from (select left(md5(user_id::text), 10) as id, rev, versao_esquema, estado from game_states order by user_id) t" \
 //     > dumps/saves_producao.json
-//   unset URL_RENDER
+//   unset URL_DB
+//   wc -c dumps/saves_producao.json   # tem de ter conteúdo (um dump vazio faz o script recusar)
 //
 // dumps/ está no .gitignore. Nunca commitar o dump; apagar depois de conferir:
 //   rm dumps/saves_producao.json
