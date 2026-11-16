@@ -13,7 +13,9 @@ import {
   avisoExpedicao, caminhoDoTempo, cartasHerois, chipsGrupo, emAndamento, eraAtual, guilda, linhasDestinos, relatorios, reliquias,
   type CartaHeroi, type Peca,
 } from '../../lib/casca/telas';
+import { AJUDA } from '../../lib/casca/ajuda';
 import { SpriteAnimado } from '../anim/SpriteAnimado';
+import { Ajuda } from './Ajuda';
 import estilos from './casca.module.css';
 import { Icone } from './Icone';
 import { Cronica } from './Paineis';
@@ -147,6 +149,7 @@ export function TelaHerois({ estado, agora, acoes }: { estado: VisaoCliente; ago
             </div>
           }
         >
+          <Ajuda rotulo={AJUDA.aventureiros.rotulo} texto={AJUDA.aventureiros.texto} />
           <ul className={estilos.lista}>
             {herois.map((h) => (
               <CartaoHeroi key={h.id} h={h} acoes={acoes} />

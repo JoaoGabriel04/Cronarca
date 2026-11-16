@@ -61,10 +61,10 @@ export function desenharComContorno(ctx: CanvasRenderingContext2D, img: HTMLImag
  */
 export function desenharObjetos(
   ctx: CanvasRenderingContext2D, itens: readonly ItemL4[], sprites: Sprites, sombras: Sombras, relogio: RelogioAnim, d: Destino,
-  realce: Realce = {}, pesFixos: readonly { x: number; y: number }[] = [], naTelaAbaixoDoZoom = false, arvores: ArvoresNoPlano | null = null,
+  realce: Realce = {}, pesFixos: readonly { x: number; y: number }[] = [], arvores: ArvoresNoPlano | null = null,
 ): number {
   let nArvores = 0;
-  for (const c of planoL4(itens, d, relogio, (chave) => sombras.get(chave) && { largura: sombras.get(chave)!.width, altura: sombras.get(chave)!.height }, pesFixos, naTelaAbaixoDoZoom, arvores)) {
+  for (const c of planoL4(itens, d, relogio, (chave) => sombras.get(chave) && { largura: sombras.get(chave)!.width, altura: sombras.get(chave)!.height }, pesFixos, arvores)) {
     if (c.tipo === 'arvore') {
       const img = sprites.get(c.sprite);
       if (!img) throw new Error(`sprite não carregado: ${c.sprite}`);

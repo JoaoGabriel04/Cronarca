@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { OFICIOS } from '../data/aventureiros.ts';
 import { DESTINOS_IDS } from '../data/expedicoes.ts';
-import { ESCALA, POSICOES_ALDEOES, VERSAO_MAPA_ATUAL } from '../data/mapa.ts';
+import { ESCALA, LADO_SPRITE_ALDEAO, POSICOES_ALDEOES, POSICOES_OCIOSOS, VERSAO_MAPA_ATUAL } from '../data/mapa.ts';
 import { SLOT_IDS, SLOTS } from '../data/slots.ts';
 import bruto from '../data/mapa_meta.json' with { type: 'json' };
 import { recursoDoObjeto } from '../src/acoes.ts';
@@ -129,14 +129,29 @@ describe('mapa do jogo', () => {
     expect(OFICIOS).toHaveLength(5);
     for (const a of MAPA.aldeoes) {
       const p = POSICOES_ALDEOES[a.oficio];
-      expect(a).toEqual({ oficio: a.oficio, x: p.x + O.x + ESCALA.aldeao / 2, y: p.y + O.y + 28 });
+      expect(a).toEqual({ oficio: a.oficio, x: p.x + O.x + LADO_SPRITE_ALDEAO / 2, y: p.y + O.y + 28 });
       expect(Number.isInteger(a.x) && Number.isInteger(a.y)).toBe(true);
       expect(p.x + O.x >= N.x && p.y + O.y >= N.y && p.x + O.x + 32 <= N.x + N.largura && p.y + O.y + 32 <= N.y + N.altura, a.oficio).toBe(true);
     }
   });
 
+  it('Ociosos: 3 lugares em volta da fogueira (portão de ajustes rápidos), pé em mundo, dentro do núcleo', () => {
+    const O = META_MAPA.origemNucleo;
+    const N = MAPA.nucleo;
+    expect(MAPA.ociosos).toHaveLength(POSICOES_OCIOSOS.length);
+    MAPA.ociosos.forEach((o, k) => {
+      const p = POSICOES_OCIOSOS[k]!;
+      expect(o).toEqual({ x: p.x + O.x + LADO_SPRITE_ALDEAO / 2, y: p.y + O.y + 28 });
+      expect(p.x + O.x >= N.x && p.y + O.y >= N.y && p.x + O.x + 32 <= N.x + N.largura && p.y + O.y + 32 <= N.y + N.altura).toBe(true);
+    });
+    // A até 70 px do centro da fogueira (176 + 16, 250 + 16): na praça.
+    for (const p of POSICOES_OCIOSOS) expect(Math.hypot(p.x + 16 - 192, p.y + 16 - 266)).toBeLessThan(70);
+  });
+
   it('tabela de escala única: multiplicador 1, só os lados da spec (seção 2)', () => {
-    expect(ESCALA).toEqual({ construcao: 48, poco: 32, fogueira: 32, aldeao: 32, aventureiro: 32, flores: 16, cerca: 16, arvore: 48 });
+    // Aldeão com 24 no mundo e a arte de 32 (experimento do dono; ver data/mapa.ts).
+    expect(ESCALA).toEqual({ construcao: 48, poco: 32, fogueira: 32, aldeao: 24, aventureiro: 32, flores: 16, cerca: 16, arvore: 48 });
+    expect(LADO_SPRITE_ALDEAO).toBe(32);
   });
 
   it('o clique confere o objeto contra a lista do meta', () => {

@@ -10,8 +10,8 @@
 // Controles e leitura de depuração são provisórios (a UI é a L8, Portão 11).
 
 import {
-  animacao, CLASSES, CONSTRUCOES, formatarQuantidade, OFICIO_OCIOSO, OFICIOS, HITBOX_CONSTRUCAO, mapaDaVersao, RAIO_ACERTO_PIXEL_TELA, SLOT_IDS, SOMBRA_ELIPSE_16, TILE,
-  type MapaJogo, type Oficio, type SlotId, type VisaoCliente,
+  animacao, CLASSES, CONSTRUCOES, formatarQuantidade, OFICIOS, OFICIOS_ALDEAO, HITBOX_CONSTRUCAO, mapaDaVersao, RAIO_ACERTO_PIXEL_TELA, SLOT_IDS, SOMBRA_ELIPSE_16, TILE,
+  type MapaJogo, type SlotId, type VisaoCliente,
 } from '@cronarca/game-core';
 import { gsap } from 'gsap';
 import { Plus } from 'lucide-react';
@@ -131,8 +131,6 @@ interface OpcoesDesenho {
   piscando: { slot: SlotId; desde: number } | null;
   /** Último tipo de ponteiro: a hitbox efetiva depende dele. */
   ponteiro: Ponteiro;
-  /** Vila no celular: aldeões a 32 px de tela mesmo abaixo do zoom deles (A6). */
-  aldeoesNaTela: boolean;
   destaque: string | null;
   tremida: { id: string; desde: number } | null;
 }
@@ -166,7 +164,7 @@ function desenhar(ctx: CanvasRenderingContext2D, o: OpcoesDesenho): LayoutL7 | n
   o.medidas.arvores = desenharObjetos(ctx, itens, camadas.sprites, camadas.sombras, anim, { ...tela, largura: VP.largura, altura: VP.altura }, {
     destaque: o.destaque,
     tremida: t ? { id: t.id, dx: dxTremida } : null,
-  }, pesDosGrupos(mk, tela), o.aldeoesNaTela, camadas.arvores);
+  }, pesDosGrupos(mk, tela), camadas.arvores);
   // O que estava na frente das árvores na arte (pedras, arbustos): por cima delas, só os ladrilhos visíveis.
   desenharFrente(ctx, camadas.frente, tela, VP);
   desenharTrilhas(ctx, mk, tela); // trilhas: por baixo da névoa
@@ -377,8 +375,6 @@ export interface PropsCanvasMapa {
   cameraInicial?: Camera;
   /** Celular (até 600 px): Vila e Reino em 2x (spec 4c). */
   celular?: boolean;
-  /** Vila no celular: aldeões a 32 px de tela no zoom 2x (exceção A6). No Reino, false. */
-  aldeoesNaTela?: boolean;
 }
 
 /** O que a casca pode pedir ao mapa (Portão 11). */
@@ -397,16 +393,13 @@ export interface ControleMapa {
 
 /** Todas as construções de pé e os 5 ofícios: carrega sprites e sombras de uma vez (obra concluída ou aldeão novo não recarrega nada). */
 const TODOS_CONSTRUIDOS = Object.fromEntries(SLOT_IDS.map((id) => [id, { nivel: 1 }]));
-const TODOS_OFICIOS = OFICIOS.map((oficio) => ({ oficio }));
+/** Todos os ofícios e o Ocioso: o pré-carregamento dos sprites cobre qualquer aldeão que o mapa possa desenhar. */
+const TODOS_OFICIOS = OFICIOS_ALDEAO.map((oficio) => ({ oficio }));
 
-export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao = false, controle, children, mostrarAjuda = true, ajustavel = false, animado = true, cameraInicial, celular = false, aldeoesNaTela = false }: PropsCanvasMapa) {
+export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao = false, controle, children, mostrarAjuda = true, ajustavel = false, animado = true, cameraInicial, celular = false }: PropsCanvasMapa) {
   const mapa = mapaDaVersao(estado.mundo.versaoMapa);
   const area = useMemo<Area>(() => areaDoMapa(mapa), [mapa]);
-  // O Ocioso ainda não tem lugar no mapa (fica para o portão dos aldeões no mapa): só os ofícios produtivos aparecem.
-  const itens = useMemo(
-    () => camadaObjetos(mapa, estado.slots, estado.aldeoes.filter((a): a is { oficio: Oficio } => a.oficio !== OFICIO_OCIOSO)),
-    [mapa, estado.slots, estado.aldeoes],
-  );
+  const itens = useMemo(() => camadaObjetos(mapa, estado.slots, estado.aldeoes), [mapa, estado.slots, estado.aldeoes]);
   // Tecla B: só o desenho muda (todas de pé, com os 5 aldeões); o clique continua seguindo o estado.
   const itensTodos = useMemo(() => camadaObjetos(mapa, TODOS_CONSTRUIDOS, TODOS_OFICIOS), [mapa]);
   const relogioRef = useRef(relogio);
@@ -537,8 +530,8 @@ export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao 
   useEffect(() => {
     // Até a imagem e os sprites chegarem, desenha a tela de espera.
     const prontas = camadas?.mapa === mapa ? camadas : null;
-    paraDesenhar.current = { vp: VP, cam, mapa, nevoas, escala, camadas: prontas, itens: todasConstrucoes ? itensTodos : itens, estado, todasConstrucoes, slotSobMouse, piscando, mostrarGrade, mostrarHitboxes, mostrarMascaras, ponteiro, aldeoesNaTela, destaque, tremida, relogio: () => relogioRef.current() };
-  }, [VP, cam, mapa, nevoas, escala, camadas, itens, itensTodos, todasConstrucoes, slotSobMouse, piscando, estado, mostrarGrade, mostrarHitboxes, mostrarMascaras, ponteiro, aldeoesNaTela, destaque, tremida]);
+    paraDesenhar.current = { vp: VP, cam, mapa, nevoas, escala, camadas: prontas, itens: todasConstrucoes ? itensTodos : itens, estado, todasConstrucoes, slotSobMouse, piscando, mostrarGrade, mostrarHitboxes, mostrarMascaras, ponteiro, destaque, tremida, relogio: () => relogioRef.current() };
+  }, [VP, cam, mapa, nevoas, escala, camadas, itens, itensTodos, todasConstrucoes, slotSobMouse, piscando, estado, mostrarGrade, mostrarHitboxes, mostrarMascaras, ponteiro, destaque, tremida]);
 
   // Laço de desenho: um quadro por atualização da tela, para o grupo em marcha
   // andar liso e o contador virar no segundo certo. O quadro da animação de

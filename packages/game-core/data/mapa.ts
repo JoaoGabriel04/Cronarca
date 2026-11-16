@@ -32,7 +32,14 @@ export const ESCALA = {
   construcao: 48,
   poco: 32,
   fogueira: 32,
-  aldeao: 32,
+  /**
+   * EXPERIMENTO (pedido do dono, depois do portão de ajustes rápidos): aldeões
+   * com 24 de lado no mundo (metade da construção) usando a arte de 32
+   * (LADO_SPRITE_ALDEAO), reduzida no desenho: 0,75x em 1x, 1,5x em 2x, 2,25x
+   * em 3x e 3x em 4x. Foge da regra de pixel inteiro; se não agradar, entra
+   * uma arte de 24 px e este valor fica igual ao lado da arte.
+   */
+  aldeao: 24,
   /** O grupo em marcha (L7) usa este lado em px de tela, fixo em qualquer zoom (decisão do dono). */
   aventureiro: 32,
   flores: 16,
@@ -78,11 +85,28 @@ export const POSICOES_ALDEOES = {
 } as const satisfies Record<Oficio, { x: number; y: number }>;
 
 /**
- * Aldeões só aparecem a partir deste zoom (handoff, Aldeões: 96 na Vila
- * desktop em 3x, nunca no zoom do Mapa). A exceção do celular (32 de tela no
- * zoom 2x, spec 4c) entra no Portão 14.
+ * Ociosos (Portão 17) na praça, em volta da fogueira (portão de ajustes
+ * rápidos): o k-ésimo Ocioso fica no lugar k, sem sorteio. Canto superior
+ * esquerdo do sprite de 32, antes de somar a origem do núcleo, como em
+ * POSICOES_ALDEOES. Só cabem estes sem cobrir a fogueira nem a fachada das
+ * construções vizinhas (Taverna, Forja, Celeiro e o poço): acima disso não
+ * aparecem mais figuras (o número exato está no cartão dos aldeões).
  */
-export const ZOOM_MINIMO_ALDEOES = 3;
+export const POSICOES_OCIOSOS = [
+  { x: 143, y: 266 },
+  { x: 113, y: 252 },
+  { x: 120, y: 280 },
+] as const satisfies readonly { x: number; y: number }[];
+
+/**
+ * Lado da arte dos aldeões (quadros.json: 32). As posições (POSICOES_ALDEOES,
+ * POSICOES_OCIOSOS) são o canto do sprite de 32; o pé sai daqui, então os
+ * aldeões ficam no mesmo lugar qualquer que seja ESCALA.aldeao.
+ *
+ * Aldeões aparecem em qualquer zoom e largura, sempre na escala de mundo
+ * (ESCALA.aldeao × zoom), proporcionais às construções em todos os zooms (A6).
+ */
+export const LADO_SPRITE_ALDEAO = 32;
 
 /**
  * Névoa (L6, Portão 9): só na Cripta, enquanto ela estiver bloqueada (Estradas

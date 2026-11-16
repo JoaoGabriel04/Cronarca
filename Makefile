@@ -8,7 +8,7 @@ COMPOSE := docker compose
 MOUNT_DIRS := packages/game-core/node_modules apps/backend/node_modules \
 	apps/frontend/node_modules apps/frontend/.next
 
-.PHONY: help up down logs ps migrate seed reset-db test typecheck conferir-mapa conferir-mobile conferir-inicio conferir-mercador conferir-teto conferir-falha gerar-frente evento-mercador shell-backend shell-db env-check
+.PHONY: help up down logs ps migrate seed reset-db test typecheck conferir-mapa conferir-mobile conferir-inicio conferir-mercador conferir-teto conferir-falha conferir-aldeoes gerar-frente evento-mercador shell-backend shell-db env-check
 
 help: ## Lista os comandos
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-14s\033[0m %s\n", $$1, $$2}'
@@ -80,6 +80,11 @@ conferir-falha: ## Portão 18b: a Falha na tela de Eras e no modal de Ascensão 
 	docker run --rm --network host --user $$(id -u):$$(id -g) -e HOME=/tmp \
 		-e PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 -v $(CURDIR):/w -w /w $(PLAYWRIGHT_IMG) \
 		sh -c 'npm install --silent --no-save --no-package-lock --prefix /tmp/pw playwright@1.61.1 >/dev/null && NODE_PATH=/tmp/pw/node_modules node scripts/conferir-falha.cjs'
+
+conferir-aldeoes: ## Aldeões em qualquer zoom e os Ociosos na fogueira: Reino em 1440 e 390 px e a praça, fps com 40 aldeões (estado de teste só na resposta; ações bloqueadas); precisa de make up e make seed
+	docker run --rm --network host --user $$(id -u):$$(id -g) -e HOME=/tmp \
+		-e PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 -v $(CURDIR):/w -w /w $(PLAYWRIGHT_IMG) \
+		sh -c 'npm install --silent --no-save --no-package-lock --prefix /tmp/pw playwright@1.61.1 >/dev/null && NODE_PATH=/tmp/pw/node_modules node scripts/conferir-aldeoes.cjs'
 
 conferir-mercador: evento-mercador ## Negociação do Mercador no Chromium em 1440, 601, 600, 390 e 360 px: termos do servidor, botões e prazo visíveis; capturas em docs/referencia/mercador
 	docker run --rm --network host --user $$(id -u):$$(id -g) -e HOME=/tmp \

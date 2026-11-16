@@ -2654,3 +2654,42 @@
   font-style: italic;
   color: #6a5a40;
 }
+
+/* ---------- Ajuda curta nos cartões (aldeões e guilda) ---------- */
+.ajudaCartao {
+  margin: 4px 0 6px;
+}
+.ajudaBotao {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  font-size: 13px;
+  color: #6a4a2c;
+  cursor: pointer;
+  list-style: none;
+}
+.ajudaBotao::-webkit-details-marker {
+  display: none;
+}
+.ajudaBotao:hover {
+  color: #3a261c;
+}
+.ajudaBotao:focus-visible {
+  outline: 3px solid var(--ouro-claro);
+  outline-offset: 2px;
+}
+.ajudaTexto {
+  margin: 4px 0 0;
+  padding: 8px 10px;
+  border: 2px solid #c8b890;
+  background: #efe5cc;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #3a261c;
+}
+@media (max-width: 1023px) {
+  .ajudaBotao {
+    min-height: 44px;
+  }
+}

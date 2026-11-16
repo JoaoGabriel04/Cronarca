@@ -379,7 +379,6 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
                 ajustavel
                 animado={preferencias.animacoes}
                 celular={celular}
-                aldeoesNaTela={celular && visao === 'vila'}
               >
                 {(cam: Camera, vp: Tamanho) => {
                   /** Mesmo limite do CSS (@container mapa, 600 px): chip compacto, sem zoom nem minimapa. */

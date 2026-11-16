@@ -1,6 +1,6 @@
 // Camada L4 (CRONARCA_MAPA_GRANDE.md, seção 3): o que não está na imagem.
 // Props do núcleo, construções dos slots construídos e aldeões (um por ofício
-// presente), ordenados pelo Y do pé. Funções puras. Tamanhos só da tabela de
+// presente, e até 3 Ociosos em volta da fogueira), ordenados pelo Y do pé. Funções puras. Tamanhos só da tabela de
 // escala (ESCALA, game-core/data/mapa.ts).
 // Árvores, pedras e montanhas estão no mapa_base.png (L0), estáticas.
 // L3b (Portão 9c): a sombra de cada item (gerada da silhueta do sprite),
@@ -8,8 +8,8 @@
 
 import {
   AJUSTE_PE_SOMBRA, animacao, ESCALA, faseDe, quadroNoTempo, PE_ALTURA_PERMIL, SOMBRA_ALDEAO, SOMBRA_AVENTUREIRO, SOMBRA_CONSTRUCAO, SOMBRA_ELIPSE_16,
-  SOMBRA_OBJETO, ZOOM_MINIMO_ALDEOES,
-  type Animacao, type ArvoreMapa, type MapaJogo, type Oficio, type SlotId, type SombraSilhueta,
+  SOMBRA_OBJETO,
+  type Animacao, type ArvoreMapa, type MapaJogo, type OficioAldeao, type SlotId, type SombraSilhueta,
 } from '@cronarca/game-core';
 import { arvoresVisiveis, LADO_ARVORE, quadroDaArvore, spriteDaArvore, type GradeArvores } from './arvores';
 
@@ -43,8 +43,6 @@ export interface ItemL4 {
    * do desenho do quadro 1, ver lib/mapa/sombras). null = sem sombra.
    */
   sombra: { p: SombraSilhueta; ajuste: number } | null;
-  /** Menor zoom em que o item aparece (aldeões: 3x; o resto: sempre). */
-  zoomMinimo: number;
 }
 
 /** Nível de cada slot (o mapa só desenha construções de nível 1 ou mais). */
@@ -53,8 +51,8 @@ export type NiveisSlots = Readonly<Partial<Record<SlotId, { nivel: number }>>>;
 const altura90 = (lado: number) => Math.floor((lado * PE_ALTURA_PERMIL) / 1000);
 const comFase = (anim: Animacao, id: string) => ({ anim, fase: faseDe(id, anim.cicloMs) });
 
-/** Os aldeões do estado (só o ofício importa para o mapa). */
-export type AldeoesMapa = readonly { oficio: Oficio }[];
+/** Os aldeões do estado (só o ofício importa para o mapa; o Ocioso também aparece). */
+export type AldeoesMapa = readonly { oficio: OficioAldeao }[];
 
 export function camadaObjetos(m: MapaJogo, slots: NiveisSlots, aldeoes: AldeoesMapa = []): ItemL4[] {
   const itens: ItemL4[] = [];
@@ -71,7 +69,6 @@ export function camadaObjetos(m: MapaJogo, slots: NiveisSlots, aldeoes: AldeoesM
       peX: o.x,
       peY: o.y,
       sombra: sombra ? { p: sombra, ajuste: AJUSTE_PE_SOMBRA[o.tipo] ?? 0 } : null,
-      zoomMinimo: 1,
     });
   }
 
@@ -86,7 +83,6 @@ export function camadaObjetos(m: MapaJogo, slots: NiveisSlots, aldeoes: AldeoesM
       peX: s.x + ESCALA.construcao / 2,
       peY: s.y + altura90(ESCALA.construcao),
       sombra: { p: SOMBRA_CONSTRUCAO, ajuste: AJUSTE_PE_SOMBRA.construcao ?? 0 },
-      zoomMinimo: 1,
     });
   }
 
@@ -104,7 +100,24 @@ export function camadaObjetos(m: MapaJogo, slots: NiveisSlots, aldeoes: AldeoesM
       peX: a.x,
       peY: a.y,
       sombra: { p: SOMBRA_ALDEAO, ajuste: AJUSTE_PE_SOMBRA.aldeao ?? 0 },
-      zoomMinimo: ZOOM_MINIMO_ALDEOES,
+    });
+  }
+
+  // Ociosos: um por Ocioso presente, até os lugares em volta da fogueira (o k-ésimo no lugar k, sem sorteio).
+  const ociosos = Math.min(aldeoes.filter((a) => a.oficio === 'ocioso').length, m.ociosos.length);
+  for (let k = 0; k < ociosos; k++) {
+    const p = m.ociosos[k]!;
+    const lado = ESCALA.aldeao;
+    const id = `aldeao_ocioso_${k + 1}`;
+    itens.push({
+      id,
+      ...comFase(animacao('aldeao', 'ocioso'), id),
+      x: p.x - lado / 2,
+      y: p.y - altura90(lado),
+      lado,
+      peX: p.x,
+      peY: p.y,
+      sombra: { p: SOMBRA_ALDEAO, ajuste: AJUSTE_PE_SOMBRA.aldeao ?? 0 },
     });
   }
 
@@ -192,9 +205,7 @@ const visivel = (r: RetTela, v: Vista) => r.x + r.largura > 0 && r.y + r.altura 
  * vem da imagem gerada (`tamanhoSombra`), porque o pé sai do desenho.
  * `pesFixos` são pés em px de tela de quem tem tamanho fixo na tela
  * (aventureiros do grupo em marcha): a elipse de 16 deles fica em 1x.
- * `naTelaAbaixoDoZoom`: exceção da Vila no celular (A6, spec 4c): quem só
- * apareceria a partir de um zoom maior (os aldeões) aparece mesmo assim, com
- * o sprite em 1x (32 px de tela), apoiado pelo pé, e a sombra também em 1x.
+ * Tudo na escala de mundo (inteira), inclusive os aldeões em qualquer zoom (A6).
  * `arvores`: as árvores da arte (versão 2), só as visíveis (grade), no quadro
  * do balanço, intercaladas pelo pé com os objetos. A sombra delas está na imagem.
  */
@@ -202,22 +213,20 @@ export function planoL4(
   itens: readonly ItemL4[], v: Vista, relogio: RelogioAnim,
   tamanhoSombra: (chave: string) => { largura: number; altura: number } | undefined,
   pesFixos: readonly { x: number; y: number }[] = [],
-  naTelaAbaixoDoZoom = false,
   arvores: ArvoresNoPlano | null = null,
 ): ComandoL4[] {
   const sombras: ComandoL4[] = [];
   const objetos: ComandoL4[] = [];
   for (const it of itens) {
-    const abaixo = v.zoom < it.zoomMinimo;
-    if (abaixo && !naTelaAbaixoDoZoom) continue; // aldeões somem no zoom do Mapa
-    // Na exceção, escala 1 e o pé no mesmo ponto da tela (o canto sai do pé, não do canto em mundo).
-    const escala = abaixo ? 1 : v.zoom;
-    const x = abaixo ? Math.round(it.peX * v.zoom + v.dx) - (it.peX - it.x) : it.x * v.zoom + v.dx;
-    const y = abaixo ? Math.round(it.peY * v.zoom + v.dy) - (it.peY - it.y) : it.y * v.zoom + v.dy;
+    const escala = v.zoom;
+    const x = it.x * v.zoom + v.dx;
+    const y = it.y * v.zoom + v.dy;
     const chave = chaveDaSombra(nomeDoSprite(it, relogio));
     const t = it.sombra ? tamanhoSombra(chave) : undefined;
     if (t && t.largura > 0) {
-      const ret = { x, y, largura: t.largura * escala, altura: t.altura * escala };
+      // A sombra sai do quadro da arte: acompanha o sprite quando o lado no mundo difere da arte (aldeões, ESCALA.aldeao).
+      const fator = it.lado / it.anim.tamanho;
+      const ret = { x, y, largura: Math.round(t.largura * escala * fator), altura: Math.round(t.altura * escala * fator) };
       if (visivel(ret, v)) sombras.push({ tipo: 'sombra', sprite: chave, ret });
     }
     const ret = { x, y, largura: it.lado * escala, altura: it.lado * escala };

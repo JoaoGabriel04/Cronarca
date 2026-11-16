@@ -5,7 +5,7 @@ import bruto from '../data/quadros.json' with { type: 'json' };
 import { CLASSES, OFICIOS } from '../data/aventureiros.ts';
 import { TIPOS_CONSTRUCAO } from '../data/construcoes.ts';
 import { DESTINOS_IDS } from '../data/expedicoes.ts';
-import { ESCALA, TIPOS_PROP } from '../data/mapa.ts';
+import { ESCALA, LADO_SPRITE_ALDEAO, TIPOS_PROP } from '../data/mapa.ts';
 import {
   ANIMACOES, animacao, esquemaQuadros, faseDe, indiceNoTempo, montarCatalogo, quadroNoTempo, quadrosDaCena, todosOsQuadros, urlDoQuadro,
 } from '../src/animacao.ts';
@@ -98,7 +98,7 @@ describe('quadros.json', () => {
 
   it('cobre o que o jogo desenha: construções, aldeões, aventureiros, props, destinos e o Mercador', () => {
     for (const t of TIPOS_CONSTRUCAO) expect(animacao('construcao', t).tamanho).toBe(ESCALA.construcao);
-    for (const o of OFICIOS) expect(animacao('aldeao', o).tamanho).toBe(ESCALA.aldeao);
+    for (const o of OFICIOS) expect(animacao('aldeao', o).tamanho).toBe(LADO_SPRITE_ALDEAO);
     for (const c of CLASSES) expect(animacao('aventureiro', c).tamanho).toBe(ESCALA.aventureiro);
     for (const p of TIPOS_PROP) expect(animacao('cenario', p).tamanho).toBe(ESCALA[p]);
     for (const d of DESTINOS_IDS) expect(animacao('expedicao', d).tamanho).toBe(64);

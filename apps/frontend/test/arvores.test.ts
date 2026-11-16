@@ -71,7 +71,7 @@ describe('árvores no plano da L4', () => {
   for (const zoom of [1, 2, 3, 4]) {
     it(`${zoom}x: sombras primeiro, depois árvores e objetos numa só ordem de pé; só as visíveis; pixel inteiro`, () => {
       const v: Vista = { dx: -1200 * zoom, dy: -800 * zoom, zoom, largura: 1440, altura: 900 };
-      const plano = planoL4(itens, v, { t: 12_345, animado: true }, () => ({ largura: 50, altura: 50 }), [], false, { mapa: m, grade });
+      const plano = planoL4(itens, v, { t: 12_345, animado: true }, () => ({ largura: 50, altura: 50 }), [], { mapa: m, grade });
       const corpo = plano.filter((c) => c.tipo !== 'sombra');
       expect(plano.findIndex((c) => c.tipo !== 'sombra')).toBe(plano.filter((c) => c.tipo === 'sombra').length);
       for (let i = 1; i < corpo.length; i++) expect(pe(corpo[i]!) >= pe(corpo[i - 1]!), `${i}`).toBe(true);

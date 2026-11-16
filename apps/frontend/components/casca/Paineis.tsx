@@ -9,7 +9,9 @@ import type { DestinoId, OficioAldeao, PoliticaAldeoes, SlotId } from '@cronarca
 import { Minus, Plus } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { CartaConstrucao, CartaDestino, DadosAldeoes, LinhaCronica } from '../../lib/casca/dados';
+import { AJUDA } from '../../lib/casca/ajuda';
 import { SpriteAnimado } from '../anim/SpriteAnimado';
+import { Ajuda } from './Ajuda';
 import estilos from './casca.module.css';
 import { Icone } from './Icone';
 
@@ -112,6 +114,7 @@ export function CartaoAldeoes({ d, aoEvento }: { d: DadosAldeoes; aoEvento: (e: 
           {d.total} de {d.maximo}
         </span>
       </h3>
+      <Ajuda rotulo={AJUDA.aldeoes.rotulo} texto={AJUDA.aldeoes.texto} />
       <p className={estilos.cartaoTexto}>Chegam um a cada 20 s, enquanto houver vaga nas Casas e comida.</p>
       <p className={`${estilos.cartaoTexto} ${d.alerta ? estilos.alerta : ''}`}>{d.situacao}</p>
       <ul className={estilos.oficios} aria-label="Ofícios">

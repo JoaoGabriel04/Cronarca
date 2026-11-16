@@ -7,7 +7,7 @@ import { OFICIOS, type Oficio } from '../../data/aventureiros.ts';
 import type { TipoConstrucao } from '../../data/construcoes.ts';
 import { DESTINOS_IDS, type DestinoId } from '../../data/expedicoes.ts';
 import {
-  ESCALA, PE_ALTURA_PERMIL, POSICOES_ALDEOES, PROPS_NUCLEO, RECURSO_DO_CLICAVEL, TILE, VERSAO_MAPA_ATUAL, VERSOES_MAPA,
+  ESCALA, LADO_SPRITE_ALDEAO, PE_ALTURA_PERMIL, POSICOES_ALDEOES, POSICOES_OCIOSOS, PROPS_NUCLEO, RECURSO_DO_CLICAVEL, TILE, VERSAO_MAPA_ATUAL, VERSOES_MAPA,
   type TipoClicavel, type TipoObjeto, type VersaoMapa,
 } from '../../data/mapa.ts';
 import bruto from '../../data/mapa_meta.json' with { type: 'json' };
@@ -237,6 +237,8 @@ export interface MapaJogo {
   props: readonly PropMapa[];
   /** Um lugar por ofício, na ordem do rodízio (OFICIOS). */
   aldeoes: readonly LugarAldeao[];
+  /** Lugares dos Ociosos em volta da fogueira (pé, em mundo), na ordem em que são ocupados. */
+  ociosos: readonly PontoMapa[];
   /** Árvores desenhadas por cima da imagem, em ordem de pé. */
   arvores: readonly ArvoreMapa[];
   /** Balanço das árvores: duração de cada quadro (k = 1..n). */
@@ -293,9 +295,10 @@ export function mapaDoMeta(m: MetaMapa): MapaJogo {
     }),
     aldeoes: OFICIOS.map((oficio) => {
       const p = POSICOES_ALDEOES[oficio];
-      const lado = ESCALA.aldeao;
+      const lado = LADO_SPRITE_ALDEAO;
       return { oficio, x: p.x + O.x + lado / 2, y: p.y + O.y + Math.floor((lado * PE_ALTURA_PERMIL) / 1000) };
     }),
+    ociosos: POSICOES_OCIOSOS.map((p) => ({ x: p.x + O.x + LADO_SPRITE_ALDEAO / 2, y: p.y + O.y + Math.floor((LADO_SPRITE_ALDEAO * PE_ALTURA_PERMIL) / 1000) })),
     arvores: m.arvores.map((a) => ({ ...a })),
     balanco: { duracoesMs: [...m.balanco.duracoesMs] },
   };

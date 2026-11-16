@@ -72,7 +72,7 @@ async function medir(p, largura) {
     // Com um diálogo aberto, só o que está nele conta (o resto fica atrás do fundo escurecido).
     const dialogo = document.querySelector('[role="dialog"]');
     const raiz = dialogo || document;
-    const pequenos = [...raiz.querySelectorAll('button, a[href], [role="button"]')]
+    const pequenos = [...raiz.querySelectorAll('button, a[href], [role="button"], summary')]
       .filter(visivel)
       .map((el) => ({ el, r: el.getBoundingClientRect() }))
       .filter(({ r }) => largura <= 600 && (r.width < 43.5 || r.height < 43.5))

@@ -45,40 +45,24 @@ describe('gaveta de Destinos', () => {
   });
 });
 
-describe('aldeões na Vila do celular (exceção A6)', () => {
+describe('aldeões em qualquer visão e largura (A6)', () => {
   const itens = camadaObjetos(MAPA, {}, OFICIOS.map((oficio) => ({ oficio })));
   const aldeoes = itens.filter((it) => it.id.startsWith('aldeao_'));
   const tamanhos = () => ({ largura: 40, altura: 20 });
   const v = { dx: -2000, dy: -1500, zoom: 2, largura: 99_999, altura: 99_999 };
 
-  it('em 2x, com a exceção: 32 px de tela, apoiados pelo pé, em pixel inteiro, com a sombra em 1x', () => {
-    const plano = planoL4(itens, v, QUADRO_1, tamanhos, [], true);
+  it('em 2x (Vila e Reino do celular, Reino do desktop): escala de mundo, 48 px (24 × 2), metade da construção; sombra junto', () => {
+    const plano = planoL4(itens, v, QUADRO_1, tamanhos, []);
     for (const a of aldeoes) {
       const obj = plano.find((c) => c.tipo === 'objeto' && c.item.id === a.id);
       expect(obj, a.id).toBeDefined();
       if (obj?.tipo !== 'objeto') continue;
-      expect(obj.ret.largura).toBe(32);
-      expect(obj.ret.altura).toBe(32);
-      // O pé do sprite (centro, 28 px abaixo do topo) cai no pé em mundo convertido para a tela.
-      expect(obj.ret.x + 16).toBe(Math.round(a.peX * 2 + v.dx));
-      expect(obj.ret.y + 28).toBe(Math.round(a.peY * 2 + v.dy));
-      expect(Number.isInteger(obj.ret.x) && Number.isInteger(obj.ret.y)).toBe(true);
+      expect(obj.ret).toEqual({ x: a.x * 2 + v.dx, y: a.y * 2 + v.dy, largura: 48, altura: 48 });
     }
     const sombras = plano.filter((c) => c.tipo === 'sombra' && c.sprite.includes('aldeao'));
     expect(sombras).toHaveLength(aldeoes.length);
-    for (const s of sombras) expect({ l: s.ret.largura, a: s.ret.altura }).toEqual({ l: 40, a: 20 });
-  });
-
-  it('sem a exceção (Reino no celular, Mapa no desktop), somem em 2x; construções e props seguem em escala de mundo', () => {
-    const plano = planoL4(itens, v, QUADRO_1, tamanhos, [], false);
-    expect(plano.some((c) => c.tipo === 'objeto' && c.item.id.startsWith('aldeao_'))).toBe(false);
+    for (const s of sombras) expect({ l: s.ret.largura, a: s.ret.altura }).toEqual({ l: 60, a: 30 }); // 40 x 20 da arte de 32, × 2 × 24/32
     const poco = plano.find((c) => c.tipo === 'objeto' && c.item.id === 'poco_1');
     expect(poco?.tipo === 'objeto' && poco.ret.largura).toBe(64);
-  });
-
-  it('a partir de 3x a exceção não muda nada: tamanho de mundo (96 em 3x)', () => {
-    const p3 = planoL4(itens, { ...v, zoom: 3 }, QUADRO_1, tamanhos, [], true);
-    const a = p3.find((c) => c.tipo === 'objeto' && c.item.id.startsWith('aldeao_'));
-    expect(a?.tipo === 'objeto' && a.ret.largura).toBe(96);
   });
 });
