@@ -40,16 +40,34 @@ describe('login: esqueci a senha e convidado (Portão A)', () => {
     expect(AVISO_CONVIDADO).not.toBe(LEGENDA_CONVIDADO);
     expect(`${AVISO_CONVIDADO}${LEGENDA_CONVIDADO}`).not.toMatch(/\p{Extended_Pictographic}/u);
   });
-  it('no mobile o cartão não tem selo nem pergaminho, e o formulário tem 350 de largura', () => {
+  it('no mobile o painel é de madeira escura, no pé da tela, sem selo, e cabe sem rolar', () => {
     const css = ler('app/login/login.module.css');
     const mobile = css.slice(css.indexOf('@media (max-width: 899px)'));
     expect(mobile).toMatch(/width: min\(100%, 350px\)/);
+    expect(mobile).toMatch(/margin: auto 0 0/); // encostado embaixo; sobra vira castelo, e rola só se não couber
+    expect(mobile).toMatch(/--fundo: #2a1c12/); // opaco, do estilo do menu (contraste do texto: 5,0:1 a 12,1:1)
+    expect(mobile).not.toMatch(/clip-path: none|background: none/); // mantém a moldura em pixel art
     expect(mobile).toMatch(/\.selo,\s*\.sub \{\s*display: none/);
-    expect(mobile).toMatch(/clip-path: none/);
-    expect(mobile).toMatch(/\.formulario :global\(\.campo\) \{\s*height: 44px/);
-    expect(mobile).toMatch(/\.principal \{\s*height: 50px/);
-    expect(mobile).toMatch(/min-height: 46px/);
+    expect(mobile).toMatch(/\.formulario :global\(input\.campo\) \{\s*height: 40px/);
+    expect(mobile).toMatch(/\.principal \{\s*height: 46px/);
+    expect(mobile).toMatch(/\.alternar :global\(\.link\) \{\s*min-height: 44px/);
+    expect(mobile).toMatch(/\.botaoConvidado\.botaoConvidado \{\s*width: 100%;\s*height: 44px/);
     expect(mobile).toMatch(/width: 300px/);
+  });
+  it('a logo cai para 91 x 32 em telas baixas (até 640 px) e no celular deitado', () => {
+    const css = ler('app/login/login.module.css');
+    expect(css).toMatch(/@media \(max-width: 899px\) and \(max-height: 640px\), \(max-height: 499px\) \{\s*\.marca \{\s*width: 91px;\s*height: 32px;/);
+    const g = ler('app/globals.css');
+    expect(g).toMatch(/\.cena-login \{\s*--castelo-topo: calc\(env\(safe-area-inset-top\) \+ 52px\);/);
+    expect(g).toMatch(/\.cena-login \{\s*--castelo-topo: calc\(env\(safe-area-inset-top\) \+ 84px\);/);
+    expect(g).toMatch(/\.cena-inicio \{\s*--castelo-topo: calc\(env\(safe-area-inset-top\) \+ 140px\);/);
+  });
+  it('o castelo é cenário no mobile: fora do fluxo, atrás de tudo, ancorado pelo topo e sem bloco reservado', () => {
+    const g = ler('app/globals.css');
+    expect(g).toMatch(/\.cena-celular-paisagem \{\s*display: block;[\s\S]*?position: absolute;[\s\S]*?top: var\(--castelo-topo, 0px\);/);
+    expect(g).toMatch(/\.cel-sprite\.k4 \{ top: 0; \}/);
+    expect(g).toMatch(/env\(safe-area-inset-bottom\) \+ 12px/);
+    expect(ler('app/inicio.module.css')).toMatch(/margin-top: auto; \/\* o menu fica no pé da tela/);
   });
 });
 

@@ -180,6 +180,20 @@ input {
   }
 }
 
+/* Topo do castelo no celular: 8 px abaixo da base do bloco de cima (logo e subtítulo no Início, só a logo no Login).
+   Início: 12 + logo 96 + 4 + subtítulo 20 + 8. Login: 12 + logo 64 (32 em telas baixas) + 8. */
+.cena-inicio {
+  --castelo-topo: calc(env(safe-area-inset-top) + 140px);
+}
+.cena-login {
+  --castelo-topo: calc(env(safe-area-inset-top) + 84px);
+}
+@media (max-width: 899px) and (max-height: 640px), (max-height: 499px) {
+  .cena-login {
+    --castelo-topo: calc(env(safe-area-inset-top) + 52px);
+  }
+}
+
 @media (max-width: 899px), (max-height: 499px) {
   .cena {
     /* --altura-visivel: altura do visualViewport (teclado aberto no iPhone), de lib/cena/teclado. */
@@ -208,11 +222,13 @@ input {
     align-items: center;
     /* clip (não hidden): corta o fundo largo e o chão sem virar área de rolagem. */
     overflow: clip;
+    /* Folga de 12 px nas bordas, fora das áreas seguras (notch e barra do Safari). */
+    position: relative;
     padding:
-      calc(env(safe-area-inset-top) + 24px)
-      calc(env(safe-area-inset-right) + 16px)
-      calc(env(safe-area-inset-bottom) + 24px)
-      calc(env(safe-area-inset-left) + 16px);
+      calc(env(safe-area-inset-top) + 12px)
+      calc(env(safe-area-inset-right) + 12px)
+      calc(env(safe-area-inset-bottom) + 12px)
+      calc(env(safe-area-inset-left) + 12px);
   }
 
   .cena-palco > .cena-fundo,
@@ -225,13 +241,14 @@ input {
      z-index -1: a paisagem e o chão (::after) ficam atrás de todo o conteúdo da coluna. */
   .cena-celular-paisagem {
     display: block;
-    position: relative;
+    /* Cenário: fora do fluxo, atrás de tudo, a partir de --castelo-topo (abaixo da logo). O painel (menu ou
+       cartão) fica no pé da tela e pode cobrir o castelo (decisão do dono, 17/11; só no celular). */
+    position: absolute;
     z-index: -1;
-    order: 3;
+    left: 0;
+    right: 0;
+    top: var(--castelo-topo, 0px);
     flex: none;
-    width: calc(100% + 32px);
-    margin-left: -16px;
-    margin-right: -16px;
   }
 
   .cena-celular-fundo {
@@ -268,6 +285,8 @@ input {
     height: var(--w);
   }
   .cel-sprite.k4 { --m: var(--m4); }
+  /* O castelo é ancorado pelo topo, para começar sempre logo abaixo da logo (pelo pé, a 3x ele descia 96 px). */
+  .cel-sprite.k4 { top: 0; }
   .cel-sprite.ancora-esq { left: calc(var(--dx) * 1px); }
   .cel-sprite.ancora-dir { right: calc(var(--dx) * 1px); }
   .cel-sprite.ancora-centro { left: calc(50% + var(--dx) * 1px - var(--w) / 2); }

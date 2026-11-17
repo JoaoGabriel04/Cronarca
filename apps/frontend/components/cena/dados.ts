@@ -108,7 +108,7 @@ export const CENA_INICIO: DadosCena = {
   // Frame de 390: castelo em (3,150); o bloco vai do topo do castelo (150) ao topo do menu (650).
   celular: {
     altura: 500,
-    margemTopo: 7,
+    margemTopo: 0,
     fundoY: -222,
     sprites: [
       { nome: 'pinho0', k: 3, ancora: 'esq', dx: -50, y: 270 },
@@ -130,7 +130,7 @@ export const CENA_LOGIN: DadosCena = {
   // Frame de 390: castelo em (3,62) no cabeçalho de 424; o formulário começa em 416.
   celular: {
     altura: 394,
-    margemTopo: -26,
+    margemTopo: 0,
     fundoY: -222,
     sprites: [{ nome: 'castelo', k: 4, ancora: 'centro', dx: 0, y: 0 }],
   },

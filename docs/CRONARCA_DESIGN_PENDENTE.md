@@ -168,3 +168,43 @@ Ascensão e Avançar de era (16/11), notas:
 - O objetivo "Vencer a fase 5 × Falha" (fase 10 na Falha 2) vem do rascunho do spec e só vale depois que o combate existir. O texto do botão bloqueado de Avançar de era assume que a Era II ainda não é jogável.
 - Falta decidir: o que acontece quando o jogador está no máximo da Falha (nível 10). O spec tem o texto "A Falha já está no máximo", mas a tela ainda não mostra esse estado. Também falta desenhar o resultado depois de confirmar (a tela de "novo ciclo" ou "nova era").
 - Correção visual: no desktop v3 o título "Sabedoria Ancestral" já não quebra em duas linhas sobre o contador. O mesmo defeito existe nas telas antigas de Eras.
+
+Arte do QG (16/11): prédio reerguido (quartel_1.png a quartel_4.png, 48 x 48 px, 4 quadros em que a bandeira com a ampulheta dourada e as tochas balançam) e Ruínas do QG (ruinas_qg_1.png e ruinas_qg_2.png, 48 x 48 px, 2 quadros em que as faíscas de tempo piscam). Mesmo formato das construções atuais; vão para apps/frontend/public/sprites/construcao/. Gerados pelo script gen_qg.py. Falta o ícone de destino de expedição "Ruínas do QG" no mapa (64 px) e ligar os sprites ao mapa na posição perto do tile 65, 28.
+
+
+## Exploração, Ruínas do QG e Brejo de Ervas (16/11)
+Frames no Figma (página Telas v2, y=5200 e 6300): Expedições Ruínas do QG e Brejo D 178:42460; Mapa com pins e card do nó D 179:45546; Resultado Coleta de Ervas D 179:46751; Mapa Nó do Brejo M 179:47278.
+Decisões de design (provisórias, a confirmar): Ruínas do QG é destino único (Perigo 30, 1:30:00, butim raro de Fragmento de Tempo, Eco possível, chance 58% de exemplo) e reerguer o QG depende de vencê-la. Brejo de Ervas: nós de coleta sem combate, 3 estados visuais (Disponível, Esgotado com contagem de renovação, Aguarde), rende 3-6 Ervas por coleta, renova sozinho; resultado mostra ganho de Ervas, estoque e quando o nó renova; atalho para a Enfermaria. Ervas aceleram a cura (regra da Enfermaria já definida).
+Observações: os sprites dentro do Figma (pins, miniaturas, Erva, Fragmento) são vetores simples de placeholder; a arte final são os PNGs de sprites_extra.zip. O HUD dos frames novos é o antigo de 6 recursos (falta Fragmento/Erva no HUD de 7 recursos nesses frames).
+Arte pixel entregue (sprites_extra.zip): recurso/fragmento_1-4 e erva_1-4 (32 px), expedicao/ruinas_qg_1-4 e brejo_1-4 (64 px), brejo_esgotado_1-2, icones_classe/ (lanceiro, cavaleiro, arqueiro, mago_do_tempo, 32 px), aventureiro/eco_{lanceiro,cavaleiro,mago_do_tempo}_1-6 (variantes Eco roxas). Gerados por gen_extra.py. Falta eco_arqueiro (depende do sprite do Arqueiro) e variantes de cenário por tema.
+
+
+## Falha nível 10, Novo ciclo e Nova era (16/11)
+Frames (Telas v2, y=7400): Falha nível máximo D 180:47095; Novo ciclo iniciado D 180:47634; Nova era D 180:48139.
+Decisões provisórias: no nível 10 a Falha não sobe mais (efeitos fixos: obras e pesquisas +30% de tempo, Estradas Reais e Carta Real +50% de custo), Recomeçar com Bônus segue disponível e Avançar de era é o único jeito de zerar. Novo ciclo mostra relíquias ganhas (3 base + 2 por ciclo, exemplo ciclo 2 = +5), Falha 3 para 4, o que recomeça (vila, recursos, tropa, pesquisas) e o que fica (relíquias, conquistas, níveis de Falha). Nova era mostra Era I Aldeia para Era II Reino (marcada "Em construção", pois só a Era I é jogável), Falha 10 para 0 e o que chega junto.
+Observações: frames montados só em desktop; a aba ativa no fundo deveria ser Eras (clonado de Expedições); chip "Em construção" encosta no título Reino na Nova era (ajuste fino). Falta mobile dessas três telas e o Portão 19.
+
+
+## Tela inicial v2 (16/11): redesenho com profundidade
+Fundo novo gerado em pixel art (240 x 150 px, 1 px = 6 px do frame 1440 x 900), arquivo fundo_inicio.png, gerador gen_cena.py, prévia previa_inicio.png (fundo + sprites + caixa do menu de exemplo).
+Camadas: céu com degradê em dither, estrelas (algumas em cruz), Via Láctea discreta, lua com halo, nuvens finas iluminadas; duas cordilheiras e colinas com bruma entre elas; linha de pinheiros distantes; chão com textura e touceiras; colina sob o castelo com sombra projetada para a esquerda (a lua está à direita) e luz das tochas no portão; caminho de terra que desce do portão até o canto inferior esquerdo, passando ao lado do acampamento (cavaleiro e fogueira); primeiro plano escuro em silhueta nos cantos; vaga-lumes.
+Sprites de cena (separados do fundo): pinheiros em 3 tamanhos (perto, meio, longe, com balanço de 4 quadros), castelo, cavaleiro, fogueira, placa, cerca, flores. Pinheiros, cerca e flores da prévia são provisórios (estáticos).
+Pendências: tirar a cerca e as flores do fundo e fazê-las sprites animados, redesenhar o frame do Figma (Início e Login, desktop e celular), novo dados.ts e novo prompt para o Claude Code. O prompt de unificação de árvores fica com o Portão 2 suspenso.
+
+
+### Sprites da cena v2 (16/11, tarde)
+Entregues em cena_v2_sprites.zip (destino sugerido: public/sprites/cena/, fundo em public/cenas/): castelo (96 x 96, 8 quadros), pinheiros perto/meio/longe, duas variantes cada (48x72, 44x66, 32x48, 30x44, 20x30, 18x26, 8 quadros de balanço em onda, topo balança mais), cavaleiro (48x48, respiração, penacho e brilho na espada), fogueira (48x48, chama em 3 camadas, fagulhas, brilho), flores (32x32) e cerca (64x32) com grama balançando. Todos com 8 quadros, 140 ms por quadro, 1 px de sprite = 4 px do frame (o fundo segue 1 px = 6 px). manifesto_cena_v2.json lista nomes, quadros e tamanhos. Geradores: gen_castelo.py, gen_sprites_cena.py, gen_cena.py, compor.py.
+Ainda provisório: placa (sprite antigo), versão mobile, Figma da tela (Início e Login) e novo dados.ts. A troca no código deve ser feita pelo Claude Code com verificação (teste que falha se SVG antigo for referenciado, remoção dos SVGs antigos, captura de tela).
+
+
+### Tela inicial e Login v2, Figma (16/11)
+Frames: Início v2 Desktop 184:47341, Login v2 Desktop 184:47406, Início v2 Mobile 184:47468, Login v2 Mobile 184:47498 (página Telas v2, y=10800). Camadas-fonte com imagem em 183:47341 (y=9600). Os PNGs foram enviados ao Figma, então o layout é fiel à arte real.
+Lista fechada de sprites da cena: castelo, cavaleiro, fogueira, flores, cerca, placa, pinheiro grande/medio/longe (a e b). Arbusto fica fora (sem versão nova). Fundo único fundo_inicio.png para Início e Login. Sprites a 4 px por pixel de arte, fundo a 6 px; mobile usa recortes da mesma composição. Prompt do Claude Code: PROMPT_TELA_INICIAL_V2.md (substitui PROMPT_UNIFICAR_ANIMACAO_ARVORES.md).
+Pendente: a placa ainda é o sprite antigo (6 px por pixel), Login desktop esconde a lua atrás do cartão, frames de Início/Login antigos (44:2870, 44:3616) ficam como histórico.
+
+## Atualização (Opção 1)
+- Concluído: Figma com sprites existentes + catálogo de 278 sprites; prompt do Claude Code reescrito.
+- Pendente: Login Mobile com mais cena (só castelo hoje); versões mobile de Falha/Novo ciclo/Nova era; Portão 19; chip "Em construção" e aba ativa; arqueiro/eco_arqueiro.
+
+## Celular deitado (844x390): layout de duas colunas
+- Hoje usa o layout mobile com rolagem (aceito por ora). Layout dedicado seria um portão à parte; prioridade baixa, decidir depois do Portão 21.

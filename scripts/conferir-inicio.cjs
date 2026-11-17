@@ -89,6 +89,64 @@ const celular = (b, w, h) => b.newContext({ viewport: { width: w, height: h }, i
     await ctx.close();
   }
 
+  // Painel sobre o castelo (decisão do dono, 17/11): em 360x560, 375x600, 390x664 e 412x700 todo o conteúdo interativo
+  // de Início e Login cabe na tela SEM rolar, o painel termina 12 px acima do pé, a logo não encosta no castelo
+  // (8 px de folga), o castelo mantém escala inteira (3x ou 4x) e o texto do painel tem contraste de pelo menos 4,5:1.
+  {
+    const lum = (c) => {
+      const [r, g, b] = c.match(/[\d.]+/g).slice(0, 3).map((v) => { const x = Number(v) / 255; return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const contraste = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
+    for (const [w, h] of [[360, 560], [375, 600], [390, 664], [412, 700]]) {
+      const ctx = await celular(b, w, h);
+      const p = await ctx.newPage();
+      for (const rota of ['/', '/login']) {
+        const nome = `painel ${w}x${h} ${rota === '/' ? 'inicio' : 'login '}`;
+        await p.goto(APP + rota, { timeout: 120_000 });
+        await p.waitForTimeout(1200);
+        const m = await p.evaluate(() => {
+          const cena = document.querySelector('.cena');
+          const painel = document.querySelector('.cena-palco > nav, .cena-palco > section');
+          const pr = painel.getBoundingClientRect();
+          const fora = [...document.querySelectorAll('a[href], button, input')]
+            .filter((e) => e.getBoundingClientRect().width > 0 && getComputedStyle(e).display !== 'none')
+            .map((e) => ({ e, r: e.getBoundingClientRect() }))
+            .filter(({ r }) => r.top < -0.5 || r.bottom > innerHeight + 0.5)
+            .map(({ e }) => (e.getAttribute('aria-label') || e.textContent || e.name || '').trim().slice(0, 24));
+          const logo = document.querySelector('.cena-palco img[alt="Cronarca"]').getBoundingClientRect();
+          const subtitulo = [...document.querySelectorAll('.cena-palco > p')].find((e) => /Crônicas/.test(e.textContent));
+          const baseDoBloco = Math.max(logo.bottom, subtitulo ? subtitulo.getBoundingClientRect().bottom : 0);
+          const castelo = [...document.querySelectorAll('.cena-celular-paisagem .cel-sprite img')].find((i) => /castelo/.test(i.getAttribute('src'))).getBoundingClientRect();
+          const fundo = getComputedStyle(painel).backgroundColor;
+          const cores = [...painel.querySelectorAll('h1, label, p, .link, a, button')]
+            .filter((e) => e.getBoundingClientRect().width > 0 && (e.textContent || '').trim() && !e.disabled && !/botao-dourado|botao-claro/.test(e.className))
+            .map((e) => ({ t: e.textContent.trim().slice(0, 22), c: getComputedStyle(e).color }));
+          return {
+            rolagem: cena.scrollHeight - cena.clientHeight, painelTopo: pr.top, painelBase: pr.bottom, fora, logoAltura: logo.height,
+            folgaCastelo: castelo.top - baseDoBloco, casteloLargura: castelo.width, fundo, cores,
+          };
+        });
+        const livre = m.painelBase <= h - 12 + 0.5 && m.painelTopo >= -0.5;
+        console.log(`${nome} rolagem ${m.rolagem} px, painel ${Math.round(m.painelTopo)}-${Math.round(m.painelBase)} de ${h}, logo ${Math.round(m.logoAltura)} px, folga do castelo ${Math.round(m.folgaCastelo)} px, castelo ${Math.round(m.casteloLargura)} px, fora da tela: ${m.fora.join(', ') || 'nada'}`);
+        if (m.rolagem > 0) falhou(`${nome}: a tela rola ${m.rolagem} px`);
+        if (!livre) falhou(`${nome}: painel fora da área visível (${Math.round(m.painelTopo)}-${Math.round(m.painelBase)} em ${h})`);
+        if (m.fora.length) falhou(`${nome}: controles fora da tela: ${m.fora.join(', ')}`);
+        if (m.folgaCastelo < 8 - 0.5) falhou(`${nome}: castelo a ${m.folgaCastelo.toFixed(1)} px da logo (mínimo 8)`);
+        const n = m.casteloLargura / 96;
+        if (!Number.isInteger(n) || (n !== 3 && n !== 4)) falhou(`${nome}: castelo fora da escala inteira (${m.casteloLargura} px de largura)`);
+        const esperada = rota === '/' ? 96 : h <= 640 ? 32 : 64;
+        if (Math.abs(m.logoAltura - esperada) > 0.5) falhou(`${nome}: logo com ${m.logoAltura} px (esperado ${esperada})`);
+        for (const { t, c } of m.cores) {
+          const razao = contraste(c, m.fundo);
+          if (razao < 4.5) falhou(`${nome}: contraste ${razao.toFixed(1)}:1 em "${t}"`);
+        }
+        await p.screenshot({ path: path.join(SAIDA, `depois_${rota === '/' ? 'inicio' : 'login'}_painel_${w}x${h}.png`) });
+      }
+      await ctx.close();
+    }
+  }
+
   // Teclado simulado: o viewport encolhe 300 px com o e-mail focado (como o teclado do sistema).
   {
     const ctx = await celular(b, 390, 844);

@@ -131,7 +131,7 @@
     top: auto;
     width: min(100%, 342px);
     height: auto;
-    margin-top: 0; /* o menu começa onde a paisagem acaba (y = 650 no frame de 390) */
+    margin-top: auto; /* o menu fica no pé da tela, sobre o castelo (decisão do dono, 17/11) */
     gap: 6px;
     padding: 10px 12px 6px;
   }
@@ -143,6 +143,8 @@
     position: static;
     margin-top: 0;
     line-height: 14px;
+    /* Sobre o menu de madeira o apagado do desktop dá 4,2:1; este dá mais de 4,5:1. */
+    color: #bba884;
   }
   .config {
     left: auto;
