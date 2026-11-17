@@ -291,10 +291,11 @@ Ofícios com sprite: Lenhador, Mineiro, Ferreiro, Fazendeiro, Sábio, Sem funç�
 
 Classes (Portão 20a, esquema 9): Lanceiro, Arqueiro, Cavaleiro e Mago do Tempo; a migração 8 → 9 converte guerreiro → Lanceiro, arqueiro e ladino → Arqueiro, clérigo → Cavaleiro, mago → Mago do Tempo, sem perder nível, XP, equipamento, estado, nome nem id. Até a arte nova (Portão 22), as classes novas usam a arte antiga por `EQUIVALENCIA_SPRITES.aventureiro` (`src/animacao.ts`), o único ponto do mapeamento. Campos: nome, classe, nível, poder, estado (`na_vila`, `em_expedicao`, `ferido` com contagem), arma 0 a 6, armadura 0 a 6. Guilda: 4 vagas na Era I, consomem comida. Contratar custa ouro e comida (exemplo: 43 ouro, 20 comida). Melhorar arma e armadura custa ferro e ouro (exemplo: arma 3 = 19 ferro, 29 ouro).
 
-### Expedições (5 destinos, sprite 64)
+### Expedições (6 destinos, sprite 64)
 
 | Destino | Perigo | Duração | Estado inicial | Requisito |
 |---|---|---|---|---|
+| Ruínas do Quartel General (Portão 21; primeiro da lista; some depois de descoberto) | 6 | 0:40 | aberto | nenhum |
 | Floresta dos Lobos | 9 | 0:30 | aberto | nenhum |
 | Ruínas Esquecidas | 20 | 0:55 | aberto | nenhum |
 | Mina Abandonada | 30 | 2:00 | bloqueado | Cartografia |
@@ -477,6 +478,16 @@ A A13 cancela o 7b: o mapa é uma imagem fixa (ver `CRONARCA_MAPA_GRANDE.md`, qu
 - **Fontes:** Alegreya SC Bold (títulos e rótulos), Alegreya Sans Regular (texto), IBM Plex Mono Medium (números).
 - **Fundo da tela:** `#14201c` com texturas de 6 px. HUD: `#3a2818`, 72 px de altura no desktop e 56 no mobile.
 - **Estados do aventureiro:** Na vila (verde `#4a8a52`), Em expedição (azul `#3a62a8`), Ferido (vermelho `#8a2420`).
+
+## Quartel General: descoberta (Portão 21)
+- **Estado (esquema 10):** `qg: { estado: 'oculto' | 'ruinas' | 'reerguido', desde }` no topo do estado, ao lado de `reliquias` e `diario`; atravessa a ascensão (`ascender` passa o `qg` adiante; o resto do reset do QG é do Portão 25). `desde` é o instante em que o estado atual começou. Migração 9 para 10: `qg: { estado: 'oculto', desde: t do save }`. Veja `docs/CHECKLIST_DEPLOY_ESQUEMA_10.md` (branch ou backup no Neon antes do deploy).
+- **Destino `ruinas_qg`:** perigo 6, 40 s, sem pesquisa, saque pedra 12 a 20, madeira 15 a 25, ouro 3 a 6; primeiro em `DESTINOS_IDS`. Só aparece com o QG `oculto` (e continua à vista enquanto um grupo está a caminho); nunca dois grupos ao mesmo tempo. **A descoberta não é sorteada:** ao voltar o grupo, vitória ou recuo, o QG passa a `ruinas`; o sorteio vale só para saque e feridos.
+- **Reerguer:** ação `reerguer_qg` (servidor autoritativo, espera a resposta; idempotente pela chave). Só com o QG em `ruinas`; custo madeira 80 e pedra 20 (`data/qg.ts`); `qg_indisponivel` se já reerguido ou ainda oculto, sem cobrar; `recursos_insuficientes` sem pagar.
+- **Mapa:** `mapa_meta.json` ganha `pontosDeInteresse` (`quartel_general`, tile 65,28, centro 2096,912, o mesmo ponto do destino) com validação no Zod (dentro da área jogável, fora do núcleo, caixa de 48 sem tocar árvore ou pedra clicável). Objeto na L4 a partir do ponto: `construcao/ruinas_qg` (2 quadros) em `ruinas` e `construcao/quartel` (4 quadros) em `reerguido`; clique pela caixa (`HITBOX_QG`) abre o modal de reerguer; já reerguido, avisa que a Tropa e a Mesa de Guerra chegam no Portão 22.
+- **Sábio e Diário:** com o QG oculto há 8 minutos, "O Sábio diz: as pedras do norte guardam algo mais antigo que a vila." (vem antes do aviso de "falta X" e depois do conflito do ouro). Capítulo `quartel_general`, "O que o exército deixou", abre ao descobrir, logo depois de "Os livros do Sábio".
+- **Números e textos:** `packages/game-core/data/qg.ts` (custo, tempo da dica, todos os textos).
+- **Arte:** `expedicao/ruinas_qg_1-4` (64 px, miniatura do destino), `construcao/ruinas_qg_1-2` e `construcao/quartel_1-4` (48 px). O resto dos pacotes `sprites_qg.zip` e `sprites_extra.zip` fica para o Portão 22.
+- **Placeholders até o Figma:** cartão do destino (estilo dos cartões de expedição), pin (o de sempre) e modal de reerguer (estilo do Melhorar).
 
 ## Conta de convidado (Portão B)
 - `User.email` opcional (único quando presente) e `User.convidado`. Convidado: sem e-mail e sem senha, sessão por cookie como as demais, **fora do ranking** (nem `criarEntrada` nem `gravarMarco` criam entrada) até vincular.

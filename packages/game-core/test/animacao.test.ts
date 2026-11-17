@@ -107,10 +107,10 @@ describe('quadros.json', () => {
     expect(() => animacao('aldeao', 'inexistente')).toThrow();
   });
 
-  it('jogo: 47 sprites, 202 quadros (45 da entrega + cerca e flores); a cena não entra no pré-carregamento do jogo', () => {
-    expect(ANIMACOES.size).toBe(47 + 15); // 15 da cena: os 14 de antes e a cerca (Tela inicial v2)
-    expect(todosOsQuadros()).toHaveLength(202);
-    expect(new Set(todosOsQuadros()).size).toBe(202);
+  it('jogo: 50 sprites, 212 quadros (45 da entrega + cerca e flores + os 3 do Quartel General); a cena não entra no pré-carregamento do jogo', () => {
+    expect(ANIMACOES.size).toBe(50 + 15); // 15 da cena: os 14 de antes e a cerca (Tela inicial v2)
+    expect(todosOsQuadros()).toHaveLength(212); // Portão 21: quartel (4), ruinas_qg de 48 px (2) e ruinas_qg de 64 px (4)
+    expect(new Set(todosOsQuadros()).size).toBe(212);
     expect(animacao('cenario', 'cerca').quadros[1]).toBe(urlDoQuadro('cenario', 'cerca_2.png'));
   });
 });

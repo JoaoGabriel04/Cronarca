@@ -2,8 +2,10 @@
 // Duração em segundos; saque = faixa [mínimo, máximo] por recurso.
 import type { PesquisaId } from './pesquisas.ts';
 import type { Recurso } from './recursos.ts';
+import { TEXTOS_QG } from './qg.ts';
 
-export const DESTINOS_IDS = ['floresta_lobos', 'ruinas', 'mina', 'pantano', 'cripta'] as const;
+// O das Ruínas do Quartel General vem primeiro: é o que o jogador descobre cedo (Portão 21).
+export const DESTINOS_IDS = ['ruinas_qg', 'floresta_lobos', 'ruinas', 'mina', 'pantano', 'cripta'] as const;
 export type DestinoId = (typeof DESTINOS_IDS)[number];
 
 export interface DadosDestino {
@@ -27,6 +29,10 @@ export const FAIXAS_PERIGO: readonly { ate: number; nome: string }[] = [
 ];
 
 export const DESTINOS: Record<DestinoId, DadosDestino> = {
+  ruinas_qg: {
+    nome: 'Ruínas do Quartel General', perigo: 6, segundos: 40, requer: null, descricao: TEXTOS_QG.descricaoDestino,
+    saque: { pedra: [12, 20], madeira: [15, 25], ouro: [3, 6] },
+  },
   floresta_lobos: {
     nome: 'Floresta dos Lobos', perigo: 9, segundos: 30, requer: null, descricao: 'Trilhas de caça cheias de lobos famintos.',
     saque: { madeira: [25, 45], comida: [20, 40], ferro: [4, 9], ouro: [0.4, 1] },

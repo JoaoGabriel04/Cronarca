@@ -58,14 +58,20 @@ describe('telas: Expedições', () => {
   it('destinos: chance só com grupo, bloqueados com a pesquisa, faixas de saque', () => {
     const e = novo();
     const sem = linhasDestinos(e, []);
-    expect(sem[0]).toMatchObject({ destino: 'floresta_lobos', chance: null, pode: false, motivo: 'Escolha o grupo' });
+    expect(sem[0]).toMatchObject({ destino: 'ruinas_qg', chance: null, pode: false, motivo: 'Escolha o grupo' }); // o das Ruínas do QG vem primeiro (Portão 21)
+    expect(sem.find((d) => d.destino === 'floresta_lobos')).toMatchObject({ chance: null, pode: false, motivo: 'Escolha o grupo' });
     expect(sem.find((d) => d.destino === 'mina')).toMatchObject({ aberto: false, requer: 'Requer a pesquisa Cartografia', pode: false });
     const com = linhasDestinos(e, [e.aventureiros[0]!.id]);
-    expect(com[0]!.pode).toBe(true);
-    expect(com[0]!.chance!.texto).toMatch(/^\d+%$/);
-    expect(com[0]!.saque[0]).toEqual({ recurso: 'madeira', faixa: '25–45' });
-    expect(com[0]!.saque.find((s) => s.recurso === 'ouro')!.faixa).toBe('0,4–1');
-    expect(com[0]!.perigo).toBe('Perigo 9 · 0:30');
+    const floresta = com.find((d) => d.destino === 'floresta_lobos')!;
+    expect(floresta.pode).toBe(true);
+    expect(floresta.chance!.texto).toMatch(/^\d+%$/);
+    expect(floresta.saque[0]).toEqual({ recurso: 'madeira', faixa: '25–45' });
+    expect(floresta.saque.find((s) => s.recurso === 'ouro')!.faixa).toBe('0,4–1');
+    expect(floresta.perigo).toBe('Perigo 9 · 0:30');
+    // Ruínas do Quartel General: perigo 6, 40 s, saque aprovado.
+    const qg = com.find((d) => d.destino === 'ruinas_qg')!;
+    expect(qg.perigo).toBe('Perigo 6 · 0:40');
+    expect(qg.saque).toEqual([{ recurso: 'pedra', faixa: '12–20' }, { recurso: 'madeira', faixa: '15–25' }, { recurso: 'ouro', faixa: '3–6' }]);
   });
 
   it('em andamento: progresso e tempo restante', () => {

@@ -2,7 +2,7 @@
 // do game-core, sem número fixo aqui. Funções puras, testadas sem navegador.
 
 import {
-  CONSTRUCOES, custoConstrucao, DESTINOS, DESTINOS_IDS, destinoAberto, duracaoExpedicaoMs, ERAS, FAIXAS_PERIGO,
+  CONSTRUCOES, custoConstrucao, DESTINOS, DESTINOS_IDS, destinoAberto, destinoVisivel, duracaoExpedicaoMs, ERAS, FAIXAS_PERIGO,
   calcularTaxas, chegaComoFazendeiro, MICRO, NIVEL_MAXIMO_CONSTRUCAO, perigoDestino, tetosNosNiveis, NOMES_RECURSOS, nivelReliquia, PESQUISAS, RECURSOS, SLOT_IDS, SLOTS, somaNiveis, tetoMicro, tetos,
   type DestinoId, type IconeCronica, type Recurso, type RefSprite, type SlotId, type VisaoCliente,
   aldeoesMaximos, aldeaoAtivo, FORMULAS, NOME_OCIOSO, NOMES_OFICIOS, NOMES_POLITICAS, OFICIO_OCIOSO, OFICIOS, OFICIOS_ALDEAO,
@@ -151,7 +151,7 @@ export interface CartaDestino {
 export const faixaDePerigo = (perigo: number) => FAIXAS_PERIGO.find((f) => perigo <= f.ate)!.nome;
 
 export function cartasDestinos(e: VisaoCliente, agora: number): { titulo: string; cartas: CartaDestino[] } {
-  const cartas = DESTINOS_IDS.map((id): CartaDestino => {
+  const cartas = DESTINOS_IDS.filter((id) => destinoVisivel(e, id)).map((id): CartaDestino => {
     const d = DESTINOS[id];
     const saque = (Object.keys(d.saque) as Recurso[]).filter((r) => RECURSOS.includes(r));
     const exp = e.expedicoes.filter((x) => x.destino === id).sort((a, b) => a.fim - b.fim)[0];

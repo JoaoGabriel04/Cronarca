@@ -2,9 +2,9 @@
 // das regras do game-core; nada de número fixo aqui. Funções puras.
 
 import {
-  calcularTaxas, chanceExitoBp, custoContratar, custoEquipamento, custoReliquia, DESTINOS, DESTINOS_IDS, destinoAberto, duracaoExpedicaoMs,
+  calcularTaxas, chanceExitoBp, custoContratar, custoEquipamento, custoReliquia, DESTINO_QG, DESTINOS, DESTINOS_IDS, destinoAberto, destinoVisivel, duracaoExpedicaoMs,
   ERAS, FALHA, FORMULAS, MICRO, perigoDestino, TEXTOS_FALHA, NIVEL_MAXIMO_CONSTRUCAO, NOMES_CLASSES, nivelReliquia, objetivosEra, OBJETIVOS_ERA_1, PESQUISAS,
-  poderAventureiro, RELIQUIAS, RELIQUIAS_IDS, SLOT_IDS, SLOTS, TAMANHO_MAXIMO_GRUPO, vagasGuilda,
+  poderAventureiro, RELIQUIAS, RELIQUIAS_IDS, SLOT_IDS, SLOTS, TAMANHO_MAXIMO_GRUPO, TEXTOS_QG, vagasGuilda,
   type Classe, type DestinoId, type Recurso, type RefSprite, type ReliquiaId, type VisaoCliente,
 } from '@cronarca/game-core';
 import { formatarHora, formatarInteiro, formatarRestante, formatarTaxa, textoEra } from './dados';
@@ -230,7 +230,7 @@ export function avisoExpedicao(e: VisaoCliente, selecionados: readonly string[],
 export function linhasDestinos(e: VisaoCliente, selecionados: readonly string[]): LinhaDestino[] {
   const grupo = grupoValido(e, selecionados);
   const poder = grupo.reduce((s, id) => s + poderAventureiro(e.aventureiros.find((a) => a.id === id)!), 0);
-  return DESTINOS_IDS.map((id) => {
+  return DESTINOS_IDS.filter((id) => destinoVisivel(e, id)).map((id) => {
     const d = DESTINOS[id];
     const aberto = destinoAberto(e, id);
     const duracao = duracaoExpedicaoMs(id, nivelReliquia(e, 'caminhos_eternos'));
@@ -276,7 +276,14 @@ export function relatorios(e: VisaoCliente): CartaRelatorio[] {
         nome: DESTINOS[r.destino].nome,
         vitoria: r.vitoria,
         hora: formatarHora(r.em),
-        texto: r.vitoria ? feridos : r.feridos.length ? `O grupo recuou; ${juntarNomes(r.feridos)} ${r.feridos.length > 1 ? 'voltaram feridos' : 'voltou ferido'}.` : 'O grupo recuou antes de achar algo.',
+        // Ruínas do QG: o recuo não esconde a descoberta (ela não é sorteada).
+        texto: r.vitoria
+          ? feridos
+          : r.destino === DESTINO_QG
+            ? `${TEXTOS_QG.recuoComDescoberta}${r.feridos.length ? ` ${juntarNomes(r.feridos)} ${r.feridos.length > 1 ? 'voltaram feridos' : 'voltou ferido'}.` : ''}`
+            : r.feridos.length
+              ? `O grupo recuou; ${juntarNomes(r.feridos)} ${r.feridos.length > 1 ? 'voltaram feridos' : 'voltou ferido'}.`
+              : 'O grupo recuou antes de achar algo.',
         saque,
       };
     });

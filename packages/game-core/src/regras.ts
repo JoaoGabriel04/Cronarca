@@ -4,6 +4,7 @@ import { COMIDA_MINIMA_ALDEAO, OFICIO_OCIOSO, PESOS_POLITICA, type OficioAldeao 
 import { RODIZIO_OFICIOS, type Oficio } from '../data/aventureiros.ts';
 import { CONSTRUCOES, type TipoConstrucao } from '../data/construcoes.ts';
 import { DESTINOS, type DestinoId } from '../data/expedicoes.ts';
+import { DESTINO_QG } from '../data/qg.ts';
 import { FORMULAS } from '../data/formulas.ts';
 import { ESTADO_INICIAL_CICLO, OBJETIVOS_ERA_1 } from '../data/eras.ts';
 import { RECURSOS, type Recurso } from '../data/recursos.ts';
@@ -186,10 +187,23 @@ export function calcularTaxas(e: VisaoCliente): Taxas {
   return { producao, consumoComida, saldo };
 }
 
-export function destinoAberto(e: Pick<EstadoJogo, 'pesquisas'>, destino: DestinoId): boolean {
+export function destinoAberto(e: Pick<EstadoJogo, 'pesquisas' | 'qg' | 'expedicoes'>, destino: DestinoId): boolean {
+  // Ruínas do Quartel General: só com o QG oculto e sem outro grupo já a caminho (a descoberta acontece uma vez).
+  if (destino === DESTINO_QG) return e.qg.estado === 'oculto' && !e.expedicoes.some((x) => x.destino === DESTINO_QG);
   const req = DESTINOS[destino].requer;
   return req === null || e.pesquisas.concluidas.includes(req);
 }
+
+/**
+ * O destino aparece na lista e no mapa? O das Ruínas do QG some depois de descoberto (entra o objeto das Ruínas);
+ * enquanto um grupo está a caminho ele continua à vista.
+ */
+export function destinoVisivel(e: Pick<EstadoJogo, 'qg'>, destino: DestinoId): boolean {
+  return destino !== DESTINO_QG || e.qg.estado === 'oculto';
+}
+
+/** O QG foi reerguido: a tela da Tropa e a Mesa de Guerra (Portão 22) só abrem com isto. */
+export const qgReerguido = (e: Pick<EstadoJogo, 'qg'>): boolean => e.qg.estado === 'reerguido';
 
 export interface Objetivos {
   cartaReal: boolean;

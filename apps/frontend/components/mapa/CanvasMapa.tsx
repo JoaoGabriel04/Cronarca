@@ -10,7 +10,7 @@
 // Controles e leitura de depuração são provisórios (a UI é a L8, Portão 11).
 
 import {
-  animacao, CLASSES, CONSTRUCOES, formatarQuantidade, OFICIOS, OFICIOS_ALDEAO, HITBOX_CONSTRUCAO, mapaDaVersao, RAIO_ACERTO_PIXEL_TELA, SLOT_IDS, SOMBRA_ELIPSE_16, TILE,
+  animacao, CLASSES, CONSTRUCOES, formatarQuantidade, OFICIOS, OFICIOS_ALDEAO, HITBOX_CONSTRUCAO, mapaDaVersao, PONTO_QG, RAIO_ACERTO_PIXEL_TELA, SLOT_IDS, SOMBRA_ELIPSE_16, TILE,
   type MapaJogo, type SlotId, type VisaoCliente,
 } from '@cronarca/game-core';
 import { gsap } from 'gsap';
@@ -340,6 +340,7 @@ function desenharMeta(ctx: CanvasRenderingContext2D, mapa: MapaJogo, zoom: numbe
 const numero = (n: number) => n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
 
 function descreverEvento(e: EventoMapa): string {
+  if (e.tipo === 'qgClicado') return 'qgClicado';
   return e.tipo === 'pinClicado' ? `pinClicado { destino: ${e.destino}, estado: ${e.estado} }` : `${e.tipo} { slotId: ${e.slotId} }`;
 }
 
@@ -415,7 +416,7 @@ const TODOS_OFICIOS = OFICIOS_ALDEAO.map((oficio) => ({ oficio }));
 export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao = false, controle, children, mostrarAjuda = true, ajustavel = false, animado = true, cameraInicial, celular = false }: PropsCanvasMapa) {
   const mapa = mapaDaVersao(estado.mundo.versaoMapa);
   const area = useMemo<Area>(() => areaDoMapa(mapa), [mapa]);
-  const itens = useMemo(() => camadaObjetos(mapa, estado.slots, estado.aldeoes), [mapa, estado.slots, estado.aldeoes]);
+  const itens = useMemo(() => camadaObjetos(mapa, estado.slots, estado.aldeoes, estado.qg.estado), [mapa, estado.slots, estado.aldeoes, estado.qg.estado]);
   // Tecla B: só o desenho muda (todas de pé, com os 5 aldeões); o clique continua seguindo o estado.
   const itensTodos = useMemo(() => camadaObjetos(mapa, TODOS_CONSTRUIDOS, TODOS_OFICIOS), [mapa]);
   const relogioRef = useRef(relogio);
@@ -514,7 +515,8 @@ export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao 
   useEffect(() => {
     let ativo = true;
     const doL7 = ['icone-expedicao', 'icone-bloqueado', ...CLASSES.flatMap((c) => animacao('aventureiro', c).quadros)];
-    const possiveis = camadaObjetos(mapa, TODOS_CONSTRUIDOS, TODOS_OFICIOS);
+    // As Ruínas e o QG reerguido (Portão 21) carregam junto, para a troca depois de reerguer não piscar.
+    const possiveis = [...camadaObjetos(mapa, TODOS_CONSTRUIDOS, TODOS_OFICIOS, 'ruinas'), ...camadaObjetos(mapa, {}, [], 'reerguido')];
     // Os 64 quadros das árvores e a camada de frente carregam junto com o mapa (sem piscar).
     Promise.all([carregarMapaBase(), carregarMapaBase(urlMapaFrente()), carregarSprites([...spritesDosContornos(mapa), ...SPRITES_NEVOA, ...spritesDosObjetos(possiveis), ...spritesDasArvores(mapa), SOMBRA_ELIPSE_16.sprite, ...doL7]), carregarFontes()])
       .then(([base, frente, sprites, fontes]) => {
@@ -671,6 +673,10 @@ export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao 
     if (alvo.tipo === 'construcao') {
       setTremida({ id: alvo.slotId, desde: Date.now() });
       return emitir({ tipo: 'construcaoClicada', slotId: alvo.slotId });
+    }
+    if (alvo.tipo === 'qg') {
+      setTremida({ id: PONTO_QG, desde: Date.now() });
+      return emitir({ tipo: 'qgClicado' });
     }
     // Objeto: só a intenção sai daqui. O ganho previsto vem da mesma regra do
     // servidor (limite de 5/s por objeto e 10/s no total); se o servidor recusar, o "+N" some.

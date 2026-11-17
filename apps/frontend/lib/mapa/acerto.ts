@@ -12,7 +12,7 @@
 // pela caixa x, y, w, h do meta; pins e slots vazios, pela caixa deles.
 
 import {
-  CONSTRUCOES, HITBOX_CONSTRUCAO, HITBOX_MINIMA_TELA, LIMITE_ARRASTO_PX, RAIO_ACERTO_PIXEL_TELA, TOLERANCIA_MOUSE_PX,
+  CONSTRUCOES, HITBOX_CONSTRUCAO, HITBOX_MINIMA_TELA, HITBOX_QG, LIMITE_ARRASTO_PX, PONTO_QG, RAIO_ACERTO_PIXEL_TELA, TOLERANCIA_MOUSE_PX,
   type DestinoId, type MapaJogo, type Recurso, type SlotId,
 } from '@cronarca/game-core';
 import type { Ret } from './layoutMarcadores';
@@ -35,12 +35,15 @@ export type Alvo =
   | { tipo: 'objeto'; id: string; recurso: Recurso }
   /** Construção que não coleta no clique: abre o Melhorar (ou a Pesquisa, no Scriptorium). */
   | { tipo: 'construcao'; slotId: SlotId }
-  | { tipo: 'slotVazio'; slotId: SlotId };
+  | { tipo: 'slotVazio'; slotId: SlotId }
+  /** As Ruínas do Quartel General ou o QG já reerguido (Portão 21): abre o modal de reerguer ou o aviso. */
+  | { tipo: 'qg' };
 
 /** Eventos que o mapa emite para os portões de telas e modais (12 e 13). */
 export type EventoMapa =
   | { tipo: 'slotVazioClicado'; slotId: SlotId }
   | { tipo: 'construcaoClicada'; slotId: SlotId }
+  | { tipo: 'qgClicado' }
   | { tipo: 'pinClicado'; destino: DestinoId; estado: EstadoPin };
 
 export interface Clicavel {
@@ -72,6 +75,14 @@ export function clicaveisDoMapa(m: MapaJogo, itens: readonly ItemL4[]): Clicavel
   const out: Clicavel[] = clicaveisDaImagem(m);
   const slots = new Map(m.slots.map((s) => [s.id as string, s]));
   for (const it of itens) {
+    // Quartel General: só pela caixa (sem máscara de pixel); o clique abre o modal de reerguer.
+    if (it.id === PONTO_QG) {
+      out.push({
+        id: it.id, recurso: null, hitbox: { x: it.x + HITBOX_QG.x, y: it.y + HITBOX_QG.y, largura: HITBOX_QG.largura, altura: HITBOX_QG.altura },
+        origem: { x: it.x, y: it.y }, sprite: it.anim.quadros[0]!, porPixel: false,
+      });
+      continue;
+    }
     // Construções: as produtoras coletam no clique; as outras (e o Scriptorium) abrem um modal.
     const s = slots.get(it.id);
     if (!s) continue;
@@ -216,6 +227,7 @@ export function acertar(cena: Cena, pTela: Ponto): Alvo | null {
   for (let k = cena.clicaveis.length - 1; k >= 0; k--) {
     const c = cena.clicaveis[k]!;
     if (contem(hitboxObjeto(c.hitbox, cena.zoom, cena.ponteiro), pm) && passaNoPixel(c, pm, cena)) {
+      if (c.id === PONTO_QG) return { tipo: 'qg' };
       return c.recurso ? { tipo: 'objeto', id: c.id, recurso: c.recurso } : { tipo: 'construcao', slotId: c.id as SlotId };
     }
   }

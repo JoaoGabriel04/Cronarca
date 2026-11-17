@@ -17,7 +17,7 @@ export interface NevoaAtiva {
 }
 
 /** Névoas do estado: as dos destinos com névoa que ainda estão bloqueados (só a Cripta, até Estradas Reais). */
-export function nevoasAtivas(e: Pick<EstadoJogo, 'pesquisas'>): NevoaAtiva[] {
+export function nevoasAtivas(e: Pick<EstadoJogo, 'pesquisas' | 'qg' | 'expedicoes'>): NevoaAtiva[] {
   return (Object.entries(NEVOA_DESTINOS) as [DestinoId, { x: number; y: number }][])
     .filter(([id]) => !destinoAberto(e, id))
     .map(([destino, c]) => ({ destino, x: c.x, y: c.y, raio: RAIO_NEVOA }));

@@ -16,10 +16,10 @@ const m = MAPA;
 const CRUZAMENTO = { x: m.origemNucleo.x + 240, y: m.origemNucleo.y + 240 };
 
 describe('pins', () => {
-  it('estados pelo estado do jogo: Floresta ativa (expedição), Ruínas aberta, Mina, Pântano e Cripta bloqueados', () => {
+  it('estados pelo estado do jogo: Floresta ativa (expedição), Ruínas do QG e Ruínas abertas, Mina, Pântano e Cripta bloqueados', () => {
     const mk = marcadores(m, estadoDeExemplo(T0), T0);
     const estado = Object.fromEntries(mk.pins.map((p) => [p.id, p.estado]));
-    expect(estado).toEqual({ floresta_lobos: 'ativo', ruinas: 'aberto', mina: 'bloqueado', pantano: 'bloqueado', cripta: 'bloqueado' });
+    expect(estado).toEqual({ ruinas_qg: 'aberto', floresta_lobos: 'ativo', ruinas: 'aberto', mina: 'bloqueado', pantano: 'bloqueado', cripta: 'bloqueado' });
     for (const p of mk.pins) expect(p.nome).toBe(DESTINOS[p.id].nome);
   });
 
@@ -119,6 +119,6 @@ describe('formato e sprites', () => {
     for (const n of ['icone-expedicao', 'icone-bloqueado', ...CLASSES.flatMap((c) => animacao('aventureiro', c).quadros)]) {
       expect(existsSync(arquivoDoSprite(n)), n).toBe(true);
     }
-    expect(DESTINOS_IDS).toHaveLength(5);
+    expect(DESTINOS_IDS).toHaveLength(6);
   });
 });

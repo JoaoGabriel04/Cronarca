@@ -36,9 +36,13 @@ const igual = (a: unknown, b: unknown) => isDeepStrictEqual(a, b);
 const CAMPOS_INVARIANTES = ['recursos', 'slots', 'pesquisas', 'reliquias', 'ciclo', 'falha', 'expedicoes', 'relatorios'] as const;
 
 /** Classe nova esperada para a classe gravada, ou null se ela não existe em nenhum esquema. */
+/** Primeiro esquema com as classes novas (Portão 20a). */
+const VERSAO_DAS_CLASSES_NOVAS = 9;
+
 function classeEsperada(classe: unknown, versaoOrigem: number): string | null {
   if (typeof classe !== 'string') return null;
-  if (versaoOrigem >= VERSAO_ESQUEMA) return (CLASSES as readonly string[]).includes(classe) ? classe : null;
+  // Desde o esquema 9 as classes já são as quatro novas; só os saves de antes (6 a 8) trazem os ids antigos.
+  if (versaoOrigem >= VERSAO_DAS_CLASSES_NOVAS) return (CLASSES as readonly string[]).includes(classe) ? classe : null;
   return (CLASSES_ANTIGAS as Record<string, string>)[classe] ?? null;
 }
 
@@ -106,14 +110,18 @@ export function conferirSave(save: SaveBruto, migrar: Migrador = migrarEstado): 
       v(`falha ausente no save de origem: esperado 0, veio ${valido.falha}`);
     }
   }
-  // Save do esquema 8: todo o resto também fica idêntico (só versão e classes mudam) e nada aparece de novo.
-  if (save.versao_esquema === VERSAO_ESQUEMA - 1) {
+  // Save do esquema 8 ou 9: todo o resto também fica idêntico (muda a versão; no 8, as classes; no 9, entra o `qg`) e nada
+  // mais aparece de novo. Esquema 9 para 10 (Portão 21): o Quartel General começa oculto, desde o instante do save.
+  if (save.versao_esquema >= 8) {
+    const mudam = new Set(['versao', ...(save.versao_esquema === 8 ? ['aventureiros'] : [])]);
+    const novos = save.versao_esquema < 10 ? ['qg'] : [];
     for (const campo of Object.keys(origem)) {
-      if (campo === 'versao' || campo === 'aventureiros') continue;
-      if (!igual(origem[campo], (valido as unknown as Objeto)[campo])) v(`save do esquema 8: campo ${campo} mudou`);
+      if (mudam.has(campo)) continue;
+      if (!igual(origem[campo], (valido as unknown as Objeto)[campo])) v(`save do esquema ${save.versao_esquema}: campo ${campo} mudou`);
     }
-    for (const campo of Object.keys(valido)) if (!(campo in origem)) v(`save do esquema 8: campo novo ${campo}`);
+    for (const campo of Object.keys(valido)) if (!(campo in origem) && !novos.includes(campo)) v(`save do esquema ${save.versao_esquema}: campo novo ${campo}`);
   }
+  if (save.versao_esquema < 10 && !igual(valido.qg, { estado: 'oculto', desde: valido.t })) v(`qg depois da migração: esperado oculto desde ${valido.t}, veio ${JSON.stringify(valido.qg)}`);
 
   // 5. Expedições em andamento: o relatório que sai é o sorteado antes da migração, e a classe não influi nele.
   r.expedicoes = valido.expedicoes.length;

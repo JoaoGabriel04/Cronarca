@@ -24,7 +24,7 @@ export interface Capitulo {
 }
 
 export const CAPITULOS_IDS = [
-  'prologo', 'scriptorium', 'cartografia', 'estradas_reais', 'carta_real', 'cripta_vencida', 'aldeoes_40', 'primeira_ascensao', 'falha_3',
+  'prologo', 'scriptorium', 'quartel_general', 'cartografia', 'estradas_reais', 'carta_real', 'cripta_vencida', 'aldeoes_40', 'primeira_ascensao', 'falha_3',
 ] as const;
 export type CapituloId = (typeof CAPITULOS_IDS)[number];
 
@@ -41,6 +41,12 @@ export const CAPITULOS: Record<CapituloId, Capitulo> = {
     texto:
       'O Sábio pôs nas estantes os livros que trouxe nas costas. Diz que neles está o caminho até a Cripta, para quem tiver paciência de lê-los, e que alguns nunca deveriam ser abertos.',
     dica: 'Construa um lugar para os livros.',
+  },
+  quartel_general: {
+    titulo: 'O que o exército deixou',
+    texto:
+      'Entre as pedras caídas, o Cronarca achou brasões de um exército que ninguém lembra de ter visto marchar. Um canto das ruínas ainda tem teto. Talvez dê para reerguer o que foi deixado.',
+    dica: 'Explore as pedras do norte.',
   },
   cartografia: {
     titulo: 'O que o mapa esconde',

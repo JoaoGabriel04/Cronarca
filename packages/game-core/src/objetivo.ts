@@ -8,6 +8,7 @@ import { CONSTRUCOES, type TipoConstrucao } from '../data/construcoes.ts';
 import { OBJETIVOS_ERA_1 } from '../data/eras.ts';
 import { DESTINOS, TAMANHO_MAXIMO_GRUPO } from '../data/expedicoes.ts';
 import { SABIO } from '../data/lore.ts';
+import { QG, TEXTOS_QG } from '../data/qg.ts';
 import { PESQUISAS, type PesquisaId } from '../data/pesquisas.ts';
 import { NOMES_RECURSOS, RECURSOS, type Recurso } from '../data/recursos.ts';
 import { SLOT_IDS, SLOTS, type SlotId } from '../data/slots.ts';
@@ -171,6 +172,12 @@ function dicaDoSabio(e: VisaoCliente, principal: PassoTrilha | null): string | n
   const podeGastarOuro = e.aventureiros.length < vagasGuilda(e);
   if (cartografiaFeita && !e.pesquisas.concluidas.includes(caminho) && e.recursos.ouro < ouro && podeGastarOuro) {
     return `${SABIO.prefixo} ${SABIO.guardeOuro(unidades(ouro), PESQUISAS[caminho].nome)}`;
+  }
+  // Quartel General (Portão 21): se o jogador demorar a explorar (QG oculto há QG.dicaDoSabioAposMs), o Sábio aponta o norte.
+  // Vem antes do aviso de "falta X" (que quase sempre existe no começo e taparia a dica) e depois do conflito do ouro.
+  if (e.qg.estado === 'oculto' && e.t - e.qg.desde >= QG.dicaDoSabioAposMs) {
+    const dica = TEXTOS_QG.dicaDoSabio;
+    return `${SABIO.prefixo} ${dica.charAt(0).toLowerCase()}${dica.slice(1)}`;
   }
   // Esperas (obra, pesquisa, grupo a caminho) e a chance não são conselho: o Sábio só fala de bloqueios.
   const motivo = principal?.motivo;

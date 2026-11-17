@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { OFICIOS, type Oficio } from '../../data/aventureiros.ts';
 import type { TipoConstrucao } from '../../data/construcoes.ts';
 import { DESTINOS_IDS, type DestinoId } from '../../data/expedicoes.ts';
+import { PONTO_QG } from '../../data/qg.ts';
 import {
   ESCALA, LADO_SPRITE_ALDEAO, PE_ALTURA_PERMIL, POSICOES_ALDEOES, POSICOES_OCIOSOS, PROPS_NUCLEO, RECURSO_DO_CLICAVEL, TILE, VERSAO_MAPA_ATUAL, VERSOES_MAPA,
   type TipoClicavel, type TipoObjeto, type VersaoMapa,
@@ -27,6 +28,15 @@ const retangulo = z
 
 const esquemaDestino = z.strictObject({
   tipo: z.enum(['expedicao', 'poi']),
+  tile: z.tuple([inteiro.min(0), inteiro.min(0)]),
+  x: inteiro,
+  y: inteiro,
+});
+
+/** Ponto de interesse do mapa (Portão 21): onde as Ruínas do Quartel General aparecem (objeto da L4) e o destino que as revela. */
+const esquemaPontoDeInteresse = z.strictObject({
+  id: z.enum([PONTO_QG]),
+  destino: z.enum(DESTINOS_IDS),
   tile: z.tuple([inteiro.min(0), inteiro.min(0)]),
   x: inteiro,
   y: inteiro,
@@ -88,6 +98,7 @@ export const esquemaMetaMapa = z
     nucleo: retangulo,
     origemNucleo: z.strictObject({ x: inteiro, y: inteiro }),
     destinos: z.record(z.string(), esquemaDestino),
+    pontosDeInteresse: z.array(esquemaPontoDeInteresse),
     minasAbandonadas: z.array(ponto),
     lagoGrande: z.strictObject({ cx: z.number(), cy: z.number(), rx: z.number(), ry: z.number() }),
     clicaveis: z.array(esquemaClicavel),
@@ -108,6 +119,27 @@ export const esquemaMetaMapa = z
     }
     for (const [id, d] of Object.entries(m.destinos)) {
       if (d.tipo === 'expedicao' && !(DESTINOS_IDS as readonly string[]).includes(id)) erro(`destino de expedição desconhecido: ${id}`);
+    }
+    // Pontos de interesse (Portão 21): o do QG coincide com o destino que o revela, cai na área jogável e a caixa do
+    // sprite (48 x 48, centrada no ponto) não toca árvore ou pedra clicável, o núcleo, um slot nem outro destino.
+    const lado = ESCALA.construcao;
+    const quartel = m.pontosDeInteresse.filter((p) => p.id === PONTO_QG);
+    if (quartel.length !== 1) erro('o mapa precisa de exatamente um ponto de interesse do quartel_general');
+    for (const p of m.pontosDeInteresse) {
+      const d = m.destinos[p.destino];
+      if (!d || d.tipo !== 'expedicao' || d.x !== p.x || d.y !== p.y) erro(`ponto de interesse ${p.id} não coincide com o destino ${p.destino}`);
+      if (!dentro(m.jogavel, p.x, p.y)) erro(`ponto de interesse ${p.id} fora da área jogável`);
+      const caixa = { x0: p.x - lado / 2, y0: p.y - lado / 2, x1: p.x + lado / 2, y1: p.y + lado / 2 };
+      const cruza = (b: Ret) => caixa.x0 < b.x1 && b.x0 < caixa.x1 && caixa.y0 < b.y1 && b.y0 < caixa.y1;
+      if (cruza(m.nucleo)) erro(`ponto de interesse ${p.id} dentro do núcleo`);
+      for (const c of m.clicaveis) {
+        if (cruza({ x0: c.x - Math.floor(c.w / 2), y0: c.y - c.h, x1: c.x - Math.floor(c.w / 2) + c.w, y1: c.y })) erro(`ponto de interesse ${p.id} cruza o clicável ${c.id}`);
+      }
+      for (const [id, o] of Object.entries(m.destinos)) {
+        if (o.x !== p.x || o.y !== p.y) {
+          if (Math.hypot(o.x - p.x, o.y - p.y) < lado) erro(`ponto de interesse ${p.id} perto demais do destino ${id}`);
+        }
+      }
     }
     const ids = new Set<string>();
     for (const c of m.clicaveis) {
@@ -160,6 +192,12 @@ export interface PontoMapa {
 /** Destino de expedição: centro do ponto no mapa, em mundo. */
 export interface DestinoMapa extends PontoMapa {
   id: DestinoId;
+}
+
+/** Ponto de interesse com objeto próprio na L4 (as Ruínas do Quartel General); o centro do sprite de 48, em mundo. */
+export interface PontoDeInteresseMapa extends PontoMapa {
+  id: typeof PONTO_QG;
+  destino: DestinoId;
 }
 
 /** Ponto decorativo (Acampamento, Menires...): sem pin e sem clique na v0. */
@@ -232,6 +270,8 @@ export interface MapaJogo {
   origemNucleo: PontoMapa;
   destinos: readonly DestinoMapa[];
   pois: readonly PoiMapa[];
+  /** Pontos de interesse com objeto na L4 (Portão 21). */
+  pontosDeInteresse: readonly PontoDeInteresseMapa[];
   clicaveis: readonly ClicavelMapa[];
   slots: readonly SlotMapa[];
   props: readonly PropMapa[];
@@ -270,6 +310,7 @@ export function mapaDoMeta(m: MetaMapa): MapaJogo {
     pois: Object.entries(m.destinos)
       .filter(([, d]) => d.tipo === 'poi')
       .map(([id, d]) => ({ id, x: d.x, y: d.y })),
+    pontosDeInteresse: m.pontosDeInteresse.map((p) => ({ id: p.id, destino: p.destino, x: p.x, y: p.y })),
     clicaveis: m.clicaveis.map((c) => ({
       id: c.id,
       tipo: c.tipo,

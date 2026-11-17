@@ -162,6 +162,12 @@ export const HITBOX_CONSTRUCAO = {
   taverna: { x: 2, y: 2, largura: 45, altura: 43 },
 } as const satisfies Record<string, HitboxSprite>;
 
+/**
+ * Hitbox das Ruínas do Quartel General e do QG reerguido (Portão 21): só pela caixa, sem máscara de pixel, como as
+ * árvores e pedras da imagem. Canto e tamanho dentro do sprite de 48.
+ */
+export const HITBOX_QG = { x: 2, y: 4, largura: 44, altura: 42 } as const satisfies HitboxSprite;
+
 /** Lado mínimo da hitbox na tela, em px: só para toque e caneta. */
 export const HITBOX_MINIMA_TELA = 44;
 /** Mouse: a hitbox real cresce só isto, em px de tela, de cada lado (clicáveis e produtoras; slot vazio não). */

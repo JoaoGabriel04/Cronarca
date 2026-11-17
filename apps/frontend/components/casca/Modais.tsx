@@ -7,7 +7,7 @@
 import type { PesquisaId } from '@cronarca/game-core';
 import { ArrowRight, Hourglass } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import type { CartaPesquisa, CustoModal, DadosObra, dadosAscensao } from '../../lib/casca/modais';
+import type { CartaPesquisa, CustoModal, DadosObra, DadosReerguerQg, dadosAscensao } from '../../lib/casca/modais';
 import { AVISO_CONVIDADO } from '../../lib/convidado';
 import { Icone } from './Icone';
 import { Modal } from './Modal';
@@ -112,6 +112,48 @@ export function ModalObra({
         }
       />
       {dados.motivo && dados.situacao === 'pronta' && <p className={estilos.motivo}>{dados.motivo}</p>}
+    </Modal>
+  );
+}
+
+// ---------- Quartel General (Portão 21) ----------
+
+/** Reerguer o Quartel General: custo baixo, uma vez. Placeholder no estilo do Melhorar até o Figma do QG chegar. */
+export function ModalReerguerQg({
+  dados, enviando, aoConfirmar, aoFechar,
+}: { dados: DadosReerguerQg; enviando: boolean; aoConfirmar: () => void; aoFechar: () => void }) {
+  return (
+    <Modal titulo={dados.titulo} subtitulo={dados.subtitulo} largura="media" aoFechar={aoFechar}>
+      <div className={estilos.obra}>
+        <div className={`caixa ${estilos.retratoObra}`}>
+          <SpriteAnimado className={estilos.pixel} sprite={dados.sprite} instancia="qg-reerguer" lado={144} />
+        </div>
+        <div className={estilos.obraInfo}>
+          <div className={`caixa ${estilos.cartao}`}>
+            <p className={estilos.rotulo}>Custo</p>
+            <Custos itens={dados.custo} />
+          </div>
+        </div>
+      </div>
+      <Botoes
+        voltar={
+          <button type="button" className={`caixa botao ${estilos.botao}`} onClick={aoFechar}>
+            Cancelar
+          </button>
+        }
+        confirmar={
+          <button
+            type="button"
+            className={`caixa botao botao-dourado ${estilos.botao} ${estilos.principal}`}
+            disabled={!dados.pode || enviando}
+            title={dados.motivo ?? undefined}
+            onClick={aoConfirmar}
+          >
+            {enviando ? 'Reerguendo…' : dados.botao}
+          </button>
+        }
+      />
+      {dados.motivo && <p className={estilos.motivo}>{dados.motivo}</p>}
     </Modal>
   );
 }

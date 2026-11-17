@@ -6,7 +6,7 @@
 
 import { nevoasAtivas } from './nevoa';
 import {
-  CLASSE_INICIAL, DESTINOS, destinoAberto,
+  CLASSE_INICIAL, DESTINOS, destinoAberto, destinoVisivel,
   type Classe, type DestinoId, type MapaJogo, type VisaoCliente,
 } from '@cronarca/game-core';
 
@@ -58,7 +58,7 @@ export interface Marcadores {
 export const PASSO_TRILHA = 10;
 
 /** O que o mapa precisa do estado (a visão do cliente serve). */
-export type EstadoMapa = Pick<VisaoCliente, 'pesquisas' | 'expedicoes' | 'aventureiros' | 'slots'>;
+export type EstadoMapa = Pick<VisaoCliente, 'pesquisas' | 'expedicoes' | 'aventureiros' | 'slots' | 'qg'>;
 
 /**
  * Caminho do núcleo até o destino: reta do cruzamento das estradas do
@@ -121,7 +121,8 @@ export function formatarRestante(ms: number): string {
 export function marcadores(m: MapaJogo, e: EstadoMapa, agora: number): Marcadores {
   const emExpedicao = new Set(e.expedicoes.map((x) => x.destino));
 
-  const pins: Pin[] = m.destinos.map((d) => ({
+  // O destino das Ruínas do QG some depois de descoberto (entra o objeto das Ruínas na L4).
+  const pins: Pin[] = m.destinos.filter((d) => destinoVisivel(e, d.id)).map((d) => ({
     id: d.id,
     nome: DESTINOS[d.id].nome,
     estado: emExpedicao.has(d.id) ? 'ativo' : destinoAberto(e, d.id) ? 'aberto' : 'bloqueado',

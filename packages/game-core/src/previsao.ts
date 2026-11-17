@@ -9,7 +9,8 @@ import type { EstadoJogo, VisaoCliente } from './estado.ts';
 import { liquidar } from './liquidar.ts';
 
 /** Ações que sorteiam no servidor: o cliente não as prevê, espera a resposta. */
-export const ACOES_DO_SERVIDOR = ['contratar', 'partir_expedicao', 'ascender'] as const satisfies readonly Acao['tipo'][];
+// 'reerguer_qg' é determinística, mas a tela espera o servidor (compra única: nada de sucesso que depois volta atrás).
+export const ACOES_DO_SERVIDOR = ['contratar', 'partir_expedicao', 'ascender', 'reerguer_qg'] as const satisfies readonly Acao['tipo'][];
 export type AcaoDoServidor = Extract<Acao, { tipo: (typeof ACOES_DO_SERVIDOR)[number] }>;
 
 export const precisaDoServidor = (acao: Acao): acao is AcaoDoServidor =>

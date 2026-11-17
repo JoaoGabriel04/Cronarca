@@ -21,6 +21,15 @@
   "y": 928
  },
  "destinos": {
+  "ruinas_qg": {
+   "tipo": "expedicao",
+   "tile": [
+    65,
+    28
+   ],
+   "x": 2096,
+   "y": 912
+  },
   "pantano": {
    "tipo": "expedicao",
    "tile": [
@@ -103,6 +112,18 @@
    "y": 624
   }
  },
+ "pontosDeInteresse": [
+  {
+   "id": "quartel_general",
+   "destino": "ruinas_qg",
+   "tile": [
+    65,
+    28
+   ],
+   "x": 2096,
+   "y": 912
+  }
+ ],
  "minasAbandonadas": [
   {
    "x": 528,

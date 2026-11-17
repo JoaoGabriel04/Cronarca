@@ -27,6 +27,7 @@ const TEXTOS: Record<ErroAcao, string> = {
   objetivos_pendentes: 'Cumpra os objetivos da era antes de ascender.',
   objeto_invalido: 'Não dá para coletar daí.',
   limite_cliques: 'Devagar: muitos cliques seguidos.',
+  qg_indisponivel: 'O Quartel General não está disponível agora.',
 };
 
 /** Texto da recusa; um código desconhecido vira a mensagem genérica. */

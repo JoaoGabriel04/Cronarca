@@ -18,6 +18,7 @@ export * from '../data/eras.ts';
 export * from '../data/catalogo.ts';
 export * from '../data/mapa.ts';
 export * from '../data/ranking.ts';
+export * from '../data/qg.ts';
 export { FORMULAS } from '../data/formulas.ts';
 
 export * from './inteiros.ts';

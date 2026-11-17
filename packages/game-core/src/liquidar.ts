@@ -6,6 +6,7 @@ import { NOME_OCIOSO, OFICIO_OCIOSO } from '../data/aldeoes.ts';
 import { NOMES_OFICIOS } from '../data/aventureiros.ts';
 import { CONSTRUCOES } from '../data/construcoes.ts';
 import { DESTINOS } from '../data/expedicoes.ts';
+import { DESTINO_QG, TEXTOS_QG } from '../data/qg.ts';
 import { EVENTO_PARAMETROS, EVENTOS_IDS, NOMES_EVENTOS, type EventoId } from '../data/eventos.ts';
 import { FORMULAS } from '../data/formulas.ts';
 import { PESQUISAS } from '../data/pesquisas.ts';
@@ -88,16 +89,21 @@ function resolverExpedicao(e: EstadoJogo, exp: Expedicao) {
     const excesso = e.relatorios.length - FORMULAS.relatorios.maximo;
     if (excesso > 0) e.relatorios.splice(0, excesso);
   };
+  // Ruínas do Quartel General (Portão 21): a descoberta NÃO é sorteada. Voltando o grupo, vitória ou recuo, as Ruínas
+  // aparecem; o sorteio vale só para o saque e os feridos.
+  const descobre = exp.destino === DESTINO_QG && e.qg.estado === 'oculto';
+  if (descobre) e.qg = { estado: 'ruinas', desde: exp.fim };
   if (resultado.vitoria) {
     const entrou = receber(e, resultado.saque);
     relatar(entrou);
     if (exp.destino === 'cripta') e.objetivos.criptaVencida = true;
     registrar(e, 'Expedicao', `Vitória em ${destino.nome}: ${descreverGanhos(entrou)}.`, exp.fim);
+    if (descobre) registrar(e, 'Expedicao', TEXTOS_QG.descobertaCronica, exp.fim);
   } else {
     relatar({});
     const feridos = resultado.feridos.length;
     const extra = feridos === 0 ? '' : feridos === 1 ? ' Um aventureiro voltou ferido.' : ` ${feridos} aventureiros voltaram feridos.`;
-    registrar(e, 'Alerta', `O grupo recuou de ${destino.nome}, sem saque.${extra}`, exp.fim);
+    registrar(e, 'Alerta', descobre ? `${TEXTOS_QG.recuoComDescoberta}${extra}` : `O grupo recuou de ${destino.nome}, sem saque.${extra}`, exp.fim);
   }
 }
 

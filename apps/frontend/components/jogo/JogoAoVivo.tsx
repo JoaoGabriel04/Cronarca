@@ -5,7 +5,7 @@
 // as telas (Portão 12) e os modais (Portão 13). Carregando: tela de carregamento.
 
 import {
-  construiveis, CONSTRUCOES, DESTINOS, linhasCatalogo, mapaDaVersao, NOMES_RECURSOS, PALAVRA_APAGAR, PESQUISAS, preverEstado, proximoPasso, recursoDoObjeto, SLOTS,
+  construiveis, CONSTRUCOES, DESTINOS, linhasCatalogo, mapaDaVersao, NOMES_RECURSOS, PALAVRA_APAGAR, PESQUISAS, preverEstado, proximoPasso, recursoDoObjeto, SLOTS, TEXTOS_QG,
   type Acao, type CapituloId, type DestinoId, type PesquisaId, type Recurso, type SlotId,
 } from '@cronarca/game-core';
 import { gsap } from 'gsap';
@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import {
   cartasConstrucoes, cartasDestinos, chipsHud, dadosAldeoes, dadosMercador, linhasCronica, textoEra, textoSalvo, type Sincronia,
 } from '../../lib/casca/dados';
-import { dadosAscensao, dadosMelhorar, dadosPesquisa, linhasCatalogoTela, seloConstruir, seloPesquisa } from '../../lib/casca/modais';
+import { dadosAscensao, dadosMelhorar, dadosPesquisa, dadosReerguerQg, linhasCatalogoTela, seloConstruir, seloPesquisa } from '../../lib/casca/modais';
 import { grupoSugerido, grupoValido } from '../../lib/casca/telas';
 import { enviar, ErroApi, mensagemDeErro } from '../../lib/api';
 import { textoDoDesfecho, useAvisar } from '../../lib/jogo/avisos';
@@ -37,7 +37,7 @@ import { useCelular } from '../../lib/casca/celular';
 import estilos from '../casca/casca.module.css';
 import { Hud } from '../casca/Hud';
 import { Catalogo } from '../casca/Catalogo';
-import { ModalAscensao, ModalConfiguracoes, ModalObra, ModalPesquisa } from '../casca/Modais';
+import { ModalAscensao, ModalConfiguracoes, ModalObra, ModalPesquisa, ModalReerguerQg } from '../casca/Modais';
 import { ModalRanking } from '../casca/Ranking';
 import { ChipObjetivo, FaixaObjetivo, ModalDiario, ModalObjetivo, ModalPrologo } from '../casca/Objetivo';
 import { deveAbrirPrologo, gravarLidos, lerLidos, linhasDiario, marcarPrologoNoNavegador, novosNoDiario, prologoVistoNoNavegador } from '../../lib/casca/diario';
@@ -62,6 +62,8 @@ type ModalAberto =
   | { tipo: 'pesquisa' }
   | { tipo: 'configuracoes' }
   | { tipo: 'ranking' }
+  /** Reerguer o Quartel General (Portão 21). */
+  | { tipo: 'reerguerQg' }
   /** Vínculo da conta de convidado (Portão B); `retorno` vem do callback do Google ou Discord. */
   | { tipo: 'vinculo'; retorno: RetornoVinculo | null }
   /** Portão 16: painel dos objetivos, Diário e prólogo. */
@@ -257,6 +259,11 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
         return;
       case 'melhorarClicado':
         setModal({ tipo: 'obra', slot: e.slot });
+        return;
+      case 'qgClicado':
+        // Ruínas: abre o modal de reerguer. Já reerguido: a tela da Tropa e a Mesa de Guerra chegam no Portão 22.
+        if (visivel.qg.estado === 'ruinas') setModal({ tipo: 'reerguerQg' });
+        else avisar(TEXTOS_QG.reerguidoAviso);
         return;
       case 'slotVazioClicado':
         // A12: o terreno vazio abre o catálogo já na linha daquele slot.
@@ -558,6 +565,21 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
             // Prevista: a obra aparece na hora; o modal fecha e o mapa mostra o andaime.
             void enviarPrevista({ tipo: 'melhorar', slot });
             setModal(null);
+          }}
+        />
+      )}
+      {modal?.tipo === 'reerguerQg' && (
+        <ModalReerguerQg
+          dados={dadosReerguerQg(visivel)}
+          enviando={acaoServidor.enviando}
+          aoFechar={() => setModal(null)}
+          aoConfirmar={() => {
+            void acaoServidor.executar({ tipo: 'reerguer_qg' }).then((d) => {
+              if (d?.ok) {
+                setModal(null);
+                avisar(TEXTOS_QG.reerguidoCronica);
+              }
+            });
           }}
         />
       )}

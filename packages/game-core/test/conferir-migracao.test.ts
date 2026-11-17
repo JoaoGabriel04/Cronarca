@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { conferirSave, conferirSaves, lerSaves, type Migrador, type SaveBruto } from '../../../scripts/lib/conferir-migracao.ts';
 import { CLASSES_ANTIGAS } from '../data/aventureiros.ts';
-import { migrarEstado, VERSAO_ESQUEMA } from '../src/estado.ts';
+import { carregarEstado, migrarEstado, VERSAO_ESQUEMA } from '../src/estado.ts';
 
 const CAMINHO = new URL('./fixtures/sinteticos_v8.json', import.meta.url);
 const { saves, sintetico } = lerSaves(readFileSync(CAMINHO, 'utf8'));
@@ -115,6 +115,17 @@ describe('a verificação pega uma migração defeituosa', () => {
   it('qualquer outro campo do save do esquema 8 mudado, ou campo novo', () => {
     expect(conferirSave(base(), defeituoso((e) => { e.t += 1; })).violacoes.join('\n')).toMatch(/save do esquema 8: campo t mudou/);
     expect(conferirSave(base(), defeituoso((e) => { e.extra = 1; })).violacoes.join('\n')).toMatch(/recusa o estado migrado|campo novo extra/);
+  });
+
+  it('save do esquema 9 (Portão 21): ganha o QG oculto desde o instante do save e mais nada muda', () => {
+    const atual = carregarEstado(JSON.parse(JSON.stringify(porId('sint-05-pos-ascensao').estado)), porId('sint-05-pos-ascensao').versao_esquema);
+    const { qg: _qg, ...sem } = { ...atual, versao: 9 };
+    const v9: SaveBruto = { id: 'sint-v9', versao_esquema: 9, estado: JSON.parse(JSON.stringify(sem)) };
+    expect(conferirSave(v9).violacoes).toEqual([]);
+    // Um migrador que descobre o QG sem ninguém ter ido lá é pego.
+    expect(conferirSave(v9, defeituoso((e) => { e.qg = { estado: 'ruinas', desde: e.t }; })).violacoes.join('\n')).toMatch(/qg depois da migração/);
+    // E um que mexe em outro campo do save do esquema 9.
+    expect(conferirSave(v9, defeituoso((e) => { e.recursos.madeira += 1; })).violacoes.join('\n')).toMatch(/campo recursos mudou/);
   });
 
   it('expedição em andamento que perde o resultado sorteado', () => {

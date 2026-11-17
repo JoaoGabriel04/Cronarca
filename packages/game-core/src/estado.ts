@@ -7,6 +7,7 @@ import { diarioDaMigracao } from './diario.ts';
 import { CONFIG_ALDEOES_INICIAL, OFICIOS_ALDEAO, POLITICAS_ALDEOES } from '../data/aldeoes.ts';
 import { CLASSES, CLASSES_ANTIGAS, OFICIOS } from '../data/aventureiros.ts';
 import { DESTINOS_IDS } from '../data/expedicoes.ts';
+import { QG_ESTADOS } from '../data/qg.ts';
 import { NIVEL_MAXIMO_CONSTRUCAO, TIPOS_CONSTRUCAO } from '../data/construcoes.ts';
 import { PESQUISAS_IDS } from '../data/pesquisas.ts';
 import { RECURSOS } from '../data/recursos.ts';
@@ -16,7 +17,7 @@ import { FORMULAS } from '../data/formulas.ts';
 import { VERSOES_MAPA } from '../data/mapa.ts';
 import { termosDoMercador } from './mercador.ts';
 
-export const VERSAO_ESQUEMA = 9;
+export const VERSAO_ESQUEMA = 10;
 
 const inteiro = z.number().int();
 const naoNegativo = inteiro.min(0);
@@ -141,6 +142,12 @@ export const esquemaEstado = z
     /** Baldes de fichas do clique (fichas em milésimos), no relógio do servidor. */
     cliques: z.strictObject({ usuario: esquemaBalde, objetos: z.record(z.string(), esquemaBalde) }),
     cronica: z.array(z.strictObject({ icone: z.string(), texto: z.string(), em: instante })),
+    /**
+     * Esquema 10 (Portão 21): o Quartel General. `oculto` até uma expedição às Ruínas voltar, depois `ruinas` (dá para
+     * reerguer pagando) e `reerguido`. `desde` é o instante em que o estado atual começou (a dica do Sábio conta
+     * a partir dele). Atravessa a ascensão, como as relíquias e o Diário.
+     */
+    qg: z.strictObject({ estado: z.enum(QG_ESTADOS), desde: instante }),
     /** Esquema 8 (Portão 16): capítulos do Diário liberados, na ordem; atravessa a ascensão. */
     diario: z.array(z.enum(CAPITULOS_IDS)),
     /** Esquema 8: o prólogo já foi visto (não abre de novo, nem noutro aparelho). */
@@ -217,6 +224,11 @@ export function migrarEstado(bruto: unknown, versaoEsquema: number): { estado: u
     const aventureiros = (estado.aventureiros as { classe: keyof typeof CLASSES_ANTIGAS }[]).map((a) => ({ ...a, classe: CLASSES_ANTIGAS[a.classe] ?? a.classe }));
     estado = { ...estado, versao: 9, aventureiros };
     versao = 9;
+  }
+  if (versao === 9) {
+    // Quartel General (Portão 21): ninguém o descobriu ainda; a dica do Sábio conta a partir deste save.
+    estado = { ...estado, versao: 10, qg: { estado: 'oculto', desde: estado.t } };
+    versao = 10;
   }
   return { estado, versao };
 }

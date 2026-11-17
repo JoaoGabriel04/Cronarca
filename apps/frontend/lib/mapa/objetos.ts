@@ -9,7 +9,7 @@
 import {
   AJUSTE_PE_SOMBRA, animacao, ESCALA, faseDe, quadroNoTempo, PE_ALTURA_PERMIL, SOMBRA_ALDEAO, SOMBRA_AVENTUREIRO, SOMBRA_CONSTRUCAO, SOMBRA_ELIPSE_16,
   SOMBRA_OBJETO,
-  type Animacao, type ArvoreMapa, type MapaJogo, type OficioAldeao, type SlotId, type SombraSilhueta,
+  type Animacao, type ArvoreMapa, type EstadoQg, type MapaJogo, type OficioAldeao, type SlotId, type SombraSilhueta,
 } from '@cronarca/game-core';
 import { arvoresVisiveis, LADO_ARVORE, quadroDaArvore, spriteDaArvore, type GradeArvores } from './arvores';
 
@@ -54,8 +54,26 @@ const comFase = (anim: Animacao, id: string) => ({ anim, fase: faseDe(id, anim.c
 /** Os aldeões do estado (só o ofício importa para o mapa; o Ocioso também aparece). */
 export type AldeoesMapa = readonly { oficio: OficioAldeao }[];
 
-export function camadaObjetos(m: MapaJogo, slots: NiveisSlots, aldeoes: AldeoesMapa = []): ItemL4[] {
+export function camadaObjetos(m: MapaJogo, slots: NiveisSlots, aldeoes: AldeoesMapa = [], qg: EstadoQg = 'oculto'): ItemL4[] {
   const itens: ItemL4[] = [];
+
+  // Quartel General (Portão 21): as Ruínas depois de descobertas e o QG depois de reerguido, no ponto de interesse.
+  // Antes da descoberta não há objeto (só o pin do destino).
+  if (qg !== 'oculto') {
+    for (const p of m.pontosDeInteresse) {
+      const lado = ESCALA.construcao;
+      itens.push({
+        id: p.id,
+        ...comFase(animacao('construcao', qg === 'reerguido' ? 'quartel' : 'ruinas_qg'), p.id),
+        x: p.x - lado / 2,
+        y: p.y - lado / 2,
+        lado,
+        peX: p.x,
+        peY: p.y - lado / 2 + altura90(lado),
+        sombra: { p: SOMBRA_CONSTRUCAO, ajuste: AJUSTE_PE_SOMBRA.construcao ?? 0 },
+      });
+    }
+  }
 
   for (const o of m.props) {
     const lado = ESCALA[o.tipo];

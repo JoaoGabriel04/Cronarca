@@ -347,6 +347,34 @@
         "celeiro_1.png",
         "celeiro_2.png"
       ]
+    },
+    "quartel": {
+      "quadros": 4,
+      "duracoesMs": [
+        250,
+        200,
+        250,
+        200
+      ],
+      "tamanho": 48,
+      "arquivos": [
+        "quartel_1.png",
+        "quartel_2.png",
+        "quartel_3.png",
+        "quartel_4.png"
+      ]
+    },
+    "ruinas_qg": {
+      "quadros": 2,
+      "duracoesMs": [
+        450,
+        450
+      ],
+      "tamanho": 48,
+      "arquivos": [
+        "ruinas_qg_1.png",
+        "ruinas_qg_2.png"
+      ]
     }
   },
   "cenario": {
@@ -490,6 +518,22 @@
         "cripta_2.png",
         "cripta_3.png",
         "cripta_4.png"
+      ]
+    },
+    "ruinas_qg": {
+      "quadros": 4,
+      "duracoesMs": [
+        300,
+        250,
+        300,
+        250
+      ],
+      "tamanho": 64,
+      "arquivos": [
+        "ruinas_qg_1.png",
+        "ruinas_qg_2.png",
+        "ruinas_qg_3.png",
+        "ruinas_qg_4.png"
       ]
     }
   },

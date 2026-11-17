@@ -13,12 +13,14 @@ import { registrar } from './cronica.ts';
 import type { EstadoJogo, VisaoCliente } from './estado.ts';
 import { somaNiveis } from './regras.ts';
 
-type Condicao = (e: Pick<VisaoCliente, 'slots' | 'pesquisas' | 'objetivos' | 'aldeoes' | 'ciclo' | 'falha'>) => boolean;
+/** `qg` é opcional na entrada: a migração do Diário (esquema 7 para 8) roda sobre saves que ainda não o têm. */
+type Condicao = (e: Pick<VisaoCliente, 'slots' | 'pesquisas' | 'objetivos' | 'aldeoes' | 'ciclo' | 'falha'> & { qg?: VisaoCliente['qg'] }) => boolean;
 
 /** Quando cada capítulo libera. */
 export const CONDICOES: Record<CapituloId, Condicao> = {
   prologo: () => true,
   scriptorium: (e) => somaNiveis(e, 'scriptorium') >= 1,
+  quartel_general: (e) => (e.qg?.estado ?? 'oculto') !== 'oculto',
   cartografia: (e) => e.pesquisas.concluidas.includes('cartografia'),
   estradas_reais: (e) => e.pesquisas.concluidas.includes('estradas_reais'),
   carta_real: (e) => e.pesquisas.concluidas.includes('carta_real'),

@@ -4,7 +4,7 @@
 
 import {
   construiveis, CONSTRUCOES, custoConstrucao, EVENTO_PARAMETROS, linhaCatalogo, linhasCatalogo, NOMES_RECURSOS, TEXTOS_CATALOGO, FORMULAS, NIVEL_MAXIMO_CONSTRUCAO, objetivosEra, PESQUISAS, PESQUISAS_IDS,
-  custoPesquisa, duracaoPesquisaMs, micro, reliquiasNaAscensao, SLOTS, somaNiveis, tempoObraMs,
+  custoPesquisa, duracaoPesquisaMs, micro, QG, reliquiasNaAscensao, SLOTS, somaNiveis, tempoObraMs, TEXTOS_QG,
   type Custo, type EstadoLinhaCatalogo, type LinhaCatalogo, type PesquisaId, type Recurso, type RefSprite, type SlotId, type TipoConstrucao, type VisaoCliente,
 } from '@cronarca/game-core';
 import { excecoesDoPiso, formatarInteiro, formatarRestante, textoEra, textoGuarda } from './dados';
@@ -291,4 +291,34 @@ export type FiltroCatalogo = 'todas' | 'disponiveis';
 /** Disponíveis: só o que dá para construir agora (o mesmo critério do selo do botão Construir). */
 export function filtrarCatalogo(linhas: readonly LinhaCatalogoTela[], filtro: FiltroCatalogo): LinhaCatalogoTela[] {
   return filtro === 'todas' ? [...linhas] : linhas.filter((l) => l.estado === 'construivel');
+}
+
+// ---------- Quartel General (Portão 21) ----------
+
+export interface DadosReerguerQg {
+  titulo: string;
+  subtitulo: string;
+  /** Sprite das Ruínas (construcao/ruinas_qg), no retrato do modal. */
+  sprite: RefSprite;
+  custo: CustoModal[];
+  pode: boolean;
+  /** "Falta madeira e pedra" quando não dá (texto, não só cor), ou null. */
+  motivo: string | null;
+  botao: string;
+}
+
+/** O que o modal de reerguer mostra: o custo (dos dados do jogo) e se o jogador pode pagar agora. */
+export function dadosReerguerQg(e: VisaoCliente): DadosReerguerQg {
+  const custo = custoModal(e, Object.fromEntries(Object.entries(QG.custoReerguer).map(([r, v]) => [r, micro(v)])) as Custo);
+  const faltam = custo.filter((c) => c.falta).map((c) => NOMES_RECURSOS[c.recurso].toLowerCase());
+  const juntar = (xs: string[]) => (xs.length <= 1 ? (xs[0] ?? '') : `${xs.slice(0, -1).join(', ')} e ${xs.at(-1)}`);
+  return {
+    titulo: TEXTOS_QG.tituloReerguer,
+    subtitulo: TEXTOS_QG.subtituloReerguer,
+    sprite: { grupo: 'construcao', id: 'ruinas_qg' },
+    custo,
+    pode: e.qg.estado === 'ruinas' && faltam.length === 0,
+    motivo: e.qg.estado !== 'ruinas' ? 'O Quartel General não está disponível agora.' : faltam.length ? `Falta ${juntar(faltam)}` : null,
+    botao: TEXTOS_QG.botaoReerguer,
+  };
 }

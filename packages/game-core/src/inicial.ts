@@ -26,6 +26,8 @@ export interface OpcoesInicio {
   diario?: EstadoJogo['diario'];
   prologoVisto?: boolean;
   cronica?: EstadoJogo['cronica'];
+  /** Quartel General (Portão 21): atravessa a ascensão. Conta nova: oculto, desde o início. */
+  qg?: EstadoJogo['qg'];
 }
 
 export function sortearIntervaloEventoMs(s: Sorteador): number {
@@ -77,6 +79,7 @@ export function estadoInicial(op: OpcoesInicio): EstadoJogo {
     cliques: { usuario: { fichas: FORMULAS.clique.porSegundoUsuario * 1000, em: op.agora }, objetos: {} },
     cronica: structuredClone(op.cronica ?? []),
     // O prólogo vale desde a conta criada: entra sem linha na Crônica.
+    qg: structuredClone(op.qg ?? { estado: 'oculto', desde: op.agora }),
     diario: [...(op.diario ?? ['prologo'])],
     prologoVisto: op.prologoVisto ?? false,
     relatorios: [],

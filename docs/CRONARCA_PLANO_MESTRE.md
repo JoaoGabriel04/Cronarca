@@ -111,7 +111,7 @@ Na página **Sprites** do Figma: seção "Sprites existentes do projeto" (278 PN
 |---|---|---|
 | 19 | Construção com consequência | não |
 | 20 | Núcleo de combate (20a, 20b, 20c): **feito** | sim |
-| 21 | Descoberta do QG (Ruínas do QG, pontos de interesse) | sim |
+| 21 | Descoberta do QG (Ruínas do QG, pontos de interesse): **aplicado (Gate 2), aguardando Gate 3 e deploy**; esquema 10 | sim |
 | 22 | QG e aventureiros unificados, Alojamento, contratação com classe | sim (falta Arqueiro) |
 | 23 | Mesa de Guerra e Ecos | telas sim; arte de batalha e cenários não |
 | 24 | Enfermaria e derrota | tela sim; sprite do prédio não |

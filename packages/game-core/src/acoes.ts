@@ -6,6 +6,7 @@ import { DESLOCAMENTO_ALDEAO_MS, OFICIO_OCIOSO, OFICIOS_ALDEAO, POLITICAS_ALDEOE
 import { CLASSES, OFICIOS, type Oficio } from '../data/aventureiros.ts';
 import { CONSTRUCOES, NIVEL_MAXIMO_CONSTRUCAO } from '../data/construcoes.ts';
 import { DESTINOS, DESTINOS_IDS, TAMANHO_MAXIMO_GRUPO } from '../data/expedicoes.ts';
+import { QG, TEXTOS_QG } from '../data/qg.ts';
 import { FALHA } from '../data/falha.ts';
 import { FORMULAS } from '../data/formulas.ts';
 import { PESQUISAS, PESQUISAS_IDS } from '../data/pesquisas.ts';
@@ -51,6 +52,8 @@ export const esquemaAcao = z.discriminatedUnion('tipo', [
   z.strictObject({ tipo: z.literal('comprar_reliquia'), reliquia: z.enum(RELIQUIAS_IDS) }),
   z.strictObject({ tipo: z.literal('ascender') }),
   z.strictObject({ tipo: z.literal('fechar_prologo') }),
+  /** Portão 21: paga o custo e reergue o Quartel General (só com as Ruínas descobertas). */
+  z.strictObject({ tipo: z.literal('reerguer_qg') }),
   z.strictObject({
     tipo: z.literal('clicar'),
     objeto: idCurto,
@@ -71,7 +74,8 @@ export type ErroAcao =
   | 'alocacao_invalida' | 'aldeoes_insuficientes'
   | 'reliquia_maxima' | 'reliquias_insuficientes'
   | 'objetivos_pendentes'
-  | 'objeto_invalido' | 'limite_cliques';
+  | 'objeto_invalido' | 'limite_cliques'
+  | 'qg_indisponivel';
 
 export type ResultadoAcao =
   | { ok: true; estado: EstadoJogo; cliquesAceitos?: number }
@@ -80,6 +84,11 @@ export type ResultadoAcao =
 export interface OpcoesAcao {
   /** Objetos clicáveis do mapa (árvores, pedras), id -> recurso: a lista `clicaveis` do meta (objetosDoMapa). */
   objetosDoMapa?: Readonly<Record<string, Recurso>>;
+}
+
+/** Custo de reerguer o QG, em micro. */
+function custoDoQg(): Custo {
+  return Object.fromEntries(Object.entries(QG.custoReerguer).map(([r, v]) => [r, micro(v)])) as Custo;
 }
 
 function podePagar(e: EstadoJogo, custo: Custo): boolean {
@@ -273,6 +282,17 @@ function aplicador(acao: Acao, agora: number, opcoes: OpcoesAcao): Aplicador {
         registrar(e, 'Reliquia', `${dados.nome} chegou ao nível ${nivel + 1}.`, e.t);
       };
 
+    case 'reerguer_qg':
+      return (e) => {
+        // Só com as Ruínas descobertas e ainda não reerguido: a segunda chamada não cobra de novo.
+        if (e.qg.estado !== 'ruinas') return 'qg_indisponivel';
+        const custo = custoDoQg();
+        if (!podePagar(e, custo)) return 'recursos_insuficientes';
+        pagar(e, custo);
+        e.qg = { estado: 'reerguido', desde: e.t };
+        registrar(e, 'Construir', TEXTOS_QG.reerguidoCronica, e.t);
+      };
+
     case 'fechar_prologo':
       return (e) => {
         e.prologoVisto = true;
@@ -318,6 +338,8 @@ function ascender(e: EstadoJogo, s: Sorteador): ErroAcao | EstadoJogo {
     cronica: e.cronica,
     diario: e.diario,
     prologoVisto: e.prologoVisto,
+    // O Quartel General atravessa a ascensão (Portão 21); o resto do reset do QG é do Portão 25.
+    qg: e.qg,
   });
   registrar(novo, 'Ascensao', `Ascensão! O reino renasce no ciclo ${novo.ciclo} com +${ganho} relíquias.`, e.t);
   liberarCapitulos(novo, e.t);

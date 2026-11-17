@@ -229,6 +229,7 @@ describe('esquema 8', () => {
     const e = novo();
     e.ciclo = 3;
     e.falha = 3;
-    expect(carregarEstado(v7(e), 7).diario).toEqual([...CAPITULOS_IDS]);
+    // Todos, menos o do Quartel General: o QG começa oculto e o save antigo ainda não o descobriu.
+    expect(carregarEstado(v7(e), 7).diario).toEqual(CAPITULOS_IDS.filter((id) => id !== 'quartel_general'));
   });
 });
