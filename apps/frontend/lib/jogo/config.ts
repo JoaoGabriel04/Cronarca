@@ -10,6 +10,14 @@ export const SINCRONIA = {
   loteCliquesMs: 250,
   /** Ações previstas (cliques, obras) tentam de novo sozinhas, com a mesma chave, até este número de vezes. */
   tentativasRede: 3,
+  /** Reenvios de uma ação prevista depois de 409 (rev diferente); passou disso, descarta com o aviso de conflito. */
+  tentativasConflito: 3,
+  /** O relógio estimado do servidor não recua em ajustes menores que isto (o HUD não anda para trás). */
+  recuoMaximoDoRelogioMs: 2_000,
+  /** Quanto tempo depois do último clique o piso da exibição (HUD sem recuo) continua valendo. */
+  pisoDaExibicaoMs: 5_000,
+  /** "Salvar agora" e o reset não esperam a fila para sempre. */
+  salvarPrazoMs: 10_000,
   /** Espera entre tentativas por queda de rede. */
   esperaRedeMs: 1_000,
   /** Margem depois do fim de uma expedição para pedir o estado com a volta já resolvida. */

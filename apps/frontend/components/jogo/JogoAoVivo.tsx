@@ -18,6 +18,8 @@ import { dadosAscensao, dadosMelhorar, dadosPesquisa, linhasCatalogoTela, seloCo
 import { grupoSugerido, grupoValido } from '../../lib/casca/telas';
 import { enviar, ErroApi, mensagemDeErro } from '../../lib/api';
 import { textoDoDesfecho, useAvisar } from '../../lib/jogo/avisos';
+import { avisoLimiteCliques } from '../../lib/jogo/cliques';
+import { apagarComTentativas, textoDaFalhaDoReset } from '../../lib/jogo/reset';
 import { ProvedorConfirmacao, usePedidoConfirmacao } from '../../lib/jogo/confirmacao';
 import { usePreferencias } from '../../lib/jogo/preferencias';
 import type { CorpoEstado } from '../../lib/jogo/sincronia';
@@ -130,6 +132,7 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
   const [destaque, setDestaque] = useState<DestinoId | null>(null);
   const avisar = useAvisar();
   const router = useRouter();
+  const avisouLimite = useRef(false);
   // Aviso discreto, uma vez por sessão do navegador, para quem ainda é convidado.
   const eConvidado = usuario?.convidado === true;
   useEffect(() => {
@@ -163,7 +166,7 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
 
   const base = jogo.estado;
   const relogio = jogo.relogio;
-  const visivel = useMemo(() => (base && tique >= 0 ? preverEstado(base, relogio()).estado : null), [base, tique]);
+  const visivel = useMemo(() => (base && tique >= 0 ? jogo.sinc.exibir() : null), [base, tique]);
   const versaoMapa = visivel?.mundo.versaoMapa;
   // Névoa do minimapa: só muda quando a pesquisa que abre o destino termina.
   const chaveNevoas = visivel ? nevoasAtivas(visivel).map((n) => n.destino).join(',') : '';
@@ -318,17 +321,34 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
   const apagarProgresso = async (palavra: string) => {
     setApagando(true);
     try {
-      await jogo.sinc.salvarAgora();
-      const corpo = await enviar<CorpoEstado>('/api/game/reset', { confirmacao: palavra });
-      if (corpo) jogo.sinc.receberEstado(corpo);
+      // O reset apaga tudo: o que estava pendente (cliques, obras) não vale mais, e esperar a fila podia travar a tela.
+      jogo.sinc.descartarPendentes();
+      const d = await apagarComTentativas({
+        transporte: (sinal) =>
+          fetch('/api/game/reset', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify({ confirmacao: palavra }),
+            signal: sinal,
+          }).then(async (res) => ({ status: res.status, corpo: await res.json().catch(() => ({})) })),
+        esperar: (ms) => new Promise((ok) => setTimeout(ok, ms)),
+        agendar: (fn, ms) => setTimeout(fn, ms),
+        cancelar: (id) => clearTimeout(id as ReturnType<typeof setTimeout>),
+      });
+      if (!d.ok) {
+        if (d.motivo === 'sessao') router.replace('/login?voltar=/jogo');
+        else avisar(textoDaFalhaDoReset(d));
+        return;
+      }
+      // O estado novo vence qualquer base anterior, mesmo com rev menor; o jogador continua no reino novo.
+      jogo.sinc.receberEstado(d.corpo, { adotar: true });
       setModal(null);
       setSelecionados([]);
       setDestaque(null);
       setAba('vila');
       avisar('Progresso apagado. O reino recomeça do zero.');
-    } catch (erro) {
-      if (erro instanceof ErroApi && erro.status === 401) router.replace('/login?voltar=/jogo');
-      else avisar(erro instanceof ErroApi ? mensagemDeErro(erro.codigo) : 'Sem conexão com o servidor. Tente de novo.');
+    } catch {
+      avisar('Não foi possível apagar o progresso. Tente de novo.');
     } finally {
       setApagando(false);
     }
@@ -356,9 +376,15 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
     const r = jogo.sinc.clicar(id);
     const recurso = recursoDoObjeto(visivel, id, {});
     if (r.ganho > 0 && recurso) setPulso((p) => ({ recurso, n: (p?.n ?? 0) + 1 }));
+    // Primeira vez que o teto barra o clique nesta visita: explica o limite (o rótulo "Máx. N/s" sobe do clique).
+    if (r.limite && !avisouLimite.current) {
+      avisouLimite.current = true;
+      avisar(avisoLimiteCliques());
+    }
     return {
       ganho: r.ganho,
       cheio: r.cheio,
+      limite: r.limite,
       aceito: r.desfecho.then((d) => {
         // Clique recusado (limite, objeto) é silencioso: o "+N" some. Rede e sessão avisam.
         const texto = textoDoDesfecho(d, { silenciarRecusa: true });

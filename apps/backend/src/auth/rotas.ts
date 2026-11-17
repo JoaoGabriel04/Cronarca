@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { Router, type Request, type Response } from 'express';
 import { CONFIG_AUTH, CONFIG_CONVIDADO } from '../config.ts';
 import type { ContextoApp } from '../contexto.ts';
@@ -88,7 +89,9 @@ export function rotasAuth(ctx: ContextoApp) {
     // Para conferir em produção se o IP do jogador chega até aqui (sem gravar o endereço).
     if (registrosDeProxy < 5 && process.env.NODE_ENV !== 'test') {
       registrosDeProxy += 1;
-      console.log(`[convidado] saltos de proxy: ${req.ips.length}; req.ip privado: ${ipPrivado(ipDe(req))}`);
+      // Só um prefixo do hash do IP (nunca o endereço): dá para comparar redes diferentes sem gravar dado pessoal.
+      const marca = createHash('sha256').update(ipDe(req)).digest('hex').slice(0, 6);
+      console.log(`[convidado] saltos de proxy: ${req.ips.length}; req.ip privado: ${ipPrivado(ipDe(req))}; marca do ip: ${marca}`);
     }
     const ip = `ip:${ipDe(req)}`;
     if (ctx.limiteConvidadoIp) {

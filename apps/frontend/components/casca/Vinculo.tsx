@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useId, useState, type FormEvent } from 'react';
 import { useSWRConfig } from 'swr';
 import { enviar, ErroApi, mensagemDeErro, type UsuarioPublico } from '../../lib/api';
+import { limparCacheDoJogo } from '../../lib/jogo/cache';
 import { nomeParaConfirmar, type RetornoVinculo } from '../../lib/convidado';
 import { CHAVE_USUARIO, estadoProvedor, useProvedores } from '../../lib/usuario';
 import { Modal } from './Modal';
@@ -79,6 +80,7 @@ export function ModalVinculo({
     try {
       await enviar('/api/auth/logout');
     } finally {
+      await limparCacheDoJogo(mutate);
       await mutate(CHAVE_USUARIO, null, { revalidate: false });
       router.replace('/login');
     }

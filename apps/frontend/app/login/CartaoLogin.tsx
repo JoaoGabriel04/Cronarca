@@ -5,6 +5,7 @@ import { useEffect, useId, useState, type FormEvent } from 'react';
 import { useSWRConfig } from 'swr';
 import { enviar, ErroApi, mensagemDeErro, type UsuarioPublico } from '../../lib/api';
 import { LEGENDA_CONVIDADO } from '../../lib/convidado';
+import { limparCacheDoJogo } from '../../lib/jogo/cache';
 import { CHAVE_USUARIO, estadoProvedor, useProvedores, useUsuario, type EstadoProvedor } from '../../lib/usuario';
 import estilos from './login.module.css';
 
@@ -67,6 +68,7 @@ export function CartaoLogin() {
         modo === 'cadastro' ? '/api/auth/cadastro' : '/api/auth/login',
         corpo,
       );
+      await limparCacheDoJogo(mutate);
       await mutate(CHAVE_USUARIO, res?.usuario ?? null, { revalidate: false });
       router.push(destino);
     } catch (e) {
@@ -88,6 +90,7 @@ export function CartaoLogin() {
     setCriandoConvidado(true);
     try {
       const res = await enviar<{ usuario: UsuarioPublico }>('/api/auth/convidado', {});
+      await limparCacheDoJogo(mutate);
       await mutate(CHAVE_USUARIO, res?.usuario ?? null, { revalidate: false });
       router.push(destino);
     } catch (e) {

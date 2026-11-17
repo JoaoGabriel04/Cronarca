@@ -81,9 +81,14 @@ export class EfeitosClique {
    * ícone sobe com "Cheio" em vez do "+N", para o clique não parecer perdido.
    */
   mostrarCheio(chave: string, recurso: Recurso, x: number, y: number) {
+    this.mostrarTexto(chave, recurso, 'Cheio', x, y);
+  }
+
+  /** O mesmo ícone sobe com um texto no lugar do "+N" ("Cheio", "Máx. 5/s"). */
+  mostrarTexto(chave: string, recurso: Recurso, texto: string, x: number, y: number) {
     this.mostrar(chave, recurso, 0, x, y);
     const el = this.pool.find((e) => e.ocupado && e.chave === chave);
-    if (el) el.texto.textContent = 'Cheio';
+    if (el) el.texto.textContent = texto;
   }
 
   /** O servidor recusou: o "+N" dessa chave some na hora (handoff, item 7). */

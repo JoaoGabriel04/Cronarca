@@ -14,6 +14,7 @@ import {
   type MapaJogo, type SlotId, type VisaoCliente,
 } from '@cronarca/game-core';
 import { gsap } from 'gsap';
+import { rotuloLimiteCliques } from '../../lib/jogo/cliques';
 import { Plus } from 'lucide-react';
 import { useEffect, useImperativeHandle, useMemo, useRef, useState, type PointerEvent as EventoPonteiro, type ReactNode, type Ref } from 'react';
 import {
@@ -339,6 +340,8 @@ export interface CliqueObjeto {
   ganho: number;
   /** Não rendeu porque o recurso está no teto do armazém: mostra "Cheio" no lugar do "+N". */
   cheio: boolean;
+  /** Não rendeu porque bateu no teto de cliques por segundo: mostra "Máx. N/s". */
+  limite?: boolean;
   /** false: o servidor recusou (o "+N" some). */
   aceito: Promise<boolean>;
 }
@@ -410,6 +413,8 @@ export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao 
   const canvas = useRef<HTMLCanvasElement>(null);
   const camadaEfeitos = useRef<HTMLDivElement>(null);
   const efeitos = useRef<EfeitosClique | null>(null);
+  /** Última vez que o rótulo do teto de cliques subiu, por objeto. */
+  const ultimoLimite = useRef(new Map<string, number>());
   const gesto = useRef<Gesto | null>(null);
   /** Dedos (ou ponteiros) pressionados no canvas, pelo pointerId: com dois, é pinça. */
   const dedos = useRef(new Map<number, Ponto>());
@@ -660,6 +665,14 @@ export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao 
     setUltimoEvento(`clique em ${alvo.id}`);
     if (r.ganho > 0) efeitos.current?.mostrar(alvo.id, alvo.recurso, r.ganho, p.x, p.y);
     else if (r.cheio) efeitos.current?.mostrarCheio(alvo.id, alvo.recurso, p.x, p.y);
+    else if (r.limite) {
+      // No máximo um rótulo a cada 3 s por objeto: o jogador entende o teto sem encher a tela.
+      const agora = Date.now();
+      if (agora - (ultimoLimite.current.get(alvo.id) ?? 0) >= 3_000) {
+        ultimoLimite.current.set(alvo.id, agora);
+        efeitos.current?.mostrarTexto(alvo.id, alvo.recurso, rotuloLimiteCliques(), p.x, p.y);
+      }
+    }
     void r.aceito.then((ok) => {
       if (!ok) efeitos.current?.cancelar(alvo.id);
     });

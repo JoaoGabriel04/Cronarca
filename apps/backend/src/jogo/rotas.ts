@@ -11,9 +11,11 @@ import { apagarProgresso, executarAcao, obterOuCriarEstado } from './repositorio
 import { registrarAtividade } from '../ranking/repositorio.ts';
 
 /** Estado liquidado até agora, sem a parte secreta. */
-function corpoEstado(estado: EstadoJogo, rev: number, agora: number) {
+function corpoEstado(estado: EstadoJogo, rev: number, agora: number, carimbo: number = agora) {
   const liquidado = liquidar(estado, Math.max(agora, estado.t));
-  return { estado: visaoDoCliente(liquidado), rev, agora };
+  // O `agora` do corpo é o relógio do servidor no instante em que a resposta SAI (depois do banco), não o do início
+  // da requisição: o cliente mede a hora de chegada contra ele e o relógio estimado não pode recuar a cada resposta.
+  return { estado: visaoDoCliente(liquidado), rev, agora: Math.max(carimbo, liquidado.t) };
 }
 
 function usuarioId(res: Response): string {
@@ -35,7 +37,7 @@ export function rotasJogo(ctx: ContextoApp) {
     const agora = agoraMs();
     const { estado, rev } = await obterOuCriarEstado(ctx.prisma, usuarioId(res), agora, ctx.sortearSemente);
     await registrarAtividade(ctx.prisma, usuarioId(res), agora);
-    res.json(corpoEstado(estado, rev, agora));
+    res.json(corpoEstado(estado, rev, agora, agoraMs()));
   });
 
   /**
@@ -104,7 +106,7 @@ export function rotasJogo(ctx: ContextoApp) {
       agora,
       sortearSemente: ctx.sortearSemente,
     });
-    const estado = corpoEstado(saida.estado, saida.rev, agora);
+    const estado = corpoEstado(saida.estado, saida.rev, agora, agoraMs());
 
     if (saida.tipo === 'conflito') {
       res.status(409).json({ erro: 'rev_desatualizada', ...estado });
@@ -123,7 +125,7 @@ export function rotasJogo(ctx: ContextoApp) {
     }
     const agora = agoraMs();
     const { estado, rev } = await apagarProgresso(ctx.prisma, userId, agora, ctx.sortearSemente);
-    res.json(corpoEstado(estado, rev, agora));
+    res.json(corpoEstado(estado, rev, agora, agoraMs()));
   });
 
   return r;

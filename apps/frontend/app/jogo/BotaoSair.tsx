@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useSWRConfig } from 'swr';
 import { enviar } from '../../lib/api';
+import { limparCacheDoJogo } from '../../lib/jogo/cache';
 import { CHAVE_USUARIO, useUsuario } from '../../lib/usuario';
 
 // Provisório até o modal de Configurações (Portão 13). Também confirma a sessão.
@@ -23,6 +24,7 @@ export function BotaoSair({ className = 'caixa botao' }: { className?: string })
     try {
       await enviar('/api/auth/logout');
     } finally {
+      await limparCacheDoJogo(mutate);
       await mutate(CHAVE_USUARIO, null, { revalidate: false });
       router.replace('/');
     }

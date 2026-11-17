@@ -16,6 +16,13 @@ import { Sincronizador, type CorpoEstado, type Desfecho, type Transporte } from 
 
 const ROTA_ESTADO = '/api/game/state';
 
+/** GET do estado medindo a ida e volta (o Sincronizador usa para estimar o relógio do servidor). */
+async function buscarEstado(rota: string): Promise<CorpoEstado> {
+  const saiu = performance.now();
+  const corpo = await buscar<CorpoEstado>(rota);
+  return { ...corpo, rttMs: performance.now() - saiu };
+}
+
 const transporte: Transporte = async (corpo, sinal) => {
   const res = await fetch('/api/game/actions', {
     method: 'POST',
@@ -53,7 +60,7 @@ export function useJogo(): Jogo {
       }),
   );
 
-  const { data, error, mutate } = useSWR<CorpoEstado>(ROTA_ESTADO, buscar, {
+  const { data, error, mutate } = useSWR<CorpoEstado>(ROTA_ESTADO, buscarEstado, {
     refreshInterval: SINCRONIA.atualizarMs,
     refreshWhenHidden: false,
     revalidateOnFocus: true,
