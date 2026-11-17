@@ -15,7 +15,7 @@ import { SLOT_IDS, SLOTS, type SlotId } from '../data/slots.ts';
 import { formatarInteiro } from './cronica.ts';
 import type { VisaoCliente } from './estado.ts';
 import { chanceExitoBp, custoConstrucao, custoContratar, custoPesquisa, perigoDestino, poderAventureiro, type Custo } from './formulas.ts';
-import { aldeoesMaximos, calcularTaxas, objetivosEra, somaNiveis, tetos, vagasGuilda } from './regras.ts';
+import { aldeoesMaximos, aventureirosNaTaverna, calcularTaxas, objetivosEra, somaNiveis, tetos, vagasGuilda } from './regras.ts';
 
 export type TrilhaId = 'carta_real' | 'cripta' | 'aldeoes';
 
@@ -139,7 +139,7 @@ function trilhaCripta(e: VisaoCliente): PassoTrilha {
   if (e.recursos.comida <= 0) return { ...base, cumprida: false, passo: `Envie um grupo à Cripta (perigo ${perigo})`, motivo: 'sem comida: expedições não partem', pronto: false };
   if (chance >= CHANCE_MINIMA_CRIPTA_BP) return { ...base, cumprida: false, passo: `Envie um grupo à Cripta (perigo ${perigo})`, motivo: `chance de ${pct}`, pronto: true };
   // Fraca demais: contratar (se há vaga e ouro), equipar na Forja ou treinar em destinos mais fáceis.
-  const podeContratar = e.aventureiros.length < vagasGuilda(e) && faltando(e, custoContratar(e.contratacoes)) === null;
+  const podeContratar = aventureirosNaTaverna(e) < vagasGuilda(e) && faltando(e, custoContratar(e.contratacoes)) === null;
   const motivo = podeContratar ? 'contrate mais aventureiros' : somaNiveis(e, 'forja') > 0 ? 'melhore armas e armaduras ou treine em destinos mais fáceis' : 'treine em destinos mais fáceis e construa a Forja';
   return { ...base, cumprida: false, passo: `Fortaleça a guilda: ${pct} na Cripta`, motivo, pronto: false };
 }
@@ -169,7 +169,7 @@ function dicaDoSabio(e: VisaoCliente, principal: PassoTrilha | null): string | n
   const caminho: PesquisaId = 'estradas_reais';
   const cartografiaFeita = e.pesquisas.concluidas.includes('cartografia') || e.pesquisas.atual?.id === 'cartografia';
   const ouro = custoPesquisa(caminho, e.falha).ouro ?? 0;
-  const podeGastarOuro = e.aventureiros.length < vagasGuilda(e);
+  const podeGastarOuro = aventureirosNaTaverna(e) < vagasGuilda(e);
   if (cartografiaFeita && !e.pesquisas.concluidas.includes(caminho) && e.recursos.ouro < ouro && podeGastarOuro) {
     return `${SABIO.prefixo} ${SABIO.guardeOuro(unidades(ouro), PESQUISAS[caminho].nome)}`;
   }

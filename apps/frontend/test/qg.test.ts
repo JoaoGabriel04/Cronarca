@@ -13,7 +13,7 @@ const T0 = Date.UTC(2026, 5, 1, 12, 0, 0);
 const MICRO = 1_000_000;
 const visao = (qg: EstadoQg = 'oculto'): VisaoCliente => {
   const e = estadoInicial({ semente: 1, agora: T0 });
-  e.qg = { estado: qg, desde: T0 };
+  e.qg = { estado: qg, desde: T0, nivel: qg === 'reerguido' ? 1 : 0 };
   return visaoDoCliente(e);
 };
 

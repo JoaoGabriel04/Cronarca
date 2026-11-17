@@ -39,7 +39,11 @@ describe('conta nova sem eventos: igual ao rodízio antigo', () => {
       const l = liquidar(e, T0 + Number(minutos) * MIN);
       const antes = contaNova.estados[minutos];
       expect(l.t).toBe(antes.t);
-      expect(l.recursos).toEqual(antes.recursos);
+      // Portão 22 (curva C): o aventureiro come menos, então a comida sobra mais; todo o resto segue idêntico ao código antigo.
+      const { comida: comidaAgora, ...semComida } = l.recursos;
+      const { comida: comidaAntes, ...semComidaAntes } = antes.recursos;
+      expect(semComida).toEqual(semComidaAntes);
+      expect(comidaAgora).toBeGreaterThanOrEqual(comidaAntes);
       expect(l.aldeoes).toEqual(antes.aldeoes);
       expect(l.progressoAldeaoMs).toBe(antes.progressoAldeaoMs);
       expect(l.cronica).toEqual(antes.cronica);
@@ -80,9 +84,11 @@ describe('regra da comida (comida em 0, abaixo de 20 ou saldo negativo)', () => 
       'fazendeiro', 'fazendeiro', 'fazendeiro', 'ferreiro', 'lenhador', 'mineiro', 'sabio', 'ferreiro',
     ]);
     expect(l.aldeoes.length).toBe(fomeAntes.aldeoes.length);
-    expect(liquidar(e, T0 + 1 * MIN).recursos.comida).toBe(u(14.4));
-    expect(liquidar(e, T0 + 2 * MIN).recursos.comida).toBe(u(60));
-    expect(l.recursos.comida).toBe(u(96.6));
+    // Portão 22 (curva C): 3 aventureiros comem 0,126/s (eram 0,24), então a comida chega mais alta que antes
+    // (a ordem dos ofícios é a mesma): 19,44 em 1 min, 71,88 em 2 e 115,32 em 3.
+    expect(liquidar(e, T0 + 1 * MIN).recursos.comida).toBe(u(19.44));
+    expect(liquidar(e, T0 + 2 * MIN).recursos.comida).toBe(u(71.88));
+    expect(l.recursos.comida).toBe(u(115.32));
   });
 
   it('saldo que ficaria negativo com quem chega: Fazendeiro, mesmo com comida de sobra e a automática desligada', () => {

@@ -77,9 +77,15 @@ describe('eventos de ganho', () => {
   it('conta nova com eventos, sem ações, 120 min: idêntica ao código antes do 18a (todos os 6 eventos aparecem)', () => {
     for (const [semente, antes] of Object.entries(comEventos.estados)) {
       const l = liquidar(estadoInicial({ semente: Number(semente), agora: T0 }), T0 + 120 * MIN);
-      expect(l.recursos, `semente ${semente}`).toEqual(antes.recursos);
+      // Portão 22 (curva C): o aventureiro come menos, então a comida sobra mais (e o Festival da Colheita pode achar o
+      // Celeiro cheio). Tudo o que não depende da comida segue idêntico ao código antigo.
+      const { comida: comidaAgora, ...semComida } = l.recursos;
+      const { comida: comidaAntes, ...semComidaAntes } = antes.recursos;
+      expect(semComida, `semente ${semente}`).toEqual(semComidaAntes);
+      expect(comidaAgora).toBeGreaterThanOrEqual(comidaAntes);
       expect(l.aldeoes).toEqual(antes.aldeoes);
-      expect(l.cronica).toEqual(antes.cronica);
+      const neutro = (t: string) => t.replace(/^Festival da Colheita: .*/, 'Festival da Colheita').replace(/\d+ comida/g, 'N comida');
+      expect(l.cronica.map((c) => ({ ...c, texto: neutro(c.texto) }))).toEqual(antes.cronica.map((c) => ({ ...c, texto: neutro(c.texto) })));
       expect(l.segredo.rng).toBe(antes.rng);
       expect(l.segredo.proximoEventoEm).toBe(antes.proximoEventoEm);
     }

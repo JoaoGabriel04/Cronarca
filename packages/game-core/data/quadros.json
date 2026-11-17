@@ -98,7 +98,7 @@
     }
   },
   "aventureiro": {
-    "guerreiro": {
+    "lanceiro": {
       "quadros": 6,
       "duracoesMs": [
         100,
@@ -110,12 +110,12 @@
       ],
       "tamanho": 32,
       "arquivos": [
-        "guerreiro_1.png",
-        "guerreiro_2.png",
-        "guerreiro_3.png",
-        "guerreiro_4.png",
-        "guerreiro_5.png",
-        "guerreiro_6.png"
+        "lanceiro_1.png",
+        "lanceiro_2.png",
+        "lanceiro_3.png",
+        "lanceiro_4.png",
+        "lanceiro_5.png",
+        "lanceiro_6.png"
       ]
     },
     "arqueiro": {
@@ -138,7 +138,7 @@
         "arqueiro_6.png"
       ]
     },
-    "mago": {
+    "cavaleiro": {
       "quadros": 6,
       "duracoesMs": [
         100,
@@ -150,15 +150,15 @@
       ],
       "tamanho": 32,
       "arquivos": [
-        "mago_1.png",
-        "mago_2.png",
-        "mago_3.png",
-        "mago_4.png",
-        "mago_5.png",
-        "mago_6.png"
+        "cavaleiro_1.png",
+        "cavaleiro_2.png",
+        "cavaleiro_3.png",
+        "cavaleiro_4.png",
+        "cavaleiro_5.png",
+        "cavaleiro_6.png"
       ]
     },
-    "ladino": {
+    "mago_do_tempo": {
       "quadros": 6,
       "duracoesMs": [
         100,
@@ -170,32 +170,12 @@
       ],
       "tamanho": 32,
       "arquivos": [
-        "ladino_1.png",
-        "ladino_2.png",
-        "ladino_3.png",
-        "ladino_4.png",
-        "ladino_5.png",
-        "ladino_6.png"
-      ]
-    },
-    "clerigo": {
-      "quadros": 6,
-      "duracoesMs": [
-        100,
-        100,
-        100,
-        100,
-        100,
-        100
-      ],
-      "tamanho": 32,
-      "arquivos": [
-        "clerigo_1.png",
-        "clerigo_2.png",
-        "clerigo_3.png",
-        "clerigo_4.png",
-        "clerigo_5.png",
-        "clerigo_6.png"
+        "mago_do_tempo_1.png",
+        "mago_do_tempo_2.png",
+        "mago_do_tempo_3.png",
+        "mago_do_tempo_4.png",
+        "mago_do_tempo_5.png",
+        "mago_do_tempo_6.png"
       ]
     }
   },

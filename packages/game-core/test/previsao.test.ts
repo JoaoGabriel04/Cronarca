@@ -77,7 +77,7 @@ describe('previsão no cliente', () => {
 
   it('contratar, partir em expedição e ascender esperam o servidor (sorteiam) e não mudam nada', () => {
     const v = visaoDoCliente(novo());
-    const acoes: Acao[] = [{ tipo: 'contratar' }, { tipo: 'ascender' }, { tipo: 'partir_expedicao', destino: 'floresta_lobos', grupo: [v.aventureiros[0]!.id] }];
+    const acoes: Acao[] = [{ tipo: 'contratar', classe: 'lanceiro' }, { tipo: 'ascender' }, { tipo: 'partir_expedicao', destino: 'floresta_lobos', grupo: [v.aventureiros[0]!.id] }];
     for (const acao of acoes) {
       expect(precisaDoServidor(acao)).toBe(true);
       const r = preverAcao(v, acao, T0);

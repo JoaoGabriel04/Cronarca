@@ -1,7 +1,7 @@
 // Texto de cada recusa do servidor (o código vem de ErroAcao, no game-core).
 // Puro: usado pelo aviso e testado sem navegador.
 
-import type { ErroAcao } from '@cronarca/game-core';
+import { TEXTOS_QG, type ErroAcao } from '@cronarca/game-core';
 
 const TEXTOS: Record<ErroAcao, string> = {
   slot_ocupado: 'Esta construção já está em obra.',
@@ -32,5 +32,7 @@ const TEXTOS: Record<ErroAcao, string> = {
 
 /** Texto da recusa; um código desconhecido vira a mensagem genérica. */
 export function textoDaRecusa(erro: string | undefined): string {
+  // Cliente antigo: a ação mudou de forma (Portão 22, contratar leva a classe) e o servidor a recusa como inválida.
+  if (erro === 'acao_invalida') return TEXTOS_QG.atualizePagina;
   return (erro && TEXTOS[erro as ErroAcao]) || 'O servidor recusou a ação.';
 }

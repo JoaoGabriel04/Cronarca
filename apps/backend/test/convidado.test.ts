@@ -125,7 +125,7 @@ describe('ranking e convidado', () => {
     await prisma.gameState.update({ where: { userId }, data: { estado: e as never } });
   }
   const acao = (a: ReturnType<typeof agente>, tipo: string, rev: number) =>
-    a.post('/game/actions').send({ tipo, dados: {}, idempotencyKey: randomUUID(), revEsperada: rev });
+    a.post('/game/actions').send({ tipo, dados: tipo === 'contratar' ? { classe: 'lanceiro' } : {}, idempotencyKey: randomUUID(), revEsperada: rev });
 
   it('um marco do convidado (ascensão) não cria entrada no ranking', async () => {
     const relogio = criarRelogio();

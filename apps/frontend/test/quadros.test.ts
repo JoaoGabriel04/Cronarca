@@ -16,7 +16,7 @@ describe('quadros.json e os arquivos', () => {
         expect({ largura: b.readUInt32BE(16), altura: b.readUInt32BE(20) }, q).toEqual({ largura: a.tamanho, altura: a.tamanho });
       }
     }
-    expect(todosOsQuadros()).toHaveLength(212); // Portão 21: quartel (4), ruinas_qg de 48 px (2) e de 64 px (4)
+    expect(todosOsQuadros()).toHaveLength(206); // Portão 21: +10 (quartel e ruínas); Portão 22: +18 das classes novas, −24 das antigas
   });
 
   it('o pé (última linha opaca) é o mesmo em todos os quadros; só o impacto do lenhador e do mineiro desce 1 px', () => {

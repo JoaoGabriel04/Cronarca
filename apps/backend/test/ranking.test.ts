@@ -118,7 +118,7 @@ describe('marcos e tempo jogado', () => {
     relogio.avancar(30 * SEG);
     await a.get('/game/state');
     relogio.avancar(30 * SEG);
-    expect((await acao('contratar', {}, 0)).status).toBe(200);
+    expect((await acao('contratar', { classe: 'lanceiro' }, 0)).status).toBe(200);
     expect(await tempo()).toBe(60 * SEG);
 
     relogio.avancar(RANKING.janelaAtividadeMs + 1); // voltou de uma pausa: não conta
@@ -149,7 +149,7 @@ describe('marcos e tempo jogado', () => {
     await prisma.gameState.update({ where: { userId }, data: { estado: e as never } });
 
     relogio.avancar(2 * MIN);
-    expect((await acao('contratar', {}, 0)).status).toBe(200);
+    expect((await acao('contratar', { classe: 'lanceiro' }, 0)).status).toBe(200);
     expect((await prisma.rankingEntry.findUniqueOrThrow({ where: { userId } })).marcoEm).toEqual(criadoEm);
 
     relogio.avancar(MIN);

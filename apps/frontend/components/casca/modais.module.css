@@ -1248,3 +1248,51 @@
     width: auto;
   }
 }
+
+/* Contratar (Portão 22): quatro cartões de classe. */
+.classes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.classe {
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.classe:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.classe:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.classe:focus-visible {
+  outline: 3px solid var(--ouro-claro);
+  outline-offset: 2px;
+}
+
+.classeTopo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+}
+
+.classeTexto {
+  font-size: 14px;
+  color: #6e5a40;
+}
+
+@media (max-width: 600px) {
+  .classes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

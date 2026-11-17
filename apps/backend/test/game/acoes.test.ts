@@ -44,7 +44,7 @@ describe('POST /game/actions: aplicar e recusar', () => {
     relogio.avancar(5 * MIN);
     await acao('construir', { slot: 'pedreira_1' }, 0);
 
-    const res = await acao('contratar', {}, 0);
+    const res = await acao('contratar', { classe: 'lanceiro' }, 0);
     expect(res.status).toBe(409);
     expect(res.body).toMatchObject({ erro: 'rev_desatualizada', rev: 1 });
     expect(res.body.estado.slots.pedreira_1.obraAte).not.toBeNull();
@@ -100,7 +100,7 @@ describe('POST /game/actions: idempotência e concorrência', () => {
     const respostas = await Promise.all([
       acao('construir', { slot: 'pedreira_1' }, 0),
       acao('construir', { slot: 'serraria_2' }, 0),
-      acao('contratar', {}, 0),
+      acao('contratar', { classe: 'lanceiro' }, 0),
     ]);
     const status = respostas.map((r) => r.status).sort();
     expect(status.filter((s) => s === 200)).toHaveLength(1);
@@ -155,13 +155,13 @@ describe('POST /game/actions: entrada', () => {
     const { a, relogio, acao } = await jogador();
     await a.get('/game/state');
     const N = CONFIG_JOGO.limiteAcoesPorJanela;
-    for (let i = 0; i < N; i++) expect((await acao('contratar', {}, 99)).status).toBe(409);
-    const bloqueada = await acao('contratar', {}, 99);
+    for (let i = 0; i < N; i++) expect((await acao('contratar', { classe: 'lanceiro' }, 99)).status).toBe(409);
+    const bloqueada = await acao('contratar', { classe: 'lanceiro' }, 99);
     expect(bloqueada.status).toBe(429);
     expect(bloqueada.headers['retry-after']).toBeDefined();
 
     relogio.avancar(CONFIG_JOGO.limiteAcoesJanelaMs);
-    expect((await acao('contratar', {}, 99)).status).toBe(409);
+    expect((await acao('contratar', { classe: 'lanceiro' }, 99)).status).toBe(409);
   });
 });
 

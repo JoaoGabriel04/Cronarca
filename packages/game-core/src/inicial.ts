@@ -28,6 +28,9 @@ export interface OpcoesInicio {
   cronica?: EstadoJogo['cronica'];
   /** Quartel General (Portão 21): atravessa a ascensão. Conta nova: oculto, desde o início. */
   qg?: EstadoJogo['qg'];
+  /** Aventureiros alojados no QG que atravessam a ascensão (Portão 22), com o contador de ids que continua o do ciclo anterior. */
+  aventureiros?: EstadoJogo['aventureiros'];
+  proximoId?: number;
 }
 
 export function sortearIntervaloEventoMs(s: Sorteador): number {
@@ -67,9 +70,9 @@ export function estadoInicial(op: OpcoesInicio): EstadoJogo {
     aldeoes: ESTADO_INICIAL_CICLO.aldeoes.map((oficio) => ({ oficio })),
     aldeoesConfig: { ...CONFIG_ALDEOES_INICIAL },
     progressoAldeaoMs: 0,
-    aventureiros: [],
+    aventureiros: structuredClone(op.aventureiros ?? []),
     contratacoes: 0,
-    proximoId: 1,
+    proximoId: op.proximoId ?? 1,
     expedicoes: [],
     pesquisas: { concluidas: [], atual: null },
     objetivos: { criptaVencida: false },
@@ -79,7 +82,7 @@ export function estadoInicial(op: OpcoesInicio): EstadoJogo {
     cliques: { usuario: { fichas: FORMULAS.clique.porSegundoUsuario * 1000, em: op.agora }, objetos: {} },
     cronica: structuredClone(op.cronica ?? []),
     // O prólogo vale desde a conta criada: entra sem linha na Crônica.
-    qg: structuredClone(op.qg ?? { estado: 'oculto', desde: op.agora }),
+    qg: structuredClone(op.qg ?? { estado: 'oculto', desde: op.agora, nivel: 0 }),
     diario: [...(op.diario ?? ['prologo'])],
     prologoVisto: op.prologoVisto ?? false,
     relatorios: [],
@@ -95,7 +98,8 @@ export function estadoInicial(op: OpcoesInicio): EstadoJogo {
     e.recursos[r] = Math.min(valor, teto[r]);
   }
 
-  for (let i = 0; i < ESTADO_INICIAL_CICLO.aventureiros; i++) {
+  // O soldado inicial só nasce se ninguém atravessou a ascensão (Portão 22): sem herói grátis a cada recomeço.
+  for (let i = 0; i < (e.aventureiros.length === 0 ? ESTADO_INICIAL_CICLO.aventureiros : 0); i++) {
     e.aventureiros.push({
       id: `a${e.proximoId++}`,
       nome: sortearNome(s, e.aventureiros.map((a) => a.nome)),
@@ -106,6 +110,7 @@ export function estadoInicial(op: OpcoesInicio): EstadoJogo {
       armadura: 0,
       estado: 'na_vila',
       feridoAte: null,
+      alojado: false,
     });
   }
 

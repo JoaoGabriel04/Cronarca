@@ -38,7 +38,7 @@ describe('telas: Heróis', () => {
     const g = guilda(e);
     expect(g.vagas).toBe('1 / 4');
     expect(g.resumo.proximaVaga).toBe('Construir a Taverna');
-    expect(g.resumo.consumo).toBe('−0,08/s');
+    expect(g.resumo.consumo).toBe('−0,03/s');
     e.recursos.ouro = 0;
     expect(guilda(e).contratar).toMatchObject({ pode: false, motivo: 'Recursos insuficientes' });
     e.slots.taverna_1.nivel = 2;

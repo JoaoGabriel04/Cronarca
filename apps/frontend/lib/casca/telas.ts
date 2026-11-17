@@ -2,9 +2,9 @@
 // das regras do game-core; nada de número fixo aqui. Funções puras.
 
 import {
-  calcularTaxas, chanceExitoBp, custoContratar, custoEquipamento, custoReliquia, DESTINO_QG, DESTINOS, DESTINOS_IDS, destinoAberto, destinoVisivel, duracaoExpedicaoMs,
+  aventureirosNaTaverna, calcularTaxas, capacidadeAlojamento, CLASSES, chanceExitoBp, consumoComidaAventureiros, ordemDeAtravessar, VENCE, custoContratar, custoEquipamento, custoReliquia, DESTINO_QG, DESTINOS, DESTINOS_IDS, destinoAberto, destinoVisivel, duracaoExpedicaoMs,
   ERAS, FALHA, FORMULAS, MICRO, perigoDestino, TEXTOS_FALHA, NIVEL_MAXIMO_CONSTRUCAO, NOMES_CLASSES, nivelReliquia, objetivosEra, OBJETIVOS_ERA_1, PESQUISAS,
-  poderAventureiro, RELIQUIAS, RELIQUIAS_IDS, SLOT_IDS, SLOTS, TAMANHO_MAXIMO_GRUPO, TEXTOS_QG, vagasGuilda,
+  poderAventureiro, QG, RELIQUIAS, RELIQUIAS_IDS, SLOT_IDS, SLOTS, TAMANHO_MAXIMO_GRUPO, TEXTOS_QG, vagasGuilda,
   type Classe, type DestinoId, type Recurso, type RefSprite, type ReliquiaId, type VisaoCliente,
 } from '@cronarca/game-core';
 import { formatarHora, formatarInteiro, formatarRestante, formatarTaxa, textoEra } from './dados';
@@ -44,6 +44,11 @@ export interface CartaHeroi {
   estado: EstadoHeroi;
   arma: Peca;
   armadura: Peca;
+  /** Mora no Quartel General (Portão 22): etiqueta "Alojado" e fora das vagas da Taverna. */
+  alojado: boolean;
+  /** Ícone da classe (icone-classe-<id>) e a linha "vence X · fraco contra Y". */
+  iconeClasse: string;
+  vantagem: string;
 }
 
 function estadoDoHeroi(a: VisaoCliente['aventureiros'][number], agora: number): EstadoHeroi {
@@ -72,7 +77,18 @@ export function cartasHerois(e: VisaoCliente, agora: number): CartaHeroi[] {
     estado: estadoDoHeroi(a, agora),
     arma: pecaDe(e, a, 'arma'),
     armadura: pecaDe(e, a, 'armadura'),
+    alojado: a.alojado,
+    iconeClasse: `icone-classe-${a.classe}`,
+    vantagem: vantagemDaClasse(a.classe),
   }));
+}
+
+/** "Vence Cavaleiro · fraco contra Arqueiro"; o Mago do Tempo é suporte, sem vantagem (dados do combate). */
+export function vantagemDaClasse(c: Classe): string {
+  const vence = VENCE[c];
+  const fraco = CLASSES.find((x) => VENCE[x] === c);
+  if (!vence || !fraco) return 'Suporte: atrasa os inimigos e acelera a tropa';
+  return `Vence ${NOMES_CLASSES[vence]} · fraco contra ${NOMES_CLASSES[fraco]}`;
 }
 
 export interface Guilda {
@@ -89,30 +105,85 @@ export interface Guilda {
 }
 
 /**
- * Cada aventureiro come comida: mostra o saldo de agora e o de depois da
- * contratação. Negativo vira alerta (com a comida em 0 a expedição não parte).
+ * Cada aventureiro come comida (curva C do Portão 22: cada um come base + crescimento × (n − 1)): mostra o saldo de agora
+ * e o de depois da contratação. Negativo vira alerta (com a comida em 0 a expedição não parte).
  */
 export function efeitoNaComida(e: VisaoCliente): { texto: string; alerta: boolean } {
+  const n = e.aventureiros.length;
   const agora = calcularTaxas(e).saldo.comida;
-  const depois = agora - Math.round(FORMULAS.consumo.comidaPorAventureiro * 1000);
-  const texto = `Cada um come ${decimal.format(FORMULAS.consumo.comidaPorAventureiro)} comida/s. Saldo de comida: ${formatarTaxa(agora)} → ${formatarTaxa(depois)}`;
+  const depois = agora - (consumoComidaAventureiros(n + 1) - consumoComidaAventureiros(n));
+  const cadaUm = consumoComidaAventureiros(n + 1) / (n + 1) / 1000;
+  const texto = `Com ${n + 1} aventureiros, cada um come ${decimal.format(cadaUm)} comida/s. Saldo de comida: ${formatarTaxa(agora)} → ${formatarTaxa(depois)}`;
   return depois < 0 ? { texto: `${texto}. Vai faltar comida: melhore a Casa antes.`, alerta: true } : { texto, alerta: false };
+}
+
+/** O que o botão do Quartel General faz: dica das Ruínas (ainda oculto), modal de reerguer (ruínas) ou a Tropa (reerguido). */
+export type CliqueQg = { tipo: 'dica'; texto: string } | { tipo: 'reerguer' } | { tipo: 'tropa' };
+
+export function cliqueDoQg(e: VisaoCliente): CliqueQg {
+  if (e.qg.estado === 'oculto') return { tipo: 'dica', texto: TEXTOS_QG.bloqueado };
+  if (e.qg.estado === 'ruinas') return { tipo: 'reerguer' };
+  return { tipo: 'tropa' };
+}
+
+export interface Alojamento {
+  /** QG reerguido: o Alojamento existe. */
+  disponivel: boolean;
+  capacidade: number;
+  ocupados: number;
+  /** "Alojamento 2 / 3" ou o aviso de bloqueado. */
+  linha: string;
+  /** Quem atravessaria o reset agora (os mais fortes, até a capacidade), por nome. */
+  atravessam: string[];
+  /** Há mais gente do que vagas: parte da guilda sairia no reset. */
+  excedente: boolean;
+}
+
+/** O Alojamento do QG: capacidade, quem já mora nele e quem atravessaria a ascensão (os mais fortes). */
+export function alojamento(e: VisaoCliente): Alojamento {
+  const capacidade = capacidadeAlojamento(e);
+  const disponivel = e.qg.estado === 'reerguido';
+  const ocupados = e.aventureiros.filter((a) => a.alojado).length;
+  const ordem = ordemDeAtravessar(e.aventureiros);
+  return {
+    disponivel,
+    capacidade,
+    ocupados,
+    linha: disponivel ? `${TEXTOS_QG.tituloAlojamento} ${ocupados} / ${capacidade}` : TEXTOS_QG.alojamentoBloqueado,
+    atravessam: disponivel ? ordem.slice(0, capacidade).map((a) => a.nome) : [],
+    excedente: disponivel && e.aventureiros.length > capacidade,
+  };
+}
+
+export interface Guilda {
+  vagas: string;
+  subtitulo: string;
+  contratar: {
+    custo: { recurso: Recurso; valor: string }[];
+    pode: boolean;
+    motivo: string | null;
+    /** Efeito na comida antes de contratar: "Saldo de comida: +0,07/s → −0,01/s". */
+    comida: { texto: string; alerta: boolean };
+  };
+  resumo: { poderTotal: number; vagas: string; consumo: string; proximaVaga: string; cabecalho: string };
+  alojamento: Alojamento;
 }
 
 export function guilda(e: VisaoCliente): Guilda {
   const vagas = vagasGuilda(e);
-  const n = e.aventureiros.length;
+  // Só quem não mora no QG ocupa vaga da Taverna (Portão 22).
+  const n = aventureirosNaTaverna(e);
   const custo = custoContratar(e.contratacoes);
   const cheia = n >= vagas;
   const pagavel = podePagar(e, custo);
-  const consumo = Math.round(FORMULAS.consumo.comidaPorAventureiro * 1000) * n;
+  const consumo = consumoComidaAventureiros(e.aventureiros.length);
   const taverna = SLOT_IDS.filter((id) => SLOTS[id].tipo === 'taverna');
   const nivelTaverna = Math.max(0, ...taverna.map((id) => e.slots[id].nivel));
   const proximaVaga =
     nivelTaverna === 0 ? 'Construir a Taverna' : nivelTaverna >= NIVEL_MAXIMO_CONSTRUCAO ? 'Taverna no nível máximo' : `Taverna nível ${nivelTaverna + 1}`;
   return {
     vagas: `${n} / ${vagas}`,
-    subtitulo: `${n} / ${vagas} vagas · consomem comida`,
+    subtitulo: `${n} / ${vagas} vagas da Taverna · consomem comida`,
     contratar: {
       custo: custoNaTela(custo),
       pode: !cheia && pagavel,
@@ -126,6 +197,44 @@ export function guilda(e: VisaoCliente): Guilda {
       proximaVaga,
       cabecalho: `${textoEra(e.era).split(' · ')[0]} · Ciclo ${e.ciclo}`,
     },
+    alojamento: alojamento(e),
+  };
+}
+
+// ---------- Contratar com classe (Portão 22) ----------
+
+export interface OpcaoClasse {
+  classe: Classe;
+  nome: string;
+  /** Ícone da classe (icone-classe-<id>) e sprite do herói. */
+  icone: string;
+  sprite: RefSprite;
+  vantagem: string;
+}
+
+export interface DadosContratar {
+  classes: OpcaoClasse[];
+  custo: { recurso: Recurso; valor: string; falta: boolean }[];
+  /** "2 / 4": quem ocupa vaga da Taverna e as vagas. */
+  vagas: string;
+  pode: boolean;
+  motivo: string | null;
+  comida: { texto: string; alerta: boolean };
+}
+
+/** O modal Contratar: as 4 classes (a escolha é do jogador), o custo de sempre, as vagas e o efeito na comida. */
+export function dadosContratar(e: VisaoCliente): DadosContratar {
+  const g = guilda(e);
+  const custo = custoContratar(e.contratacoes);
+  return {
+    classes: CLASSES.map((classe) => ({
+      classe, nome: NOMES_CLASSES[classe], icone: `icone-classe-${classe}`, sprite: { grupo: 'aventureiro', id: classe }, vantagem: vantagemDaClasse(classe),
+    })),
+    custo: (Object.entries(custo) as [Recurso, number][]).map(([recurso, v]) => ({ recurso, valor: formatarInteiro(v), falta: e.recursos[recurso] < v })),
+    vagas: g.vagas,
+    pode: g.contratar.pode,
+    motivo: g.contratar.motivo,
+    comida: g.contratar.comida,
   };
 }
 

@@ -80,7 +80,7 @@ export function conferirSave(save: SaveBruto, migrar: Migrador = migrarEstado): 
     return r;
   }
 
-  // 3. Aventureiros: mesmos ids, ordem, contagem e campos; só a classe muda (pelo mapeamento).
+  // 3. Aventureiros: mesmos ids, ordem, contagem e campos; só a classe muda (pelo mapeamento) e entra `alojado: false`.
   const antes = (origem.aventureiros ?? []) as Objeto[];
   const depois = valido.aventureiros as unknown as Objeto[];
   r.aventureiros = antes.length;
@@ -90,6 +90,11 @@ export function conferirSave(save: SaveBruto, migrar: Migrador = migrarEstado): 
     if (!b) return;
     for (const campo of new Set([...Object.keys(a), ...Object.keys(b)])) {
       if (campo === 'classe') continue;
+      // Esquema 11: o campo novo `alojado` entra como false (ninguém mora no QG ainda); nada mais muda.
+      if (campo === 'alojado' && save.versao_esquema < 11) {
+        if (b.alojado !== false) v(`aventureiro ${String(a.id)}: alojado deveria ser false depois da migração`);
+        continue;
+      }
       if (!igual(a[campo], b[campo])) v(`aventureiro ${String(a.id)}: campo ${campo} mudou (${JSON.stringify(a[campo])} → ${JSON.stringify(b[campo])})`);
     }
     const esperada = classeEsperada(a.classe, save.versao_esquema);
@@ -110,18 +115,30 @@ export function conferirSave(save: SaveBruto, migrar: Migrador = migrarEstado): 
       v(`falha ausente no save de origem: esperado 0, veio ${valido.falha}`);
     }
   }
-  // Save do esquema 8 ou 9: todo o resto também fica idêntico (muda a versão; no 8, as classes; no 9, entra o `qg`) e nada
-  // mais aparece de novo. Esquema 9 para 10 (Portão 21): o Quartel General começa oculto, desde o instante do save.
+  // Save do esquema 8 em diante: todo o resto também fica idêntico e nada mais aparece de novo. O que muda por etapa:
+  // 8 para 9 as classes (checado acima); 9 para 10 entra o `qg` (oculto, desde o instante do save); 10 para 11 cada
+  // aventureiro ganha `alojado: false` e o `qg` ganha o nível (1 se já estava reerguido, senão 0).
   if (save.versao_esquema >= 8) {
-    const mudam = new Set(['versao', ...(save.versao_esquema === 8 ? ['aventureiros'] : [])]);
-    const novos = save.versao_esquema < 10 ? ['qg'] : [];
+    const antes = save.versao_esquema;
+    const mudam = new Set(['versao', 'qg', ...(antes === 8 ? ['aventureiros'] : [])]);
     for (const campo of Object.keys(origem)) {
       if (mudam.has(campo)) continue;
-      if (!igual(origem[campo], (valido as unknown as Objeto)[campo])) v(`save do esquema ${save.versao_esquema}: campo ${campo} mudou`);
+      if (campo === 'aventureiros') {
+        const esperados = (origem.aventureiros as Objeto[]).map((a) => ({ ...a, ...(antes < 11 ? { alojado: false } : {}) }));
+        if (!igual(esperados, valido.aventureiros)) v(`save do esquema ${antes}: campo aventureiros mudou além de alojado: false`);
+        continue;
+      }
+      if (!igual(origem[campo], (valido as unknown as Objeto)[campo])) v(`save do esquema ${antes}: campo ${campo} mudou`);
     }
-    for (const campo of Object.keys(valido)) if (!(campo in origem) && !novos.includes(campo)) v(`save do esquema ${save.versao_esquema}: campo novo ${campo}`);
+    for (const campo of Object.keys(valido)) if (!(campo in origem) && !(campo === 'qg' && antes < 10)) v(`save do esquema ${antes}: campo novo ${campo}`);
   }
-  if (save.versao_esquema < 10 && !igual(valido.qg, { estado: 'oculto', desde: valido.t })) v(`qg depois da migração: esperado oculto desde ${valido.t}, veio ${JSON.stringify(valido.qg)}`);
+  if (save.versao_esquema < 11 && valido.aventureiros.some((a) => a.alojado !== false)) v('aventureiro alojado depois da migração: ninguém mora no QG ainda');
+  if (save.versao_esquema < 10) {
+    if (!igual(valido.qg, { estado: 'oculto', desde: valido.t, nivel: 0 })) v(`qg depois da migração: esperado oculto desde ${valido.t}, nível 0, veio ${JSON.stringify(valido.qg)}`);
+  } else if (save.versao_esquema === 10) {
+    const q = origem.qg as { estado: string; desde: number };
+    if (!igual(valido.qg, { ...q, nivel: q.estado === 'reerguido' ? 1 : 0 })) v(`qg depois da migração do esquema 10: esperado ${JSON.stringify({ ...q, nivel: q.estado === 'reerguido' ? 1 : 0 })}, veio ${JSON.stringify(valido.qg)}`);
+  }
 
   // 5. Expedições em andamento: o relatório que sai é o sorteado antes da migração, e a classe não influi nele.
   r.expedicoes = valido.expedicoes.length;

@@ -15,7 +15,7 @@ describe('POST /game/reset (apagar progresso)', () => {
   it('sem a palavra exata não apaga nada', async () => {
     const { a, acao, doBanco } = await jogador();
     await a.get('/game/state');
-    expect((await acao('contratar', {}, 0)).status).toBe(200);
+    expect((await acao('contratar', { classe: 'lanceiro' }, 0)).status).toBe(200);
     const antes = await doBanco();
     for (const corpo of [{}, { confirmacao: 'apagar' }, { confirmacao: 'APAGAR', extra: 1 }]) {
       const r = await a.post('/game/reset').send(corpo);
@@ -28,7 +28,7 @@ describe('POST /game/reset (apagar progresso)', () => {
   it('recomeça do estado inicial, sobe o rev e volta ao ranking do zero', async () => {
     const { a, userId, relogio, acao, doBanco } = await jogador();
     await a.get('/game/state');
-    expect((await acao('contratar', {}, 0)).status).toBe(200);
+    expect((await acao('contratar', { classe: 'lanceiro' }, 0)).status).toBe(200);
     await prisma.gameState.update({
       where: { userId },
       data: { estado: { ...(await doBanco()).estado, reliquias: { total: 9, gastas: 3, niveis: { legado: 1 } } } as never },
@@ -54,6 +54,6 @@ describe('POST /game/reset (apagar progresso)', () => {
     expect((await prisma.gameState.findUniqueOrThrow({ where: { userId } })).tempoJogado).toBe(0n);
 
     // Ações com o rev antigo viram conflito; com o novo, seguem.
-    expect((await acao('contratar', {}, 1)).status).toBe(409);
+    expect((await acao('contratar', { classe: 'lanceiro' }, 1)).status).toBe(409);
   });
 });

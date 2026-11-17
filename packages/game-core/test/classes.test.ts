@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { CLASSE_INICIAL, CLASSES, CLASSES_ANTIGAS, NOMES_CLASSES } from '../data/aventureiros.ts';
 import { aplicarAcao } from '../src/acoes.ts';
-import { animacao } from '../src/animacao.ts';
+import { animacao, EQUIVALENCIA_SPRITES } from '../src/animacao.ts';
 import { carregarEstado, esquemaEstado, VERSAO_ESQUEMA, type EstadoJogo } from '../src/estado.ts';
 import { liquidar } from '../src/liquidar.ts';
 import { preverEstado } from '../src/previsao.ts';
@@ -24,21 +24,27 @@ describe('classes do combate', () => {
     expect(novo().aventureiros[0]!.classe).toBe('lanceiro');
   });
 
-  it('arte antiga por mapeamento num só ponto: toda classe nova tem sprite', () => {
-    expect(animacao('aventureiro', 'lanceiro').chave).toBe('aventureiro/guerreiro');
-    expect(animacao('aventureiro', 'cavaleiro').chave).toBe('aventureiro/clerigo');
-    expect(animacao('aventureiro', 'mago_do_tempo').chave).toBe('aventureiro/mago');
-    expect(animacao('aventureiro', 'arqueiro').chave).toBe('aventureiro/arqueiro');
+  it('arte própria (Portão 22): toda classe tem o sprite com o próprio nome, sem equivalência com a arte antiga', () => {
+    for (const c of CLASSES) {
+      const a = animacao('aventureiro', c);
+      expect(a.chave).toBe(`aventureiro/${c}`);
+      expect(a.quadros).toHaveLength(6);
+      expect(a.tamanho).toBe(32);
+    }
+    expect(EQUIVALENCIA_SPRITES.aventureiro).toBeUndefined();
+    // As artes antigas saíram do catálogo.
+    for (const velho of ['guerreiro', 'clerigo', 'mago', 'ladino']) expect(() => animacao('aventureiro', velho)).toThrow();
   });
 
-  it('contratar sorteia entre as quatro', () => {
-    const vistas = new Set<string>();
-    for (let semente = 1; semente <= 40; semente++) {
-      const e = comRecursos(novo({ semente }), { ouro: 300, comida: 200 });
-      const r = aplicarAcao(e, { tipo: 'contratar' }, e.t);
-      if (r.ok) vistas.add(r.estado.aventureiros.at(-1)!.classe);
+  it('contratar leva a classe ESCOLHIDA (acabou o sorteio), qualquer que seja a semente', () => {
+    for (const classe of CLASSES) {
+      for (const semente of [1, 2, 3, 4, 5]) {
+        const e = comRecursos(novo({ semente }), { ouro: 300, comida: 200 });
+        const r = aplicarAcao(e, { tipo: 'contratar', classe }, e.t);
+        expect(r.ok).toBe(true);
+        expect(r.estado.aventureiros.at(-1)!.classe).toBe(classe);
+      }
     }
-    expect([...vistas].sort()).toEqual([...CLASSES].sort());
   });
 });
 

@@ -2795,3 +2795,79 @@
   font-size: 17px;
   color: #3a261c;
 }
+
+/* Portão 22: subabas da tela Heróis, Alojamento e linha de classe. */
+.subabas {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.subaba {
+  --borda: var(--contorno);
+  --fundo: #4a3220;
+  --realce: #6e482c;
+  --sombra: #2a1c12;
+  height: 40px;
+  padding: 0 16px;
+  white-space: nowrap;
+  font-family: var(--fonte-titulo), serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #e8dcc0;
+  cursor: pointer;
+}
+
+.subabaAtiva {
+  --fundo: #e8dcc0;
+  --realce: #f4ecd4;
+  --sombra: #c8b890;
+  color: #3a261c;
+  cursor: default;
+}
+
+.subaba:focus-visible {
+  outline: 3px solid var(--ouro-claro);
+  outline-offset: 2px;
+}
+
+.alojamento {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 4px;
+  height: auto;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+}
+
+.alojamento h3 {
+  margin: 0;
+}
+
+.etiquetas {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.classeLinha {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 13px;
+  color: #6e5a40;
+}
+
+.classeLinha img {
+  image-rendering: pixelated;
+}
+
+.colunaTropa {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}

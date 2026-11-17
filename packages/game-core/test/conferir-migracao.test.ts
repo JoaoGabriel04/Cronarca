@@ -123,9 +123,26 @@ describe('a verificação pega uma migração defeituosa', () => {
     const v9: SaveBruto = { id: 'sint-v9', versao_esquema: 9, estado: JSON.parse(JSON.stringify(sem)) };
     expect(conferirSave(v9).violacoes).toEqual([]);
     // Um migrador que descobre o QG sem ninguém ter ido lá é pego.
-    expect(conferirSave(v9, defeituoso((e) => { e.qg = { estado: 'ruinas', desde: e.t }; })).violacoes.join('\n')).toMatch(/qg depois da migração/);
+    expect(conferirSave(v9, defeituoso((e) => { e.qg = { estado: 'ruinas', desde: e.t, nivel: 0 }; })).violacoes.join('\n')).toMatch(/qg depois da migração/);
     // E um que mexe em outro campo do save do esquema 9.
     expect(conferirSave(v9, defeituoso((e) => { e.recursos.madeira += 1; })).violacoes.join('\n')).toMatch(/campo recursos mudou/);
+  });
+
+  it('save do esquema 10 (Portão 22): cada aventureiro ganha alojado false e o QG reerguido vira nível 1', () => {
+    const atual = carregarEstado(JSON.parse(JSON.stringify(porId('sint-05-pos-ascensao').estado)), porId('sint-05-pos-ascensao').versao_esquema);
+    const monta = (estado: 'oculto' | 'reerguido'): SaveBruto => {
+      const aventureiros = atual.aventureiros.map(({ alojado: _a, ...resto }) => resto);
+      const { qg: _q, ...sem } = { ...atual, versao: 10, aventureiros };
+      return { id: `sint-v10-${estado}`, versao_esquema: 10, estado: JSON.parse(JSON.stringify({ ...sem, qg: { estado, desde: atual.t } })) };
+    };
+    for (const estado of ['oculto', 'reerguido'] as const) {
+      expect(conferirSave(monta(estado)).violacoes, estado).toEqual([]);
+      const r = migrarEstado(JSON.parse(JSON.stringify(monta(estado).estado)), 10).estado as { qg: { nivel: number } };
+      expect(r.qg.nivel).toBe(estado === 'reerguido' ? 1 : 0);
+    }
+    // Um migrador que aloja alguém sem querer, ou erra o nível do QG, é pego.
+    expect(conferirSave(monta('oculto'), defeituoso((e) => { e.aventureiros[0].alojado = true; })).violacoes.join('\n')).toMatch(/alojado/);
+    expect(conferirSave(monta('reerguido'), defeituoso((e) => { e.qg.nivel = 0; })).violacoes.join('\n')).toMatch(/qg depois da migração do esquema 10/);
   });
 
   it('expedição em andamento que perde o resultado sorteado', () => {

@@ -5,12 +5,12 @@
 // aqui só o desenho e as intenções. Contratar, Partir e Ascender esperam o
 // servidor (sorteiam); melhorar equipamento e comprar relíquia são previstos.
 
-import type { Acao, DestinoId, VisaoCliente } from '@cronarca/game-core';
+import { TEXTOS_QG, type Acao, type Classe, type DestinoId, type VisaoCliente } from '@cronarca/game-core';
 import { Hourglass } from 'lucide-react';
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { linhasCronica } from '../../lib/casca/dados';
 import {
-  avisoExpedicao, caminhoDoTempo, cartasHerois, chipsGrupo, emAndamento, eraAtual, guilda, linhasDestinos, relatorios, reliquias,
+  avisoExpedicao, caminhoDoTempo, cartasHerois, dadosContratar, chipsGrupo, emAndamento, eraAtual, guilda, linhasDestinos, relatorios, reliquias,
   type CartaHeroi, type Peca,
 } from '../../lib/casca/telas';
 import { AJUDA } from '../../lib/casca/ajuda';
@@ -19,12 +19,13 @@ import { Ajuda } from './Ajuda';
 import estilos from './casca.module.css';
 import { Icone } from './Icone';
 import { Cronica } from './Paineis';
+import { ModalContratar } from './Modais';
 
 export interface AcoesTela {
   /** Ação prevista no cliente (equipamento, relíquia). */
   prevista: (acao: Acao) => void;
   /** Ação que espera o servidor (contratar, partir, ascender); o botão trava enquanto envia. */
-  servidor: (acao: Acao) => void;
+  servidor: (acao: Acao) => Promise<{ ok: boolean } | null>;
   enviando: boolean;
 }
 
@@ -109,8 +110,15 @@ function CartaoHeroi({ h, acoes }: { h: CartaHeroi; acoes: AcoesTela }) {
             <h3 className={estilos.heroiNome}>{h.nome}</h3>
             <p className={estilos.cartaoTexto}>{h.linha}</p>
           </div>
-          <span className={`${estilos.etiqueta} ${estilos[`etiqueta_${h.estado.tipo}`]}`}>{h.estado.texto}</span>
+          <span className={estilos.etiquetas}>
+            {h.alojado && <span className={`${estilos.etiqueta} ${estilos.etiquetaCiclo}`}>{TEXTOS_QG.etiquetaAlojado}</span>}
+            <span className={`${estilos.etiqueta} ${estilos[`etiqueta_${h.estado.tipo}`]}`}>{h.estado.texto}</span>
+          </span>
         </div>
+        <p className={estilos.classeLinha}>
+          <Icone nome={h.iconeClasse} tamanho={32} />
+          {h.vantagem}
+        </p>
         <p className={estilos.poder}>
           <Icone nome="icone-aventureiro" tamanho={16} />
           poder {h.poder}
@@ -124,38 +132,96 @@ function CartaoHeroi({ h, acoes }: { h: CartaHeroi; acoes: AcoesTela }) {
   );
 }
 
+type SubAba = 'tropa' | 'mesa' | 'enfermaria';
+const SUBABAS: { id: SubAba; rotulo: string }[] = [
+  { id: 'tropa', rotulo: 'Tropa' },
+  { id: 'mesa', rotulo: 'Mesa de Guerra' },
+  { id: 'enfermaria', rotulo: 'Enfermaria' },
+];
+
 export function TelaHerois({ estado, agora, acoes }: { estado: VisaoCliente; agora: number; acoes: AcoesTela }) {
   const g = guilda(estado);
   const herois = cartasHerois(estado, agora);
+  const [sub, setSub] = useState<SubAba>('tropa');
+  const [contratando, setContratando] = useState(false);
+  const alojados = herois.filter((h) => h.alojado);
+  const naTaverna = herois.filter((h) => !h.alojado);
+  const aloj = g.alojamento;
+  const contratar = (classe: Classe) => {
+    void acoes.servidor({ tipo: 'contratar', classe }).then((d) => {
+      if (d?.ok) setContratando(false);
+    });
+  };
   return (
     <>
       <div className={estilos.principal}>
-        <Painel
-          titulo="Guilda"
-          subtitulo={g.subtitulo}
-          extra={
-            <div className={estilos.contratar}>
-              <button
-                type="button"
-                className={`caixa botao botao-dourado ${estilos.botaoCasca}`}
-                disabled={!g.contratar.pode || acoes.enviando}
-                title={g.contratar.motivo ?? undefined}
-                onClick={() => acoes.servidor({ tipo: 'contratar' })}
-              >
-                {acoes.enviando ? 'Contratando...' : 'Contratar aventureiro'}
-              </button>
-              <Custos itens={g.contratar.custo} />
-              <p className={`${estilos.efeitoComida} ${g.contratar.comida.alerta ? estilos.efeitoComidaAlerta : ''}`}>{g.contratar.comida.texto}</p>
-            </div>
-          }
-        >
-          <Ajuda rotulo={AJUDA.aventureiros.rotulo} texto={AJUDA.aventureiros.texto} />
-          <ul className={estilos.lista}>
-            {herois.map((h) => (
-              <CartaoHeroi key={h.id} h={h} acoes={acoes} />
-            ))}
-          </ul>
-        </Painel>
+        <div className={estilos.colunaTropa}>
+        <div className={estilos.subabas} role="tablist" aria-label="Seções da tropa">
+          {SUBABAS.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              role="tab"
+              aria-selected={sub === s.id}
+              className={`caixa ${estilos.subaba} ${sub === s.id ? estilos.subabaAtiva : ''}`}
+              onClick={() => setSub(s.id)}
+            >
+              {s.rotulo}
+            </button>
+          ))}
+        </div>
+        {sub === 'tropa' && (
+          <Painel
+            titulo="Guilda"
+            subtitulo={g.subtitulo}
+            extra={
+              <div className={estilos.contratar}>
+                <button
+                  type="button"
+                  className={`caixa botao botao-dourado ${estilos.botaoCasca}`}
+                  disabled={!g.contratar.pode}
+                  title={g.contratar.motivo ?? undefined}
+                  onClick={() => setContratando(true)}
+                >
+                  Contratar aventureiro
+                </button>
+                <Custos itens={g.contratar.custo} />
+                <p className={`${estilos.efeitoComida} ${g.contratar.comida.alerta ? estilos.efeitoComidaAlerta : ''}`}>{g.contratar.comida.texto}</p>
+              </div>
+            }
+          >
+            <Ajuda rotulo={AJUDA.aventureiros.rotulo} texto={AJUDA.aventureiros.texto} />
+            <section className={`caixa ${estilos.cartao} ${estilos.alojamento}`} aria-label={TEXTOS_QG.tituloAlojamento}>
+              <h3 className={estilos.heroiNome}>{aloj.linha}</h3>
+              {aloj.disponivel ? (
+                <>
+                  <p className={estilos.cartaoTexto}>
+                    {TEXTOS_QG.atravessam}: {aloj.atravessam.length > 0 ? aloj.atravessam.join(', ') : 'ninguém ainda'}
+                    {aloj.excedente ? '. Os demais deixam a guilda.' : '.'}
+                  </p>
+                </>
+              ) : (
+                <p className={estilos.cartaoTexto}>{TEXTOS_QG.alojamentoBloqueado}</p>
+              )}
+            </section>
+            <ul className={estilos.lista}>
+              {[...alojados, ...naTaverna].map((h) => (
+                <CartaoHeroi key={h.id} h={h} acoes={acoes} />
+              ))}
+            </ul>
+          </Painel>
+        )}
+        {sub === 'mesa' && (
+          <Painel titulo="Mesa de Guerra" subtitulo="Em breve">
+            <p className={estilos.cartaoTexto}>{TEXTOS_QG.mesaDeGuerraEmBreve}</p>
+          </Painel>
+        )}
+        {sub === 'enfermaria' && (
+          <Painel titulo="Enfermaria" subtitulo="Em breve">
+            <p className={estilos.cartaoTexto}>{TEXTOS_QG.enfermariaEmBreve}</p>
+          </Painel>
+        )}
+        </div>
       </div>
       <aside className={estilos.lateral}>
         <Painel titulo="Resumo da guilda" subtitulo={g.resumo.cabecalho}>
@@ -163,7 +229,7 @@ export function TelaHerois({ estado, agora, acoes }: { estado: VisaoCliente; ago
             {[
               { icone: 'icone-expedicao', rotulo: 'Poder total', valor: String(g.resumo.poderTotal) },
               // Vagas são de aventureiro (o ícone de aldeão confundia com os aldeões da vila).
-              { icone: 'icone-aventureiro', rotulo: 'Vagas na guilda', valor: g.resumo.vagas },
+              { icone: 'icone-aventureiro', rotulo: 'Vagas na Taverna', valor: g.resumo.vagas },
               { icone: 'icone-comida', rotulo: 'Consumo de comida', valor: g.resumo.consumo },
               { icone: 'icone-construir', rotulo: 'Próxima vaga', valor: g.resumo.proximaVaga },
             ].map((l) => (
@@ -179,6 +245,7 @@ export function TelaHerois({ estado, agora, acoes }: { estado: VisaoCliente; ago
           <Cronica linhas={linhasCronica(estado, 8)} />
         </Painel>
       </aside>
+      {contratando && <ModalContratar dados={dadosContratar(estado)} enviando={acoes.enviando} aoEscolher={contratar} aoFechar={() => setContratando(false)} />}
     </>
   );
 }

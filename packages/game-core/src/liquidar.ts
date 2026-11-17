@@ -92,7 +92,7 @@ function resolverExpedicao(e: EstadoJogo, exp: Expedicao) {
   // Ruínas do Quartel General (Portão 21): a descoberta NÃO é sorteada. Voltando o grupo, vitória ou recuo, as Ruínas
   // aparecem; o sorteio vale só para o saque e os feridos.
   const descobre = exp.destino === DESTINO_QG && e.qg.estado === 'oculto';
-  if (descobre) e.qg = { estado: 'ruinas', desde: exp.fim };
+  if (descobre) e.qg = { ...e.qg, estado: 'ruinas', desde: exp.fim };
   if (resultado.vitoria) {
     const entrou = receber(e, resultado.saque);
     relatar(entrou);

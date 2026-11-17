@@ -87,24 +87,24 @@ describe('guilda', () => {
 
   it('contratar cobra 40 × 1,58^contratações, sorteia nome sem repetir e respeita as vagas', () => {
     let e = comRecursos(novo(), { ouro: 300, comida: 200 });
-    e = fazer(e, { tipo: 'contratar' });
+    e = fazer(e, { tipo: 'contratar', classe: 'lanceiro' });
     expect(e.recursos.ouro).toBe(u(260));
     expect(e.recursos.comida).toBe(u(180));
-    e = fazer(e, { tipo: 'contratar' });
+    e = fazer(e, { tipo: 'contratar', classe: 'lanceiro' });
     expect(e.recursos.ouro).toBe(u(197)); // 63
-    e = fazer(e, { tipo: 'contratar' }); // 100
+    e = fazer(e, { tipo: 'contratar', classe: 'lanceiro' }); // 100
     expect(e.aventureiros).toHaveLength(4);
     expect(e.contratacoes).toBe(3);
     const nomes = e.aventureiros.map((a) => a.nome);
     expect(new Set(nomes).size).toBe(4);
     for (const n of nomes) expect(NOMES_AVENTUREIROS).toContain(n);
-    recusar(e, { tipo: 'contratar' }, 'guilda_cheia');
+    recusar(e, { tipo: 'contratar', classe: 'lanceiro' }, 'guilda_cheia');
   });
 
   it('Linhagem Heroica: novos aventureiros chegam um nível acima por nível', () => {
     const e = comRecursos(novo(), { ouro: 100, comida: 100 });
     e.reliquias = { total: 20, gastas: 16, niveis: { linhagem_heroica: 2 } };
-    expect(fazer(e, { tipo: 'contratar' }).aventureiros.at(-1)!.nivel).toBe(3);
+    expect(fazer(e, { tipo: 'contratar', classe: 'lanceiro' }).aventureiros.at(-1)!.nivel).toBe(3);
   });
 
   it('melhorar arma e armadura, até 6, fora de expedição', () => {
@@ -182,7 +182,7 @@ describe('expedições', () => {
   it('saque na faixa do destino, com +10% por aventureiro extra', () => {
     for (let semente = 1; semente <= 200; semente++) {
       const e = comRecursos(novo({ semente }), { ouro: 300, comida: 200 });
-      const g = fazer(fazer(e, { tipo: 'contratar' }), { tipo: 'contratar' });
+      const g = fazer(fazer(e, { tipo: 'contratar', classe: 'lanceiro' }), { tipo: 'contratar', classe: 'lanceiro' });
       const d = fazer(g, { tipo: 'partir_expedicao', destino: 'floresta_lobos', grupo: g.aventureiros.map((a) => a.id) });
       const r = Object.values(d.segredo.resultados)[0]!;
       if (!r.vitoria) continue;

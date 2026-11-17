@@ -158,7 +158,7 @@ describe('esquema 7 (Falha)', () => {
     const carregado = carregarEstado(JSON.parse(JSON.stringify(v6)), 6);
     expect(VERSAO_ESQUEMA).toBeGreaterThanOrEqual(7);
     // O Quartel General (esquema 10) entra oculto, desde o instante do save migrado.
-    expect(carregado).toEqual({ ...atual, versao: VERSAO_ESQUEMA, falha: 0, prologoVisto: true, qg: { estado: 'oculto', desde: atual.t } });
+    expect(carregado).toEqual({ ...atual, versao: VERSAO_ESQUEMA, falha: 0, prologoVisto: true, qg: { estado: 'oculto', desde: atual.t, nivel: 0 } });
     // Mesmo quem já ascendeu (ciclo 5) começa na Falha 0.
     const ciclo5 = carregarEstado(JSON.parse(JSON.stringify({ ...v6, ciclo: 5 })), 6);
     expect(ciclo5.falha).toBe(0);

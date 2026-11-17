@@ -6,7 +6,7 @@
 // ganho por clique.
 
 import { TEXTOS_CATALOGO, type Recurso } from '@cronarca/game-core';
-import { Hammer } from 'lucide-react';
+import { Castle, Hammer } from 'lucide-react';
 import { gsap } from 'gsap';
 import { useEffect, useRef } from 'react';
 import type { ChipRecurso } from '../../lib/casca/dados';
@@ -38,6 +38,8 @@ export interface PropsHud {
   /** Botão Pesquisa (e o chip de Saber): abre o modal de Pesquisa; o selo conta as que dá para começar. */
   aoPesquisar: () => void;
   seloPesquisa: number;
+  /** Botão do Quartel General (Portão 22): dica, reerguer ou Tropa, conforme o estado dele. */
+  aoQuartel: () => void;
   /** Diário (Portão 16): no HUD do desktop; abaixo de 1024 px fica na faixa do Objetivo. */
   aoDiario: () => void;
   novosDiario: number;
@@ -90,7 +92,7 @@ export function SeloNumero({ n }: { n: number }) {
   );
 }
 
-export function Hud({ era, chips, pulso, aoSalvar, salvando, aoConfigurar, aoRanking, aoConstruir, selo, aoPesquisar, seloPesquisa, aoDiario, novosDiario }: PropsHud) {
+export function Hud({ era, chips, pulso, aoSalvar, salvando, aoConfigurar, aoRanking, aoConstruir, selo, aoPesquisar, seloPesquisa, aoQuartel, aoDiario, novosDiario }: PropsHud) {
   const refs = useRef<Partial<Record<Recurso, HTMLElement | null>>>({});
 
   useEffect(() => {
@@ -149,6 +151,9 @@ export function Hud({ era, chips, pulso, aoSalvar, salvando, aoConfigurar, aoRan
           </button>
           {selo > 0 && <SeloNumero n={selo} />}
         </span>
+        <button type="button" className={`caixa ${estilos.botaoHud}`} onClick={aoQuartel} aria-label="Quartel General" title="Quartel General">
+          <Castle size={24} strokeWidth={2.5} aria-hidden="true" />
+        </button>
         <span className={`${estilos.comSelo} ${estilos.pesquisaHud}`}>
           <button
             type="button"

@@ -59,7 +59,7 @@ describe('o destino das Ruínas do Quartel General (dados)', () => {
 describe('descoberta: concluir a expedição sempre revela as Ruínas', () => {
   it('começa oculto e o destino está aberto', () => {
     const e = novo();
-    expect(e.qg).toEqual({ estado: 'oculto', desde: T0 });
+    expect(e.qg).toEqual({ estado: 'oculto', desde: T0, nivel: 0 });
     expect(destinoAberto(e, DESTINO_QG)).toBe(true);
     expect(destinoVisivel(e, DESTINO_QG)).toBe(true);
   });
@@ -74,7 +74,7 @@ describe('descoberta: concluir a expedição sempre revela as Ruínas', () => {
       expect(antes.qg.estado).toBe('oculto'); // ainda a caminho
       expect(destinoVisivel(antes, DESTINO_QG)).toBe(true);
       e = liquidar(e, fim + 1);
-      expect(e.qg).toEqual({ estado: 'ruinas', desde: fim });
+      expect(e.qg).toEqual({ estado: 'ruinas', desde: fim, nivel: 0 });
       expect(destinoVisivel(e, DESTINO_QG)).toBe(false);
       expect(destinoAberto(e, DESTINO_QG)).toBe(false);
       if (vitoria) {
@@ -100,7 +100,7 @@ describe('descoberta: concluir a expedição sempre revela as Ruínas', () => {
 
   it('dois grupos ao mesmo tempo: o segundo é recusado, e depois de descoberto ninguém mais parte para lá', () => {
     let e = novo();
-    e = ok(e, { tipo: 'contratar' }, T0);
+    e = ok(e, { tipo: 'contratar', classe: 'lanceiro' }, T0);
     const [a, b] = e.aventureiros.map((x) => x.id) as [string, string];
     e = ok(e, { tipo: 'partir_expedicao', destino: DESTINO_QG, grupo: [a] }, T0);
     const segundo = aplicarAcao(e, { tipo: 'partir_expedicao', destino: DESTINO_QG, grupo: [b] }, T0);
@@ -141,7 +141,7 @@ describe('reerguer o Quartel General', () => {
     e.recursos.pedra = micro(60);
     const r = aplicarAcao(e, reerguer, e.t);
     expect(r.ok).toBe(true);
-    expect(r.estado.qg).toEqual({ estado: 'reerguido', desde: e.t });
+    expect(r.estado.qg).toEqual({ estado: 'reerguido', desde: e.t, nivel: 1 });
     expect(r.estado.recursos.madeira).toBe(micro(120));
     expect(r.estado.recursos.pedra).toBe(micro(40));
     expect(textos(r.estado)).toContain(TEXTOS_QG.reerguidoCronica);
@@ -161,52 +161,53 @@ describe('reerguer o Quartel General', () => {
 });
 
 describe('estado persistente (esquema 10)', () => {
-  it('versão 10 e o campo qg é estrito', () => {
-    expect(VERSAO_ESQUEMA).toBe(10);
+  it('versão 11 e o campo qg é estrito (estado, desde e nível dentro da tabela do Alojamento)', () => {
+    expect(VERSAO_ESQUEMA).toBe(11);
     const e = novo();
-    expect(() => validarEstado({ ...e, qg: { estado: 'oculto', desde: T0, extra: 1 } })).toThrow();
-    expect(() => validarEstado({ ...e, qg: { estado: 'destruido', desde: T0 } })).toThrow();
+    expect(() => validarEstado({ ...e, qg: { estado: 'oculto', desde: T0, nivel: 0, extra: 1 } })).toThrow();
+    expect(() => validarEstado({ ...e, qg: { estado: 'destruido', desde: T0, nivel: 0 } })).toThrow();
+    expect(() => validarEstado({ ...e, qg: { estado: 'oculto', desde: T0, nivel: 99 } })).toThrow();
     const sem: Record<string, unknown> = { ...e };
     delete sem.qg;
     expect(() => validarEstado(sem)).toThrow();
   });
 
-  it('migração 9 para 10: o save antigo ganha qg oculto, desde o instante do save, e nada mais muda', () => {
+  it('migração 9 para 11: o save antigo ganha qg oculto (nível 0), desde o instante do save, e nada mais muda', () => {
     const atual = liquidar(novo(), T0 + 5 * MIN);
-    const { qg: _qg, ...v9 } = { ...atual, versao: 9 };
+    const { qg: _qg, ...v9 } = { ...atual, versao: 9, aventureiros: atual.aventureiros.map(({ alojado: _a, ...r }) => r) };
     const m = migrarEstado(JSON.parse(JSON.stringify(v9)), 9);
-    expect(m.versao).toBe(10);
+    expect(m.versao).toBe(11);
     const c = carregarEstado(JSON.parse(JSON.stringify(v9)), 9);
-    expect(c).toEqual({ ...atual, versao: 10, qg: { estado: 'oculto', desde: atual.t } });
-    // Idempotente: ler o que já está no 10 não muda nada.
-    expect(carregarEstado(JSON.parse(JSON.stringify(c)), 10)).toEqual(c);
+    expect(c).toEqual({ ...atual, versao: 11, qg: { estado: 'oculto', desde: atual.t, nivel: 0 } });
+    // Idempotente: ler o que já está no 11 não muda nada.
+    expect(carregarEstado(JSON.parse(JSON.stringify(c)), 11)).toEqual(c);
   });
 
-  it('um save de qualquer esquema antigo chega ao 10 com o QG oculto', () => {
+  it('um save de qualquer esquema antigo chega ao 11 com o QG oculto', () => {
     const atual = novo();
-    const { qg: _q, diario: _d, prologoVisto: _p, falha: _f, ...v6 } = { ...atual, versao: 6 };
+    const { qg: _q, diario: _d, prologoVisto: _p, falha: _f, ...v6 } = { ...atual, versao: 6, aventureiros: atual.aventureiros.map(({ alojado: _a, ...r }) => r) };
     const c = carregarEstado(JSON.parse(JSON.stringify(v6)), 6);
-    expect(c.versao).toBe(10);
+    expect(c.versao).toBe(11);
     expect(c.qg.estado).toBe('oculto');
   });
 
   it('o QG atravessa a ascensão (reerguido continua reerguido, com o mesmo desde)', () => {
     const e = novo();
-    e.qg = { estado: 'reerguido', desde: T0 + 3 * MIN };
+    e.qg = { estado: 'reerguido', desde: T0 + 3 * MIN, nivel: 1 };
     e.pesquisas.concluidas.push('carta_real');
     e.objetivos.criptaVencida = true;
     e.aldeoes = Array.from({ length: 40 }, () => ({ oficio: 'fazendeiro' as const }));
     const r = aplicarAcao(e, { tipo: 'ascender' }, T0 + 5 * MIN);
     expect(r.ok).toBe(true);
     expect(r.estado.ciclo).toBe(2);
-    expect(r.estado.qg).toEqual({ estado: 'reerguido', desde: T0 + 3 * MIN });
+    expect(r.estado.qg).toEqual({ estado: 'reerguido', desde: T0 + 3 * MIN, nivel: 1 });
     // Ruínas descobertas também passam.
-    const f = { ...e, qg: { estado: 'ruinas' as const, desde: T0 + MIN } };
+    const f = { ...e, qg: { estado: 'ruinas' as const, desde: T0 + MIN, nivel: 0 } };
     expect(aplicarAcao(f, { tipo: 'ascender' }, T0 + 5 * MIN).estado.qg.estado).toBe('ruinas');
   });
 
   it('o cliente vê o qg (nada de secreto nele)', () => {
-    expect(visaoDoCliente(novo()).qg).toEqual({ estado: 'oculto', desde: T0 });
+    expect(visaoDoCliente(novo()).qg).toEqual({ estado: 'oculto', desde: T0, nivel: 0 });
   });
 });
 
@@ -232,7 +233,7 @@ describe('Diário e dica do Sábio', () => {
     const dica = `O Sábio diz: ${TEXTOS_QG.dicaDoSabio.charAt(0).toLowerCase()}${TEXTOS_QG.dicaDoSabio.slice(1)}`;
     expect(proximoPasso({ ...visaoDoCliente(e), t: T0 + 7 * MIN + 59_000 }).sabio).not.toBe(dica);
     expect(proximoPasso({ ...visaoDoCliente(e), t: T0 + 8 * MIN }).sabio).toBe(dica);
-    const descoberto = { ...visaoDoCliente(e), t: T0 + 20 * MIN, qg: { estado: 'ruinas' as const, desde: T0 + 10 * MIN } };
+    const descoberto = { ...visaoDoCliente(e), t: T0 + 20 * MIN, qg: { estado: 'ruinas' as const, desde: T0 + 10 * MIN, nivel: 0 } };
     expect(proximoPasso(descoberto).sabio).not.toBe(dica);
   });
 });

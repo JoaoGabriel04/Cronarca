@@ -21,7 +21,11 @@ export const FORMULAS = {
     bonusPorOficio: 0.05,
   },
 
-  consumo: { comidaPorAldeao: 0.05, comidaPorAventureiro: 0.08 },
+  /**
+   * Comida por segundo. Aventureiro (Portão 22, curva C): cada um come `base + crescimento × (n − 1)`, com n o número
+   * de aventureiros (alojados ou não): simbólico com poucos e crescente com a guilda. Era 0,08 fixo por aventureiro.
+   */
+  consumo: { comidaPorAldeao: 0.05, comidaBaseAventureiro: 0.03, comidaCrescimentoAventureiro: 0.006 },
 
   guilda: { vagasBase: 4, vagasPorNivelDeTaverna: 1, vagasHospitalidadePorTaverna: 1 },
 

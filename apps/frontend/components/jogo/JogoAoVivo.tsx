@@ -15,7 +15,7 @@ import {
   cartasConstrucoes, cartasDestinos, chipsHud, dadosAldeoes, dadosMercador, linhasCronica, textoEra, textoSalvo, type Sincronia,
 } from '../../lib/casca/dados';
 import { dadosAscensao, dadosMelhorar, dadosPesquisa, dadosReerguerQg, linhasCatalogoTela, seloConstruir, seloPesquisa } from '../../lib/casca/modais';
-import { grupoSugerido, grupoValido } from '../../lib/casca/telas';
+import { cliqueDoQg, grupoSugerido, grupoValido } from '../../lib/casca/telas';
 import { enviar, ErroApi, mensagemDeErro } from '../../lib/api';
 import { textoDoDesfecho, useAvisar } from '../../lib/jogo/avisos';
 import { avisoLimiteCliques } from '../../lib/jogo/cliques';
@@ -261,9 +261,7 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
         setModal({ tipo: 'obra', slot: e.slot });
         return;
       case 'qgClicado':
-        // Ruínas: abre o modal de reerguer. Já reerguido: a tela da Tropa e a Mesa de Guerra chegam no Portão 22.
-        if (visivel.qg.estado === 'ruinas') setModal({ tipo: 'reerguerQg' });
-        else avisar(TEXTOS_QG.reerguidoAviso);
+        cliqueNoQuartel();
         return;
       case 'slotVazioClicado':
         // A12: o terreno vazio abre o catálogo já na linha daquele slot.
@@ -361,12 +359,23 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
     }
   };
 
+  /** Botão do HUD e toque no QG do mapa: dica das Ruínas, modal de reerguer ou a Tropa (aba Heróis, que abre na subaba Tropa). */
+  const cliqueNoQuartel = () => {
+    const c = cliqueDoQg(visivel);
+    if (c.tipo === 'dica') avisar(c.texto);
+    else if (c.tipo === 'reerguer') setModal({ tipo: 'reerguerQg' });
+    else {
+      setDestaque(null);
+      setAba('herois');
+    }
+  };
+
   const acoesTela: AcoesTela = {
     prevista: (acao: Acao) => {
       void enviarPrevista(acao);
     },
-    servidor: (acao: Acao) => {
-      void acaoServidor.executar(acao).then((d) => {
+    servidor: (acao: Acao) =>
+      acaoServidor.executar(acao).then((d) => {
         if (d?.ok && acao.tipo === 'partir_expedicao') setSelecionados([]);
         // Ascendeu: o ciclo novo começa na Vila.
         if (d?.ok && acao.tipo === 'ascender') {
@@ -374,8 +383,8 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
           setDestaque(null);
           setAba('vila');
         }
-      });
-    },
+        return d;
+      }),
     enviando: acaoServidor.enviando,
   };
 
@@ -440,6 +449,7 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
         selo={selo}
         aoPesquisar={() => setModal({ tipo: 'pesquisa' })}
         seloPesquisa={seloPesquisa(visivel)}
+        aoQuartel={cliqueNoQuartel}
         aoDiario={() => setModal({ tipo: 'diario' })}
         novosDiario={novosDiario}
       />

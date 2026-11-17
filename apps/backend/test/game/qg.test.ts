@@ -25,12 +25,12 @@ async function descobrir(j: Awaited<ReturnType<typeof jogador>>) {
 }
 
 describe('descoberta do Quartel General pelo servidor', () => {
-  it('o estado novo começa com o QG oculto, e o cliente vê só estado e desde', async () => {
+  it('o estado novo começa com o QG oculto, e o cliente vê estado, desde e nível', async () => {
     const { a } = await jogador();
     const r = await a.get('/game/state');
     expect(r.body.estado.qg).toMatchObject({ estado: 'oculto' });
-    expect(Object.keys(r.body.estado.qg).sort()).toEqual(['desde', 'estado']);
-    expect(r.body.estado.versao).toBe(10);
+    expect(Object.keys(r.body.estado.qg).sort()).toEqual(['desde', 'estado', 'nivel']);
+    expect(r.body.estado.versao).toBe(11);
   });
 
   it('a expedição conclui e revela as Ruínas, vitória ou recuo; o sorteio segue escondido', async () => {
@@ -166,7 +166,7 @@ describe('ascensão mantém o Quartel General', () => {
     await j.a.get('/game/state');
     const base = await j.doBanco();
     const pronto = structuredClone(base.estado);
-    pronto.qg = { estado: 'reerguido', desde: pronto.t };
+    pronto.qg = { estado: 'reerguido', desde: pronto.t, nivel: 1 };
     pronto.pesquisas.concluidas.push('carta_real');
     pronto.objetivos.criptaVencida = true;
     pronto.aldeoes = Array.from({ length: 40 }, () => ({ oficio: 'fazendeiro' as const }));

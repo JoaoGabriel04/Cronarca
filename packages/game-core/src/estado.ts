@@ -7,7 +7,7 @@ import { diarioDaMigracao } from './diario.ts';
 import { CONFIG_ALDEOES_INICIAL, OFICIOS_ALDEAO, POLITICAS_ALDEOES } from '../data/aldeoes.ts';
 import { CLASSES, CLASSES_ANTIGAS, OFICIOS } from '../data/aventureiros.ts';
 import { DESTINOS_IDS } from '../data/expedicoes.ts';
-import { QG_ESTADOS } from '../data/qg.ts';
+import { QG, QG_ESTADOS } from '../data/qg.ts';
 import { NIVEL_MAXIMO_CONSTRUCAO, TIPOS_CONSTRUCAO } from '../data/construcoes.ts';
 import { PESQUISAS_IDS } from '../data/pesquisas.ts';
 import { RECURSOS } from '../data/recursos.ts';
@@ -17,7 +17,7 @@ import { FORMULAS } from '../data/formulas.ts';
 import { VERSOES_MAPA } from '../data/mapa.ts';
 import { termosDoMercador } from './mercador.ts';
 
-export const VERSAO_ESQUEMA = 10;
+export const VERSAO_ESQUEMA = 11;
 
 const inteiro = z.number().int();
 const naoNegativo = inteiro.min(0);
@@ -60,6 +60,8 @@ const esquemaAventureiro = z.strictObject({
   armadura: inteiro.min(0).max(FORMULAS.aventureiro.equipamentoMaximo),
   estado: z.enum(['na_vila', 'em_expedicao', 'ferido']),
   feridoAte: instante.nullable(),
+  /** Esquema 11 (Portão 22): mora no Quartel General (não ocupa vaga da Taverna) e atravessa a ascensão. */
+  alojado: z.boolean(),
 });
 
 const esquemaExpedicao = z.strictObject({
@@ -145,9 +147,9 @@ export const esquemaEstado = z
     /**
      * Esquema 10 (Portão 21): o Quartel General. `oculto` até uma expedição às Ruínas voltar, depois `ruinas` (dá para
      * reerguer pagando) e `reerguido`. `desde` é o instante em que o estado atual começou (a dica do Sábio conta
-     * a partir dele). Atravessa a ascensão, como as relíquias e o Diário.
+     * a partir dele). Esquema 11: `nivel` (0 até reerguer, 1 depois) manda no Alojamento. Atravessa a ascensão.
      */
-    qg: z.strictObject({ estado: z.enum(QG_ESTADOS), desde: instante }),
+    qg: z.strictObject({ estado: z.enum(QG_ESTADOS), desde: instante, nivel: inteiro.min(0).max(QG.alojamentoPorNivel.length - 1) }),
     /** Esquema 8 (Portão 16): capítulos do Diário liberados, na ordem; atravessa a ascensão. */
     diario: z.array(z.enum(CAPITULOS_IDS)),
     /** Esquema 8: o prólogo já foi visto (não abre de novo, nem noutro aparelho). */
@@ -229,6 +231,13 @@ export function migrarEstado(bruto: unknown, versaoEsquema: number): { estado: u
     // Quartel General (Portão 21): ninguém o descobriu ainda; a dica do Sábio conta a partir deste save.
     estado = { ...estado, versao: 10, qg: { estado: 'oculto', desde: estado.t } };
     versao = 10;
+  }
+  if (versao === 10) {
+    // Alojamento (Portão 22): ninguém mora no QG ainda; o nível do QG vale 1 se ele já foi reerguido.
+    const qg = estado.qg as { estado: string; desde: number };
+    const aventureiros = (estado.aventureiros as Record<string, unknown>[]).map((a) => ({ ...a, alojado: false }));
+    estado = { ...estado, versao: 11, aventureiros, qg: { ...qg, nivel: qg.estado === 'reerguido' ? QG.nivelAoReerguer : 0 } };
+    versao = 11;
   }
   return { estado, versao };
 }

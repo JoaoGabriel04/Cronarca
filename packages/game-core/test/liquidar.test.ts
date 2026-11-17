@@ -20,8 +20,9 @@ describe('taxas', () => {
     const { producao, consumoComida, saldo } = calcularTaxas(novo());
     expect(producao.madeira).toBe(1050);
     expect(producao.comida).toBe(350);
-    expect(consumoComida).toBe(2 * 50 + 80);
-    expect(saldo.comida).toBe(170);
+    // Portão 22 (curva C): 1 aventureiro come 0,03/s (era 0,08 fixo por aventureiro).
+    expect(consumoComida).toBe(2 * 50 + 30);
+    expect(saldo.comida).toBe(350 - 130);
     expect(saldo.pedra).toBe(0);
   });
 
@@ -71,12 +72,12 @@ describe('liquidação', () => {
   it('comida zerada: ninguém morre, os bônus de ofício param e o próximo aldeão (Fazendeiro) segue a caminho', () => {
     const e = comRecursos(novo(), { comida: 1 });
     e.aldeoes = [{ oficio: 'lenhador' }, { oficio: 'lenhador' }]; // sem fazendeiro: só consumo
-    // consumo 180 milésimos/s: 1 unidade acaba em ceil(1_000_000 / 180) = 5556 ms
+    // consumo 130 milésimos/s (2 aldeões + 1 aventureiro): 1 unidade acaba em ceil(1_000_000 / 130) = 7693 ms
     const d = liquidar(e, T0 + 10 * SEG);
     expect(d.recursos.comida).toBe(0);
     expect(d.aldeoes).toHaveLength(2);
-    // 5556 ms a 1100 (2 lenhadores) + 4444 ms a 1000 (sem bônus)
-    expect(d.recursos.madeira).toBe(u(100) + 1100 * 5556 + 1000 * 4444);
+    // 7693 ms a 1100 (2 lenhadores) + 2307 ms a 1000 (sem bônus)
+    expect(d.recursos.madeira).toBe(u(100) + 1100 * 7693 + 1000 * 2307);
     // Com vaga, a chegada continua contando mesmo sem comida (quem chegar será Fazendeiro).
     expect(d.progressoAldeaoMs).toBe(10_000);
     expect(liquidar(e, T0 + 20 * SEG).aldeoes.at(-1)).toEqual({ oficio: 'fazendeiro' });
@@ -84,7 +85,7 @@ describe('liquidação', () => {
 
   it('comida voltando religa os bônus e a chegada de aldeões', () => {
     const e = comRecursos(novo(), { comida: 0 });
-    // saldo positivo (fazendeiro 350 − consumo 180): sai do zero no ms seguinte
+    // saldo positivo (fazendeiro 350 − consumo 130): sai do zero no ms seguinte
     const d = liquidar(e, T0 + 20 * SEG + 1);
     expect(d.recursos.comida).toBeGreaterThan(0);
     expect(d.aldeoes).toHaveLength(3);
@@ -94,7 +95,7 @@ describe('liquidação', () => {
     const e = comRecursos(novo(), { comida: 1 });
     e.aldeoes = [{ oficio: 'lenhador' }, { oficio: 'lenhador' }];
     e.slots.serraria_2 = { tipo: 'serraria', nivel: 0, obraAte: T0 + 3000 }; // termina antes da comida zerar
-    e.slots.armazem_1 = { tipo: 'armazem', nivel: 1, obraAte: T0 + 5556 }; // termina no mesmo ms em que zera
+    e.slots.armazem_1 = { tipo: 'armazem', nivel: 1, obraAte: T0 + 7693 }; // termina no mesmo ms em que zera (1 unidade a 130 milésimos/s)
     const umPasso = liquidar(e, T0 + 20 * SEG);
     let passos = e;
     for (let t = T0 + 1; t <= T0 + 20 * SEG; t += 997) passos = liquidar(passos, t);
@@ -104,8 +105,8 @@ describe('liquidação', () => {
     expect(umPasso.slots.serraria_2.nivel).toBe(1);
     expect(umPasso.slots.armazem_1.nivel).toBe(2);
     expect(umPasso.recursos.comida).toBe(0);
-    // 0–3000: 1 serraria a 1100; 3000–5556: 2 serrarias a 2200; depois 2000 sem bônus.
-    expect(umPasso.recursos.madeira).toBe(u(100) + 1100 * 3000 + 2200 * 2556 + 2000 * (20_000 - 5556));
+    // 0–3000: 1 serraria a 1100; 3000–7693: 2 serrarias a 2200; depois 2000 sem bônus.
+    expect(umPasso.recursos.madeira).toBe(u(100) + 1100 * 3000 + 2200 * 4693 + 2000 * (20_000 - 7693));
   });
 });
 
@@ -188,7 +189,7 @@ function acaoAleatoria(e: EstadoJogo, s: ReturnType<typeof criarSorteador>): Aca
     { tipo: 'construir', slot: s.escolher(SLOT_IDS) },
     { tipo: 'melhorar', slot: s.escolher(SLOT_IDS) },
     { tipo: 'pesquisar', pesquisa: s.escolher(PESQUISAS_IDS) },
-    { tipo: 'contratar' },
+    { tipo: 'contratar', classe: 'lanceiro' },
     { tipo: 'partir_expedicao', destino: s.escolher(DESTINOS_IDS), grupo: naVila.slice(0, s.inteiro(1, 3)) },
     { tipo: 'clicar', objeto: s.escolher(['serraria_1', 'serraria_2', 'pedreira_1']), quantidade: s.inteiro(1, 8) },
     { tipo: 'responder_mercador', aceitar: s.chance(5000) },

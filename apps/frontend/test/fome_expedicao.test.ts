@@ -45,18 +45,26 @@ describe('expedição: o motivo aparece em texto', () => {
 });
 
 describe('comida: aviso antes de contratar e no topo', () => {
-  it('contratar mostra o saldo de agora e o de depois; negativo vira alerta', () => {
+  it('contratar mostra o saldo de agora e o de depois (curva C: cada um come mais com a guilda maior); negativo vira alerta', () => {
     const e = comFome();
     e.recursos.comida = 50 * MICRO;
-    e.aventureiros.pop(); // 1 aventureiro: +0,07/s; com o 2º, −0,01/s (o caso do print)
+    e.aventureiros.pop(); // 1 aventureiro: +0,12/s; com o 2º (cada um 0,036), +0,078/s
     const r = efeitoNaComida(e);
-    expect(r.alerta).toBe(true);
-    expect(r.texto).toBe('Cada um come 0,08 comida/s. Saldo de comida: +0,07/s → −0,01/s. Vai faltar comida: melhore a Casa antes.');
+    expect(r.alerta).toBe(false);
+    expect(r.texto).toBe('Com 2 aventureiros, cada um come 0,04 comida/s. Saldo de comida: +0,12/s → +0,08/s');
+    // Com 4 na guilda o 5º faz faltar comida.
+    for (const id of ['b1', 'b2', 'b3']) e.aventureiros.push({ ...e.aventureiros[0]!, id, nome: id });
+    const apertado = efeitoNaComida(e);
+    expect(apertado.alerta).toBe(true);
+    expect(apertado.texto).toMatch(/^Com 5 aventureiros, cada um come 0,05 comida\/s\. Saldo de comida: −0,04\/s → −0,12\/s\. Vai faltar comida: melhore a Casa antes\.$/);
     expect(efeitoNaComida(novo()).alerta).toBe(false);
   });
 
   it('o chip de comida fica em alerta só com a comida em 0 e sem subir', () => {
-    expect(chipsHud(comFome()).find((c) => c.recurso === 'comida')!.alerta).toMatch(/^Sem comida/);
+    const faminta = comFome();
+    for (const id of ['b1', 'b2']) faminta.aventureiros.push({ ...faminta.aventureiros[0]!, id, nome: id }); // 4 comem 0,192/s: o saldo fica negativo
+    expect(chipsHud(faminta).find((c) => c.recurso === 'comida')!.alerta).toMatch(/^Sem comida/);
+    expect(chipsHud(comFome()).find((c) => c.recurso === 'comida')!.alerta).toBeNull();
     expect(chipsHud(novo()).find((c) => c.recurso === 'comida')!.alerta).toBeNull();
   });
 });

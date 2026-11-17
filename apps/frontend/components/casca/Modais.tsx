@@ -4,9 +4,10 @@
 // Configuracoes - Desktop"). Mostram o que lib/casca/modais calcula e só
 // emitem intenções; quem envia ao servidor é o JogoAoVivo.
 
-import type { PesquisaId } from '@cronarca/game-core';
+import type { Classe, PesquisaId } from '@cronarca/game-core';
 import { ArrowRight, Hourglass } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
+import type { DadosContratar } from '../../lib/casca/telas';
 import type { CartaPesquisa, CustoModal, DadosObra, DadosReerguerQg, dadosAscensao } from '../../lib/casca/modais';
 import { AVISO_CONVIDADO } from '../../lib/convidado';
 import { Icone } from './Icone';
@@ -154,6 +155,49 @@ export function ModalReerguerQg({
         }
       />
       {dados.motivo && <p className={estilos.motivo}>{dados.motivo}</p>}
+    </Modal>
+  );
+}
+
+// ---------- Contratar (Portão 22): a classe é escolha do jogador ----------
+
+export function ModalContratar({
+  dados, enviando, aoEscolher, aoFechar,
+}: { dados: DadosContratar; enviando: boolean; aoEscolher: (classe: Classe) => void; aoFechar: () => void }) {
+  return (
+    <Modal titulo="Contratar aventureiro" subtitulo={`Vagas da Taverna: ${dados.vagas}`} largura="media" aoFechar={aoFechar}>
+      <div className={estilos.classes}>
+        {dados.classes.map((c) => (
+          <button
+            key={c.classe}
+            type="button"
+            className={`caixa ${estilos.cartao} ${estilos.classe}`}
+            disabled={!dados.pode || enviando}
+            title={dados.motivo ?? undefined}
+            onClick={() => aoEscolher(c.classe)}
+          >
+            <span className={estilos.classeTopo}>
+              <Icone nome={c.icone} tamanho={32} />
+              <strong>{c.nome}</strong>
+            </span>
+            <span className={estilos.classeTexto}>{c.vantagem}</span>
+          </button>
+        ))}
+      </div>
+      <div className={`caixa ${estilos.cartao}`}>
+        <p className={estilos.rotulo}>Custo</p>
+        <Custos itens={dados.custo} />
+        <p className={`${estilos.rotulo} ${dados.comida.alerta ? estilos.vermelho : ''}`}>{dados.comida.texto}</p>
+      </div>
+      {dados.motivo && <p className={estilos.motivo}>{dados.motivo}</p>}
+      <Botoes
+        voltar={
+          <button type="button" className={`caixa botao ${estilos.botao}`} onClick={aoFechar}>
+            Cancelar
+          </button>
+        }
+        confirmar={<span />}
+      />
     </Modal>
   );
 }

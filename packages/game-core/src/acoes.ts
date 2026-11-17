@@ -24,7 +24,7 @@ import { aplicarBonus, bp, mili, micro } from './inteiros.ts';
 import { liberarCapitulos } from './diario.ts';
 import { liquidar, receber } from './liquidar.ts';
 import { descreverTroca } from './mercador.ts';
-import { destinoAberto, nivelReliquia, objetivosEra, quantosNoOficio, vagasGuilda } from './regras.ts';
+import { aventureirosNaTaverna, capacidadeAlojamento, destinoAberto, nivelReliquia, objetivosEra, ordemDeAtravessar, quantosNoOficio, vagasGuilda } from './regras.ts';
 import { criarSorteador, type Sorteador } from './rng.ts';
 
 const idCurto = z.string().min(1).max(32);
@@ -34,7 +34,8 @@ export const esquemaAcao = z.discriminatedUnion('tipo', [
   z.strictObject({ tipo: z.literal('construir'), slot: slotId }),
   z.strictObject({ tipo: z.literal('melhorar'), slot: slotId }),
   z.strictObject({ tipo: z.literal('pesquisar'), pesquisa: z.enum(PESQUISAS_IDS) }),
-  z.strictObject({ tipo: z.literal('contratar') }),
+  // Portão 22: o jogador ESCOLHE a classe (acabou o sorteio).
+  z.strictObject({ tipo: z.literal('contratar'), classe: z.enum(CLASSES) }),
   z.strictObject({ tipo: z.literal('melhorar_equipamento'), aventureiro: idCurto, peca: z.enum(['arma', 'armadura']) }),
   z.strictObject({
     tipo: z.literal('partir_expedicao'),
@@ -174,7 +175,8 @@ function aplicador(acao: Acao, agora: number, opcoes: OpcoesAcao): Aplicador {
 
     case 'contratar':
       return (e, s) => {
-        if (e.aventureiros.length >= vagasGuilda(e)) return 'guilda_cheia';
+        // Só quem não mora no QG ocupa vaga da Taverna.
+        if (aventureirosNaTaverna(e) >= vagasGuilda(e)) return 'guilda_cheia';
         const custo = custoContratar(e.contratacoes);
         if (!podePagar(e, custo)) return 'recursos_insuficientes';
         pagar(e, custo);
@@ -185,8 +187,8 @@ function aplicador(acao: Acao, agora: number, opcoes: OpcoesAcao): Aplicador {
         );
         const nome = sortearNome(s, e.aventureiros.map((a) => a.nome));
         e.aventureiros.push({
-          id: `a${e.proximoId++}`, nome, classe: s.escolher(CLASSES), nivel, xp: 0,
-          arma: 0, armadura: 0, estado: 'na_vila', feridoAte: null,
+          id: `a${e.proximoId++}`, nome, classe: acao.classe, nivel, xp: 0,
+          arma: 0, armadura: 0, estado: 'na_vila', feridoAte: null, alojado: false,
         });
         e.contratacoes += 1;
         registrar(e, 'Aventureiro', `${nome} entrou para a guilda.`, e.t);
@@ -289,7 +291,7 @@ function aplicador(acao: Acao, agora: number, opcoes: OpcoesAcao): Aplicador {
         const custo = custoDoQg();
         if (!podePagar(e, custo)) return 'recursos_insuficientes';
         pagar(e, custo);
-        e.qg = { estado: 'reerguido', desde: e.t };
+        e.qg = { estado: 'reerguido', desde: e.t, nivel: QG.nivelAoReerguer };
         registrar(e, 'Construir', TEXTOS_QG.reerguidoCronica, e.t);
       };
 
@@ -328,6 +330,12 @@ function aplicador(acao: Acao, agora: number, opcoes: OpcoesAcao): Aplicador {
 function ascender(e: EstadoJogo, s: Sorteador): ErroAcao | EstadoJogo {
   if (!objetivosEra(e).todos) return 'objetivos_pendentes';
   const ganho = reliquiasNaAscensao(e.ciclo);
+  // Alojamento (Portão 22): os mais fortes, até a capacidade do QG, atravessam com nome, classe, nível, XP e equipamento.
+  // Voltam à vila, curados (expedições e ferimentos acabam com o reset); quem não cabe sai da guilda.
+  const ordem = ordemDeAtravessar(e.aventureiros);
+  const capacidade = capacidadeAlojamento(e);
+  const ficam = ordem.slice(0, capacidade).map((a) => ({ ...a, estado: 'na_vila' as const, feridoAte: null, alojado: true }));
+  const saem = ordem.slice(capacidade);
   const novo = estadoInicial({
     semente: s.inteiro(0, 0xffffffff),
     agora: e.t,
@@ -340,7 +348,10 @@ function ascender(e: EstadoJogo, s: Sorteador): ErroAcao | EstadoJogo {
     prologoVisto: e.prologoVisto,
     // O Quartel General atravessa a ascensão (Portão 21); o resto do reset do QG é do Portão 25.
     qg: e.qg,
+    aventureiros: ficam,
+    proximoId: e.proximoId,
   });
+  for (const a of saem) registrar(novo, 'Aventureiro', TEXTOS_QG.saiuDaGuilda(a.nome), e.t);
   registrar(novo, 'Ascensao', `Ascensão! O reino renasce no ciclo ${novo.ciclo} com +${ganho} relíquias.`, e.t);
   liberarCapitulos(novo, e.t);
   return novo;

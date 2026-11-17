@@ -4,14 +4,14 @@ import { COMIDA_MINIMA_ALDEAO, OFICIO_OCIOSO, PESOS_POLITICA, type OficioAldeao 
 import { RODIZIO_OFICIOS, type Oficio } from '../data/aventureiros.ts';
 import { CONSTRUCOES, type TipoConstrucao } from '../data/construcoes.ts';
 import { DESTINOS, type DestinoId } from '../data/expedicoes.ts';
-import { DESTINO_QG } from '../data/qg.ts';
+import { capacidadeDoAlojamento, DESTINO_QG } from '../data/qg.ts';
 import { FORMULAS } from '../data/formulas.ts';
 import { ESTADO_INICIAL_CICLO, OBJETIVOS_ERA_1 } from '../data/eras.ts';
 import { RECURSOS, type Recurso } from '../data/recursos.ts';
 import type { ReliquiaId } from '../data/reliquias.ts';
 import { SLOT_IDS, SLOTS } from '../data/slots.ts';
 import type { EstadoJogo, VisaoCliente } from './estado.ts';
-import { tetoMicro } from './formulas.ts';
+import { poderAventureiro, tetoMicro } from './formulas.ts';
 import { aplicarBonus, bp, micro, mili } from './inteiros.ts';
 
 const F = FORMULAS;
@@ -62,6 +62,30 @@ export function tetos(e: Pick<EstadoJogo, 'slots' | 'reliquias'>): Record<Recurs
 export function aldeoesMaximos(e: VisaoCliente): number {
   return F.aldeoes.porNivelDeCasa * somaNiveis(e, 'casa');
 }
+
+/**
+ * Comida por segundo (milésimos) de n aventureiros (alojados ou não): cada um come base + crescimento × (n − 1)
+ * (Portão 22, curva C), então a guilda pequena custa quase nada e a grande pesa. Inteiros.
+ */
+export function consumoComidaAventureiros(n: number): number {
+  if (n <= 0) return 0;
+  return n * (mili(F.consumo.comidaBaseAventureiro) + mili(F.consumo.comidaCrescimentoAventureiro) * (n - 1));
+}
+
+/** Aventureiros que ocupam vaga da Taverna: quem mora no QG (alojado) não conta. */
+export const aventureirosNaTaverna = (e: Pick<VisaoCliente, 'aventureiros'>): number => e.aventureiros.filter((a) => !a.alojado).length;
+
+/** Capacidade do Alojamento agora: 0 até o QG ser reerguido. */
+export const capacidadeAlojamento = (e: Pick<VisaoCliente, 'qg'>): number => (e.qg.estado === 'reerguido' ? capacidadeDoAlojamento(e.qg.nivel) : 0);
+
+/**
+ * Quem atravessa a ascensão: os mais fortes (poder, depois nível e id), até a capacidade do Alojamento.
+ * Fora dela ficam os demais, que saem da guilda. A escolha manual é do Portão 25.
+ */
+export function ordemDeAtravessar<T extends { id: string; nivel: number; arma: number; armadura: number }>(aventureiros: readonly T[]): T[] {
+  return [...aventureiros].sort((a, b) => poderDe(b) - poderDe(a) || b.nivel - a.nivel || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+}
+const poderDe = (a: { nivel: number; arma: number; armadura: number }) => poderAventureiro(a);
 
 export function vagasGuilda(e: VisaoCliente): number {
   const g = F.guilda;
@@ -180,7 +204,7 @@ export function calcularTaxas(e: VisaoCliente): Taxas {
   }
 
   const consumoComida =
-    mili(F.consumo.comidaPorAldeao) * e.aldeoes.length + mili(F.consumo.comidaPorAventureiro) * e.aventureiros.length;
+    mili(F.consumo.comidaPorAldeao) * e.aldeoes.length + consumoComidaAventureiros(e.aventureiros.length);
 
   const saldo = { ...producao };
   saldo.comida -= consumoComida;
