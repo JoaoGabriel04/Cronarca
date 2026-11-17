@@ -2,28 +2,31 @@
 
 /* Cabeçalho nas posições do Figma v2 (Tela inicial v2): logo em y = 24, subtítulo em 154 e ornamentos em
    188 a 198, acima do castelo (que começa em 222). A logo (selo + nome, arte de 91 x 32) fica a 4x:
-   364 x 128, em pixel inteiro de tela (--e4, de cena/escala.ts), em vez dos 6x de antes. */
+   364 x 128, em pixel inteiro de tela (--e4, de cena/escala.ts), em vez dos 6x de antes.
+   Regra das escalas menores (u < 6): o bloco (logo, subtítulo, fios e losango) fica acima do topo renderizado do
+   castelo, com folga mínima de 8 px do frame (8·z na tela). --bloco-* e --logo-e vêm de blocoDoTitulo
+   (cena/escala.ts), calculados no script de escala; em 1440x900 valem os números do Figma (os padrões abaixo). */
 .titulo {
   position: absolute;
   left: 0;
-  top: 24px;
+  top: var(--bloco-logo, 24px);
   width: 1440px;
-  height: calc(32 * var(--e4) * 1px);
+  height: calc(32 * var(--logo-e, var(--e4)) * 1px);
   margin: 0;
   line-height: 0;
   text-align: center;
 }
 
 .logo {
-  width: calc(91 * var(--e4) * 1px);
-  height: calc(32 * var(--e4) * 1px);
+  width: calc(91 * var(--logo-e, var(--e4)) * 1px);
+  height: calc(32 * var(--logo-e, var(--e4)) * 1px);
   image-rendering: pixelated;
 }
 
 .subtitulo {
   position: absolute;
   left: 0;
-  top: 154px;
+  top: var(--bloco-sub, 154px);
   width: 1440px;
   margin: 0;
   font-size: 26px;
@@ -34,7 +37,7 @@
 
 .fio {
   position: absolute;
-  top: 192px;
+  top: var(--bloco-fio, 192px);
   width: 140px;
   height: 3px;
   background: var(--ouro);
@@ -43,7 +46,7 @@
 .losango {
   position: absolute;
   left: 700px;
-  top: 188px;
+  top: var(--bloco-losango, 188px);
   width: 40px;
   height: 10px;
   background: var(--ouro);

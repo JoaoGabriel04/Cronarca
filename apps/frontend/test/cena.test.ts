@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { animacao } from '@cronarca/game-core';
 import { CENA_INICIO, CENA_LOGIN, ESCALAS_DA_CENA, JANELA_NO_FUNDO, SPRITES_DA_CENA, ladoDaArte } from '../components/cena/dados';
 import { lerPng } from './png';
-import { ESCALAS_K, SCRIPT_ESCALA, escalaDaTela, pixelsDeTelaPorPixelDeArte } from '../components/cena/escala';
+import { BLOCO_FOLGA, CASTELO_ARTE, CASTELO_PE, ESCALAS_K, SCRIPT_ESCALA, TITULO_TOPO_MIN, blocoDoTitulo, escalaDaTela, pixelsDeTelaPorPixelDeArte } from '../components/cena/escala';
 
 const PUBLIC = join(__dirname, '..', 'public');
 const desenhos = (d: typeof CENA_INICIO) => [...d.sprites, ...d.celular.sprites];
@@ -136,6 +136,51 @@ describe('cena: fundo largo', () => {
       const u = escalaDaTela(w!, h!);
       expect(420 * u, `${w}x${h} largura`).toBeGreaterThanOrEqual(w!);
       expect(210 * u, `${w}x${h} altura`).toBeGreaterThanOrEqual(h!);
+    }
+  });
+});
+
+describe('cena: bloco de título acima do castelo (u < 6)', () => {
+  it('constantes do castelo batem com dados.ts e as bandeiras tocam a linha 0 dos 8 quadros', () => {
+    const c = CENA_INICIO.sprites.find((s) => s.nome === 'castelo')!;
+    expect(c.y + ladoDaArte('castelo') * c.k).toBe(CASTELO_PE);
+    expect(ladoDaArte('castelo')).toBe(CASTELO_ARTE);
+    for (let i = 1; i <= 8; i++) {
+      const png = lerPng(`/sprites/cena/castelo_${i}.png`);
+      let topo = -1;
+      for (let y = 0; y < png.altura && topo < 0; y++) for (let x = 0; x < png.largura; x++) if (png.dados[(y * png.largura + x) * 4 + 3]! > 0) { topo = y; break; }
+      expect(topo, `quadro ${i}`).toBe(0);
+    }
+  });
+  it('em u = 6 o bloco é o do Figma', () => {
+    const b = blocoDoTitulo(6);
+    expect([b.topoLogo, b.topoSubtitulo, b.topoFio, b.topoLosango, b.logoK]).toEqual([24, 154, 192, 188, 4]);
+  });
+  it('de u = 3 a 8: folga mínima de 8 px do frame, logo dentro do palco e castelo na escala de sempre', () => {
+    for (let u = 3; u <= 8; u++) {
+      const b = blocoDoTitulo(u);
+      expect(b.folga, `u=${u}`).toBeGreaterThanOrEqual(BLOCO_FOLGA);
+      expect(b.topoLogo, `u=${u}`).toBeGreaterThanOrEqual(TITULO_TOPO_MIN - 1e-9);
+      expect(b.topoCastelo).toBeCloseTo(CASTELO_PE - CASTELO_ARTE * ((pixelsDeTelaPorPixelDeArte(4, u) * 6) / u), 9);
+    }
+  });
+  it('u = 4 (1024x768, 1280x720): o bloco sobe e a logo cai um passo, sem mexer no castelo', () => {
+    const b = blocoDoTitulo(4);
+    expect(b.base).toBeLessThan(198);
+    expect(b.logoK).toBe(3);
+    expect(pixelsDeTelaPorPixelDeArte(4, 4)).toBe(3);
+  });
+  it('o script do <head> calcula o mesmo bloco', () => {
+    for (const [w, h] of [[1024, 768], [1280, 720], [1440, 900], [1920, 1080], [2560, 1080]]) {
+      const props: Record<string, string> = {};
+      const doc = { documentElement: { style: { setProperty: (k: string, v: string) => (props[k] = v) } } };
+      new Function('document', 'innerWidth', 'innerHeight', 'addEventListener', SCRIPT_ESCALA)(doc, w, h, () => {});
+      const b = blocoDoTitulo(escalaDaTela(w!, h!));
+      expect(Number(props['--logo-e'])).toBeCloseTo(b.logoE, 9);
+      expect(parseFloat(props['--bloco-logo']!)).toBeCloseTo(b.topoLogo, 9);
+      expect(parseFloat(props['--bloco-sub']!)).toBeCloseTo(b.topoSubtitulo, 9);
+      expect(parseFloat(props['--bloco-fio']!)).toBeCloseTo(b.topoFio, 9);
+      expect(parseFloat(props['--bloco-losango']!)).toBeCloseTo(b.topoLosango, 9);
     }
   });
 });
