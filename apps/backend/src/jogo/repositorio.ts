@@ -29,6 +29,15 @@ const paraJson = (v: unknown) => v as Prisma.InputJsonValue;
 /** Árvores e pedras clicáveis (id -> recurso): o mesmo mapa para todos (A13). */
 const OBJETOS_DO_MAPA = objetosDoMapa();
 
+/**
+ * Fila por jogador: ações e reset da mesma conta passam uma de cada vez. Sem isso, no READ COMMITTED uma
+ * requisição podia consultar o log (chave nova), ver a vencedora confirmar e só então ler o estado com rev
+ * novo, devolvendo 409 para uma chave que já tinha sido aplicada. O lock vale até o fim da transação.
+ */
+async function travarJogador(tx: Prisma.TransactionClient, userId: string): Promise<void> {
+  await tx.$executeRaw`select pg_advisory_xact_lock(hashtextextended(${userId}, 0))`;
+}
+
 /** Lê o estado do jogador; se ainda não existe, cria o do início do ciclo. */
 export async function obterOuCriarEstado(
   db: Cliente,
@@ -77,6 +86,7 @@ export async function executarAcao(prisma: PrismaClient, p: PedidoAcao): Promise
 
   try {
     return await prisma.$transaction(async (tx): Promise<SaidaAcao> => {
+      await travarJogador(tx, p.userId);
       const anterior = await tx.actionLog.findUnique({ where: onde });
       const atual = await obterOuCriarEstado(tx, p.userId, p.agora, p.sortearSemente);
       if (anterior) return { tipo: 'repetida', resultado: anterior.resultado as ResultadoGuardado, ...atual };
@@ -129,6 +139,7 @@ export async function executarAcao(prisma: PrismaClient, p: PedidoAcao): Promise
  */
 export async function apagarProgresso(prisma: PrismaClient, userId: string, agora: number, sortearSemente: () => number): Promise<Registro> {
   return prisma.$transaction(async (tx) => {
+    await travarJogador(tx, userId);
     await obterOuCriarEstado(tx, userId, agora, sortearSemente);
     const estado = estadoInicial({ semente: sortearSemente(), agora });
     const linha = await tx.gameState.update({

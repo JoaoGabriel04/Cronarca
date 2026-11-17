@@ -92,6 +92,42 @@ describe('POST /game/actions: idempotência e concorrência', () => {
     expect(await prisma.actionLog.count()).toBe(1);
   });
 
+  it('corrida repetida: a mesma chave em paralelo nunca vira 409 (idempotência sob fila por jogador)', async () => {
+    const { a, relogio, acao, doBanco } = await jogador();
+    await a.get('/game/state');
+    relogio.avancar(5 * MIN);
+    let rev = 0;
+    // 3 rodadas de 5 pedidos: cabe no limite de 20 ações por janela.
+    for (const slot of ['pedreira_1', 'serraria_1', 'celeiro_1'] as const) {
+      const chave = randomUUID();
+      const respostas = await Promise.all(Array.from({ length: 5 }, () => acao('construir', { slot }, rev, chave)));
+      for (const r of respostas) expect(r.status, `${slot}: ${JSON.stringify(r.body.erro)}`).not.toBe(409);
+      // Uma só aplicou; as outras repetiram a resposta guardada (200 ou a mesma recusa 422).
+      expect(respostas.filter((r) => r.body.repetida === false)).toHaveLength(1);
+      expect(new Set(respostas.map((r) => r.status)), JSON.stringify(respostas.map((r) => [r.status, r.body.erro, r.body.repetida]))).toHaveProperty('size', 1);
+      rev = (await doBanco()).rev;
+    }
+  });
+
+  it('ações de chaves diferentes e o reset ao mesmo tempo não corrompem: o rev só sobe e cada chave vale uma vez', async () => {
+    const { a, relogio, acao, doBanco } = await jogador();
+    await a.get('/game/state');
+    relogio.avancar(5 * MIN);
+    const chave = randomUUID();
+    const [x, y, z, reset] = await Promise.all([
+      acao('construir', { slot: 'pedreira_1' }, 0, chave),
+      acao('construir', { slot: 'pedreira_1' }, 0, chave),
+      acao('construir', { slot: 'serraria_1' }, 0),
+      a.post('/game/reset').send({ confirmacao: 'APAGAR' }),
+    ]);
+    for (const r of [x, y]) expect([200, 409, 422]).toContain(r.status);
+    expect([200, 409, 422]).toContain(z.status);
+    expect(reset.status).toBe(200);
+    // Duas chaves iguais nunca aplicam duas vezes: no máximo uma delas com repetida false.
+    expect([x, y].filter((r) => r.body.repetida === false && r.status === 200).length).toBeLessThanOrEqual(1);
+    expect((await doBanco()).rev).toBeGreaterThanOrEqual(1);
+  });
+
   it('chaves diferentes com o mesmo rev em paralelo: uma vence, as outras recebem 409', async () => {
     const { a, relogio, acao, doBanco } = await jogador();
     await a.get('/game/state');
