@@ -595,6 +595,21 @@
   gap: 10px;
 }
 
+.formVinculo {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.formVinculo :global(.campo) {
+  height: 44px;
+}
+
+.formVinculo .botaoPequeno {
+  justify-self: start;
+  margin-top: 8px;
+}
+
 .campoApagar {
   max-width: 240px;
   height: 40px;

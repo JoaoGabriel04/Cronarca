@@ -8,7 +8,7 @@ COMPOSE := docker compose
 MOUNT_DIRS := packages/game-core/node_modules apps/backend/node_modules \
 	apps/frontend/node_modules apps/frontend/.next
 
-.PHONY: help up down logs ps migrate seed reset-db test typecheck conferir-mapa conferir-mobile conferir-inicio conferir-mercador conferir-teto conferir-falha conferir-aldeoes conferir-lore calibrar-combate conferir-migracao gerar-frente evento-mercador shell-backend shell-db env-check
+.PHONY: help up down logs ps migrate seed reset-db test typecheck conferir-mapa conferir-mobile conferir-inicio conferir-mercador conferir-teto conferir-falha conferir-aldeoes conferir-lore calibrar-combate conferir-migracao conferir-migracao-convidado migrar-neon-status migrar-neon gerar-frente evento-mercador shell-backend shell-db env-check
 
 help: ## Lista os comandos
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[33m%-14s\033[0m %s\n", $$1, $$2}'
@@ -96,6 +96,30 @@ calibrar-combate: ## Portão 20c: calibragem do combate em lote (sementes fixas,
 
 conferir-migracao: ## Portão 20d-3: verificação offline da migração 8 para 9 (em memória; nada é gravado). Sem ARQ usa saves SINTÉTICOS; com ARQ=dumps/saves_producao.json, o dump real
 	$(COMPOSE) run --rm --no-deps backend node scripts/conferir-migracao.ts $(ARQ)
+
+conferir-migracao-convidado: env-check ## Portão B: verificação offline da migração do convidado num banco descartável do Postgres local (nunca produção)
+	$(COMPOSE) up -d --wait db
+	$(COMPOSE) run --rm backend node scripts/conferir-migracao-convidado.ts
+
+# Banco de PRODUÇÃO (Neon): a URL vem do DATABASE_URL do .env da raiz. O Compose não usa essa variável (o backend local
+# tem a própria URL no docker-compose.yml), então ela só é lida aqui. Lida com grep, não com `source`: a URL tem `&`.
+define URL_NEON
+URL=$$(grep -E '^DATABASE_URL=' .env | head -1 | cut -d= -f2- | sed -E "s/^['\"]//; s/['\"]$$//"); \
+test -n "$$URL" || { echo "DATABASE_URL não está no .env da raiz."; exit 1; }; \
+HOST=$$(echo "$$URL" | sed -E 's#^[^:]+://[^@]*@##; s#[:/?].*##'); \
+case "$$HOST" in db|localhost|127.0.0.1|'') echo "Recusado: DATABASE_URL aponta para '$$HOST', não para o Neon."; exit 1;; esac
+endef
+
+migrar-neon-status: env-check ## Só LÊ: mostra quais migrações o banco do Neon (DATABASE_URL do .env) já aplicou e quais faltam
+	@$(URL_NEON); echo "Banco: $$HOST"; \
+	$(COMPOSE) run --rm --no-deps -e DATABASE_URL="$$URL" backend npm exec -w @cronarca/backend -- prisma migrate status || echo "(o código de saída 1 só indica migração pendente)"
+
+migrar-neon: env-check ## Aplica no Neon as migrações que faltam (prisma migrate deploy), depois de mostrar o status e pedir "sim"
+	@$(URL_NEON); echo "Banco: $$HOST"; \
+	$(COMPOSE) run --rm --no-deps -e DATABASE_URL="$$URL" backend npm exec -w @cronarca/backend -- prisma migrate status || true; \
+	echo ""; read -r -p "Aplicar as migrações que faltam em $$HOST? Digite sim: " R; \
+	test "$$R" = "sim" || { echo "Cancelado, nada foi alterado."; exit 1; }; \
+	$(COMPOSE) run --rm --no-deps -e DATABASE_URL="$$URL" backend npm run db:deploy -w @cronarca/backend
 
 conferir-mercador: evento-mercador ## Negociação do Mercador no Chromium em 1440, 601, 600, 390 e 360 px: termos do servidor, botões e prazo visíveis; capturas em docs/referencia/mercador
 	docker run --rm --network host --user $$(id -u):$$(id -g) -e HOME=/tmp \

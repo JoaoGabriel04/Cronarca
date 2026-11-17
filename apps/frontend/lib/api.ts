@@ -4,10 +4,15 @@
 export interface UsuarioPublico {
   id: string;
   nome: string;
-  email: string;
+  /** Nulo em conta de convidado. */
+  email: string | null;
   avatarUrl: string | null;
   emailVerificado: boolean;
   temSenha: boolean;
+  /** Conta de convidado: sem e-mail e fora do ranking até vincular. */
+  convidado: boolean;
+  /** Já ligou Google ou Discord e falta confirmar o nome. */
+  vinculoPendente: boolean;
   provedores: ('google' | 'discord')[];
 }
 
@@ -71,7 +76,10 @@ const MENSAGENS: Record<string, string> = {
   oauth_invalido: 'O login expirou ou foi interrompido. Tente de novo.',
   oauth_falhou: 'Não foi possível falar com o provedor. Tente de novo.',
   email_nao_verificado: 'Seu e-mail não está verificado nesse provedor.',
-  conta_ja_vinculada: 'Este e-mail já está ligado a outra conta desse provedor.',
+  conta_ja_vinculada: 'Este e-mail ou esta conta já pertence a outro reino.',
+  convidados_esgotados: 'Muitos convidados entrando agora. Tente de novo em alguns minutos.',
+  nao_e_convidado: 'Esta conta já está vinculada.',
+  vinculo_inexistente: 'Ligue o Google ou o Discord antes de confirmar o nome.',
 };
 
 export function mensagemDeErro(codigo: string): string {

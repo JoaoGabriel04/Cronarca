@@ -21,12 +21,13 @@
   color: var(--texto-claro);
 }
 
-/* Cartão do Figma v2: 440 de largura em x = 940, y = 72 (não cobre o castelo, que termina em x = 912).
-   A altura segue o conteúdo. */
+/* Cartão do Figma v2: 440 de largura em x = 940 (não cobre o castelo, que termina em x = 912). A altura segue o
+   conteúdo. Com "Jogar sem conta" e a legenda o cartão cresce além dos 773 do Figma: sobe de y = 72 para 40 e aperta
+   o selo (88 para 72) e os respiros para caber em 900. */
 .cartao {
   position: absolute;
   left: 940px;
-  top: 72px;
+  top: 40px;
   width: 440px;
   padding: 28px 26px 30px; /* campos de 376, como no Figma */
   display: flex;
@@ -44,8 +45,8 @@
 }
 
 .selo {
-  width: 88px;
-  height: 88px;
+  width: 72px;
+  height: 72px;
   align-self: center;
   display: grid;
   place-items: center;
@@ -57,7 +58,7 @@
 }
 
 .titulo {
-  margin: 16px 0 0;
+  margin: 10px 0 0;
   font-family: var(--fonte-titulo), serif;
   font-size: 36px;
   font-weight: 700;
@@ -76,7 +77,7 @@
 }
 
 .formulario {
-  margin-top: 46px;
+  margin-top: 28px;
 }
 
 .campo {
@@ -122,8 +123,30 @@
 }
 
 .alternar {
-  margin: 22px 0 0;
+  margin: 14px 0 0;
   font-size: 17px;
+  text-align: center;
+  color: var(--texto-suave);
+}
+
+/* Jogar sem conta: conta de convidado no servidor (Portão B); até lá o botão fica desabilitado. */
+.convidado {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.botaoConvidado {
+  height: 44px;
+  font-size: 17px;
+}
+
+.legenda {
+  margin: 8px 0 0;
+  max-width: 360px;
+  font-size: 14px;
+  line-height: 18px;
   text-align: center;
   color: var(--texto-suave);
 }
@@ -147,49 +170,95 @@
   :global(.cena-login .cena-celular-paisagem) {
     order: 2;
   }
-  .cartao,
-  .cartaoCadastro {
+  /* Login - Mobile (Figma 184:47498): sem cartão de pergaminho nem selo; formulário de 350 de largura sobre o cenário.
+     O seletor .cartao.cartao vence as classes globais caixa, pergaminho e com-linha (borda, fundo, recorte e linha). */
+  .cartao.cartao,
+  .cartaoCadastro.cartaoCadastro {
     position: relative;
     order: 3;
     left: auto;
     top: auto;
     z-index: 1;
-    /* 24 px de cada lado: 16 do palco + 8 aqui. */
-    width: min(calc(100% - 16px), 420px);
+    width: min(100%, 350px);
     margin: -40px 0 0;
-    padding: 20px 16px 22px;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    clip-path: none;
+    color: var(--texto-claro);
   }
-  .selo {
-    width: 56px;
-    height: 56px;
+  .cartao.cartao::after {
+    display: none;
   }
-  .selo img {
-    width: 32px;
-    height: 32px;
+  .selo,
+  .sub {
+    display: none;
   }
   .titulo {
-    margin-top: 10px;
+    margin-top: 0;
     font-size: 28px;
-  }
-  .sub {
-    margin: 4px 0 0;
-    font-size: 15px;
-    line-height: 21px;
+    color: var(--texto-claro);
   }
   .formulario,
   .cartaoCadastro .formulario {
-    margin-top: 20px;
+    margin-top: 14px;
+  }
+  .formulario :global(.campo-rotulo) {
+    color: var(--texto-claro);
+  }
+  .formulario :global(.campo) {
+    height: 44px;
+  }
+  .formulario :global(.campo-erro) {
+    color: #ffb4a0;
+  }
+  .formulario .principal {
+    height: 50px;
+    font-size: 20px;
+  }
+  .ou,
+  .nota,
+  .alternar,
+  .legenda {
+    color: var(--texto-claro);
+  }
+  .ou span {
+    background: #6e5a40;
   }
   .provedores :global(.botao) {
+    height: 44px;
     font-size: 15px;
   }
   .nota {
     font-size: 14px;
   }
-  /* "Criar nova conta" é um botão de texto: no toque, 44 px de altura. */
+  .alternar {
+    margin-top: 12px;
+  }
   .alternar :global(.link) {
-    min-height: 44px;
+    min-height: 46px;
     padding: 0 4px;
+    color: var(--ouro-claro);
+  }
+  .convidado {
+    margin-top: 4px;
+  }
+  .botaoConvidado.botaoConvidado {
+    width: 100%;
+    height: 46px;
+  }
+  .botaoConvidado:disabled {
+    --borda: var(--contorno);
+    --fundo: #3a2818;
+    --realce: #4a3220;
+    --sombra: #2a1c12;
+    color: var(--texto-apagado);
+  }
+  .legenda {
+    width: 300px;
+    max-width: 100%;
+    color: var(--texto-apagado);
   }
 
   :global(html[data-teclado]) .marca {

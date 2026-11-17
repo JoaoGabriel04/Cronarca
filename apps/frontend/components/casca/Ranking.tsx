@@ -47,7 +47,7 @@ function Linha({ l }: { l: LinhaTela }) {
   );
 }
 
-export function ModalRanking({ eraDoJogador, aoFechar }: { eraDoJogador: number; aoFechar: () => void }) {
+export function ModalRanking({ eraDoJogador, convidado = false, aoVincular, aoFechar }: { eraDoJogador: number; convidado?: boolean; aoVincular?: () => void; aoFechar: () => void }) {
   const [aba, setAba] = useState<AbaRanking>('geral');
   const { data, error, isLoading } = useSWR(rotaRanking(aba), buscarRanking, {
     refreshInterval: RELER_MS,
@@ -66,6 +66,17 @@ export function ModalRanking({ eraDoJogador, aoFechar }: { eraDoJogador: number;
 
   return (
     <Modal titulo="Ranking" subtitulo={subtitulo} largura="ranking" aoFechar={aoFechar}>
+      {convidado && (
+        <p className={estilos.texto}>
+          Convidados não entram no ranking.{' '}
+          {aoVincular && (
+            <button type="button" className="link" onClick={aoVincular}>
+              Vincule sua conta
+            </button>
+          )}{' '}
+          para aparecer aqui com o seu reino.
+        </p>
+      )}
       <div className={estilos.abasRanking} role="group" aria-label="Lista">
         {abasRanking(eraDoJogador).map((x) => {
           const atual = x.id === aba;

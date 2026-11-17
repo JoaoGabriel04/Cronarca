@@ -26,6 +26,22 @@ export const CONFIG_AUTH = {
   senhaMaxBytes: 72,
 } as const;
 
+/** Conta de convidado (Portão B): tetos de criação e limpeza. */
+export const CONFIG_CONVIDADO = {
+  /** Janela dos dois tetos de criação. */
+  janelaMs: HORA,
+  /** Convidados novos por IP na janela (só vale com LIMITE_CONVIDADO_IP=ligado). */
+  porIpPorJanela: 5,
+  /** Convidados novos no total na janela, contados no banco (sobrevive ao reinício). */
+  totalPorJanela: 200,
+  /** Sem atividade por tanto tempo e sem vínculo: removido pela limpeza. */
+  inatividadeMs: 30 * DIA,
+  limpezaIntervaloMs: DIA,
+  /** Máximo removido por execução da limpeza. */
+  limpezaTeto: 500,
+  nomePrefixo: 'Convidado',
+} as const;
+
 // Proteção da API de jogo. O limite de cliques do jogo é outro e fica nos
 // dados do game-core (FORMULAS.clique); este só segura excesso de requisições.
 export const CONFIG_JOGO = {

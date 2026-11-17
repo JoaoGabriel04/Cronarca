@@ -23,6 +23,8 @@ import { usePreferencias } from '../../lib/jogo/preferencias';
 import type { CorpoEstado } from '../../lib/jogo/sincronia';
 import { useAcaoServidor, useJogo } from '../../lib/jogo/useJogo';
 import { useUsuario } from '../../lib/usuario';
+import { AVISO_CONVIDADO, lerRetornoVinculo, semParametrosDeVinculo, type RetornoVinculo } from '../../lib/convidado';
+import { ModalVinculo } from '../casca/Vinculo';
 import type { EventoMapa } from '../../lib/mapa/acerto';
 import { limitarZoom, zoomMinimoQueCobre, type Camera, type Tamanho } from '../../lib/mapa/camera';
 import { nevoasAtivas } from '../../lib/mapa/nevoa';
@@ -58,6 +60,8 @@ type ModalAberto =
   | { tipo: 'pesquisa' }
   | { tipo: 'configuracoes' }
   | { tipo: 'ranking' }
+  /** Vínculo da conta de convidado (Portão B); `retorno` vem do callback do Google ou Discord. */
+  | { tipo: 'vinculo'; retorno: RetornoVinculo | null }
   /** Portão 16: painel dos objetivos, Diário e prólogo. */
   | { tipo: 'objetivo' }
   | { tipo: 'diario' }
@@ -106,6 +110,14 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
     url.searchParams.delete('ranking');
     window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
   }, []);
+  // Retorno do vínculo por Google ou Discord (?vinculo=nome ou ?vinculo_erro=...): abre o modal e limpa o endereço.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const retorno = lerRetornoVinculo(url.searchParams);
+    if (!retorno) return;
+    setModal({ tipo: 'vinculo', retorno });
+    window.history.replaceState(window.history.state, '', semParametrosDeVinculo(url));
+  }, []);
   const [salvando, setSalvando] = useState(false);
   const [apagando, setApagando] = useState(false);
   /** Construíveis no momento em que o catálogo abriu: o selo some até aparecer um novo. */
@@ -118,6 +130,18 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
   const [destaque, setDestaque] = useState<DestinoId | null>(null);
   const avisar = useAvisar();
   const router = useRouter();
+  // Aviso discreto, uma vez por sessão do navegador, para quem ainda é convidado.
+  const eConvidado = usuario?.convidado === true;
+  useEffect(() => {
+    if (!eConvidado) return;
+    try {
+      if (sessionStorage.getItem('cronarca_aviso_convidado')) return;
+      sessionStorage.setItem('cronarca_aviso_convidado', '1');
+    } catch {
+      // sem armazenamento: avisa mesmo assim
+    }
+    avisar(AVISO_CONVIDADO);
+  }, [eConvidado, avisar]);
   const [tique, setTique] = useState(0);
   const [aba, setAba] = useState<Aba>('vila');
   const [visao, setVisao] = useState<Visao>('reino');
@@ -525,7 +549,8 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
           salvando={salvando}
           aoSalvar={() => void salvarAgora()}
           aoBaixar={() => baixarCopia({ exportadoEm: new Date().toISOString(), aviso: 'Cópia somente leitura do Cronarca.', estado: visivel }, visivel.ciclo)}
-          conta={usuario ? { nome: usuario.nome, email: usuario.email } : null}
+          conta={usuario ? { nome: usuario.nome, email: usuario.email, convidado: usuario.convidado } : null}
+          aoVincular={() => setModal({ tipo: 'vinculo', retorno: null })}
           sair={<BotaoSair />}
           apagando={apagando}
           aoApagar={(palavra) => void apagarProgresso(palavra)}
@@ -535,7 +560,20 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
           aoFechar={() => setModal(null)}
         />
       )}
-      {modal?.tipo === 'ranking' && <ModalRanking eraDoJogador={visivel.era} aoFechar={() => setModal(null)} />}
+      {modal?.tipo === 'ranking' && (
+        <ModalRanking eraDoJogador={visivel.era} convidado={eConvidado} aoVincular={() => setModal({ tipo: 'vinculo', retorno: null })} aoFechar={() => setModal(null)} />
+      )}
+      {modal?.tipo === 'vinculo' && usuario && (
+        <ModalVinculo
+          usuario={usuario}
+          retorno={modal.retorno}
+          aoConcluir={() => {
+            setModal(null);
+            avisar('Conta vinculada. Seu reino entra no ranking.');
+          }}
+          aoFechar={() => setModal(null)}
+        />
+      )}
       {modal?.tipo === 'objetivo' && (
         <ModalObjetivo
           passo={passo}

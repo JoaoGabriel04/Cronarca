@@ -36,8 +36,15 @@ export async function registrarAtividade(db: Cliente, userId: string, agora: num
   });
 }
 
-/** Cria a entrada de um reino novo (todos entram, desde o ciclo 1). Não mexe numa que já exista. */
+/** Convidado não tem entrada no ranking até vincular a conta (Portão B). */
+async function eConvidado(db: Cliente, userId: string): Promise<boolean> {
+  const u = await db.user.findUnique({ where: { id: userId }, select: { convidado: true } });
+  return u?.convidado === true;
+}
+
+/** Cria a entrada de um reino novo (todo reino de conta vinculada entra, desde o ciclo 1). Não mexe numa que já exista. */
 export async function criarEntrada(db: Cliente, userId: string, estado: EstadoJogo, agora: number): Promise<void> {
+  if (await eConvidado(db, userId)) return;
   await db.rankingEntry.createMany({
     data: [{ userId, ...chaveRanking(estado), tempoJogado: 0n, marcoEm: new Date(agora) }],
     skipDuplicates: true,
@@ -46,6 +53,7 @@ export async function criarEntrada(db: Cliente, userId: string, estado: EstadoJo
 
 /** Marco: grava a posição nova e o tempo jogado até agora; o marco desempata. */
 export async function gravarMarco(db: Cliente, userId: string, estado: EstadoJogo, agora: number): Promise<void> {
+  if (await eConvidado(db, userId)) return;
   const { tempoJogado } = await db.gameState.findUniqueOrThrow({ where: { userId }, select: { tempoJogado: true } });
   const dados = { ...chaveRanking(estado), tempoJogado, marcoEm: new Date(agora) };
   await db.rankingEntry.upsert({ where: { userId }, create: { userId, ...dados }, update: dados });

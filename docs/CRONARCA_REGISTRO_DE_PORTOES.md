@@ -217,3 +217,22 @@ Regra daqui em diante: a cada portão, antes de encerrar a conversa, atualizo as
 - **Portão 20 (20a a 20c): aceito** (03ec0ae, 50ddcd9). Multiplicadores 0,95 / 1,05 / 1,10, chefe 1,30; poder mínimo 0,88, recomendado 1,02.
 - **Decididos:** endurecimento cai de +0,05 para +0,02 (limite +0,10); peso por classe no Poder adiado, entra só um aviso de composição; `poderMinimo` e `poderRecomendado` ganham função utilizável (20d-2); migração 8 para 9 verificada offline antes do deploy (20d-3).
 - Especificação de combate passa para a revisão 8 (seções 1.5, 1.5b e 1.6).
+- 16/11 tarde: resultado do Portão 3 da Tela inicial ficou feio (escalas misturadas, pinheiros duplicados, castelo e cavaleiro desproporcionais). Correção: escala única 4x (3x no mobile), poucos pinheiros. Figma refeito nos mesmos IDs (Início D 184:47341, Login D 184:47406, Início M 184:47468). Fontes 4x e 3x na página Sprites, frame 185:47341. Prompt: PROMPT_TELA_INICIAL_V2_CORRECAO.md. Efeitos em canvas (estrelas, vaga-lumes, névoa, luz da fogueira) ficam como passo opcional depois.
+
+## 17/11/2026: Tela inicial v2 fechada (portões 0 a 4)
+- Commits na main: e6d55e0 (Portão 2), 8581edc (Portão 3), e568b88 (Portão 4). Escala 4x (3x no mobile), fundo largo 420x210 com sangria, sprites só da lista fechada.
+- Em aberto: (1) Login mobile do projeto ainda usa cartão com selo; o Figma tem formulário em largura total com "Esqueci a senha" e "Jogar sem conta" (vira portão à parte); (2) castelo em u = 4 (1024x768 e 1280x720): bandeiras encostam no subtítulo, limitação aceita e registrada no handoff; (3) trocar a senha do Neon e atualizar o DATABASE_URL no Render.
+- Segue suspensa a unificação de animação das árvores. Pendentes: portões 21 a 27 e importação da arte nova (classes, QG, recursos, expedições, ecos) no Portão 22.
+- 17/11: decisões do dono: "Esqueci a senha" removido por ora (sem provedor de e-mail); "Jogar sem conta" vira conta convidado no servidor, vinculável depois (padrão proposto: convidado fora do ranking até vincular). Figma Login Desktop (184:47406) e Mobile (184:47498) atualizados: sem "Esqueci a senha" e com a legenda nova. Regra do castelo em u < 6: bloco de título ancorado acima do topo do castelo, folga mínima 8·s, sem mudar a escala do castelo. Prompt: PROMPT_PORTAO_LOGIN_E_CONVIDADO.md (portões A e B).
+
+## 17/11/2026: Portão A (Login mobile, convidado desabilitado, folga do castelo)
+- Auditoria (A0): "Esqueci a senha" e o texto antigo do convidado já não existiam no código; "Jogar sem conta" também não. Só havia o comentário em `login/page.tsx` e o handoff.
+- Feito: Login mobile do Figma (sem pergaminho nem selo, 350 de largura); "Jogar sem conta" desabilitado com a legenda, nos dois layouts; bloco de título acima do topo do castelo com folga mínima de 8·z (leitura de "8·s": s = z = u/6, ou seja, 8 px do frame; confirmar); `conferir-inicio` com a folga, o convidado e o cartão dentro da tela.
+- Medidas: folga 6,0 px de tela em u = 4 (mínimo 5,3), 24,0 em u = 6, 10,0 em u = 7 (mínimo 9,3). Testes: 607 no `make test`, typecheck limpo.
+- Pendente: Portão B (conta convidado no servidor); ranking sem convidado segue como padrão proposto.
+
+## 17/11/2026: Portão B (conta convidado) implementado, aguardando aprovação
+- B0 e B1 aprovados; plano e decisões em `docs/CRONARCA_PORTAO_B_CONVIDADO.md`. Migração `20261117120000_convidado` (e-mail opcional, `convidado`, índice), verificada offline.
+- Backend: criação com teto total no banco, vínculo por e-mail e por Google/Discord (duas etapas), limpeza agendada, ranking sem convidado. Front: botão habilitado, aviso no jogo (uma vez por sessão), modal de vínculo (reaproveita `Modal`), Configurações e Ranking com o convite a vincular.
+- Pendente de deploy: aplicar a migração em produção (`prisma migrate deploy`) antes de subir o código; conferir os registros de proxy do Render antes de ligar `LIMITE_CONVIDADO_IP`. Portão A segue aguardando o aceite do dono.
+- 17/11: **Portões A e B aceitos pelo dono.** Sem commit ainda. Falta: aplicar a migração `20261117120000_convidado` em produção antes do deploy do código e conferir os registros de proxy do Render antes de ligar `LIMITE_CONVIDADO_IP`.

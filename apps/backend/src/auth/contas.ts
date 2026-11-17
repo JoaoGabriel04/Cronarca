@@ -4,7 +4,7 @@ import type { Provedor, User } from '../generated/prisma/client.ts';
 import type { PerfilOAuth } from './oauth.ts';
 
 export class ErroConta extends Error {
-  constructor(readonly codigo: 'email_nao_verificado' | 'conta_ja_vinculada') {
+  constructor(readonly codigo: 'email_nao_verificado' | 'conta_ja_vinculada' | 'nao_e_convidado' | 'vinculo_inexistente') {
     super(codigo);
   }
 }

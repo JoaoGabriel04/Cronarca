@@ -19,8 +19,8 @@ enum Provedor {
 
 model User {
   id              String   @id @default(uuid()) @db.Uuid
-  /// Sempre em minúsculas; a normalização é feita na aplicação.
-  email           String   @unique
+  /// Sempre em minúsculas; a normalização é feita na aplicação. Nulo só em conta de convidado (Portão B).
+  email           String?  @unique
   nome            String
   /// Nulo quando a conta só entra por Google ou Discord.
   senhaHash       String?  @map("senha_hash")
@@ -28,6 +28,8 @@ model User {
   /// Preferências do jogador (não são estado de jogo). Esquema: game-core/src/preferencias.ts.
   preferencias    Json?    @db.JsonB
   emailVerificado Boolean  @default(false) @map("email_verificado")
+  /// Conta de convidado: sem e-mail nem senha, fora do ranking até vincular (Portão B).
+  convidado       Boolean  @default(false)
   criadoEm        DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
   atualizadoEm    DateTime @updatedAt @map("atualizado_em") @db.Timestamptz(3)
 
@@ -37,6 +39,7 @@ model User {
   acoes       ActionLog[]
   ranking     RankingEntry?
 
+  @@index([convidado, criadoEm])
   @@map("users")
 }
 

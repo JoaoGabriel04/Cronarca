@@ -8,8 +8,8 @@ import { MARCA } from '../../lib/marca';
 
 export const metadata = { title: 'Entrar' };
 
-// Tela "Login - Desktop" do Figma (Telas v2), com as decisões do Portão 3:
-// sem "Jogar sem conta", com Google e Discord, sem "Esqueci a senha" por ora.
+// Telas "Login - Desktop" e "Login - Mobile" do Figma (Telas v2): Google e Discord, e "Jogar sem conta" (conta de
+// convidado, desabilitada até o Portão B). Sem "Esqueci a senha": não há envio de e-mail; volta com um provedor.
 export default function Login() {
   return (
     <main>

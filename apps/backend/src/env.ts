@@ -11,6 +11,11 @@ const esquemaEnv = z.object({
     .regex(/^postgres(ql)?:\/\//, 'DATABASE_URL precisa ser uma URL postgres://'),
   /** Origem pública do site (o Next). Usada no CSRF e nas URLs de retorno do OAuth. */
   APP_URL: z.url().default('http://localhost:3000').transform((u) => new URL(u).origin),
+  /**
+   * Teto de convidados novos por IP. Nasce desligado: só vale depois de conferir que req.ip varia entre jogadores
+   * (o Next fala com o backend pelo endereço público no Render; ver docs/CRONARCA_PORTAO_B_CONVIDADO.md).
+   */
+  LIMITE_CONVIDADO_IP: z.enum(['ligado', 'desligado']).default('desligado'),
   GOOGLE_CLIENT_ID: opcional,
   GOOGLE_CLIENT_SECRET: opcional,
   DISCORD_CLIENT_ID: opcional,

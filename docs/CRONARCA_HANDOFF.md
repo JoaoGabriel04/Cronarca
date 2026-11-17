@@ -357,8 +357,9 @@ Login desktop: pinho1 (250,470), pinho0 (400,455), castelo, pinho0 de perto (-20
 - Menu do desktop: 460 x 256 com botões de 360 de largura (Figma: 456 x 254, botões de 400).
 - Menu do celular: 188 de altura, botões de 44 px (Figma: 174, 42 px).
 - A fogueira (230,752) encosta na borda esquerda da estrada, como na tabela do Figma.
-- Em u = 4 (1024 x 768, 1280 x 720) o castelo vale 3 px por pixel de arte (12,5% maior que o nominal) e as bandeiras encostam no subtítulo. Limitação aceita da regra de escala inteira.
-- Login no celular: o frame do Figma tem o formulário em largura total, sem selo nem subtítulo no cartão, com "Esqueci a senha" e "Jogar sem conta"; o projeto mantém o cartão com selo e sem esses dois itens. Fora do escopo da cena (só o castelo e o fundo seguem o Figma).
+- Castelo em escalas menores (u < 6): o arredondamento (k = round(4·u/6)) o faz crescer além da proporção do palco (em u = 4 vale 3 px por pixel de arte, 12,5% maior). A escala do castelo não muda; em vez disso o bloco de título (logo, subtítulo, fios e losango) fica acima do topo renderizado das bandeiras (linha 0 do quadro de 96 x 96, medida nos 8 quadros), com folga mínima de 8 px do frame (8·z na tela, z = u/6) entre a base do losango e esse topo. Se não couber, o bloco sobe; se a logo passaria do topo da tela (mínimo 8 px do frame), ela cai de 4x para 3x e depois 2x. Código: `blocoDoTitulo` em `cena/escala.ts` (o script do `<head>` repete a conta e publica `--bloco-*` e `--logo-e`). `make conferir-inicio` mede a folga em 1024x768, 1280x720, 1440x900, 1920x1080 e 2560x1080 e falha se ficar abaixo do mínimo. Em 1440x900 o bloco é exatamente o do Figma.
+- Login no celular: formulário de 350 de largura sobre o cenário, sem cartão de pergaminho, sem selo e sem subtítulo (campos de 44, Entrar de 50, "Criar nova conta" de 46). O título "Entrar na Crônica" permanece (cabeçalho da página) e Google e Discord continuam, o que faz a coluna rolar. O desktop mantém o cartão com selo.
+- "Jogar sem conta" (desktop e celular, só no modo entrar): cria uma conta de convidado no servidor (`POST /auth/convidado`) e entra no jogo; legenda "Cria uma conta de convidado. Vincule um e-mail ou o Google depois para não perder o progresso." Detalhes e decisões em `docs/CRONARCA_PORTAO_B_CONVIDADO.md`. "Esqueci a senha" foi removido por ora (sem provedor de e-mail); volta em portão próprio. No desktop o cartão sobe de y = 72 para 40 e o selo vai de 88 para 72 para caber em 900 com o botão novo.
 - Cartão do Login com 773 de altura (Figma: 756) por causa da linha do Google e do Discord.
 - Se a vinheta de dithering do rodapé do fundo incomodar, a correção é regenerar o PNG, não cobrir em CSS.
 
@@ -476,3 +477,11 @@ A A13 cancela o 7b: o mapa é uma imagem fixa (ver `CRONARCA_MAPA_GRANDE.md`, qu
 - **Fontes:** Alegreya SC Bold (títulos e rótulos), Alegreya Sans Regular (texto), IBM Plex Mono Medium (números).
 - **Fundo da tela:** `#14201c` com texturas de 6 px. HUD: `#3a2818`, 72 px de altura no desktop e 56 no mobile.
 - **Estados do aventureiro:** Na vila (verde `#4a8a52`), Em expedição (azul `#3a62a8`), Ferido (vermelho `#8a2420`).
+
+## Conta de convidado (Portão B)
+- `User.email` opcional (único quando presente) e `User.convidado`. Convidado: sem e-mail e sem senha, sessão por cookie como as demais, **fora do ranking** (nem `criarEntrada` nem `gravarMarco` criam entrada) até vincular.
+- Criação: `POST /auth/convidado` (nome "Convidado NNNN"); teto de 200 por hora no total, contado no banco, e 5 por IP por hora só com `LIMITE_CONVIDADO_IP=ligado` (nasce desligado: no Render o Next fala com o backend pelo endereço público, então `req.ip` pode ser o da borda; o servidor registra `req.ips.length` e se `req.ip` é privado nas primeiras criações).
+- Vínculo (mesmo `User`, mesmo `id` e estado de jogo): `POST /auth/vincular/email` (uma etapa, com o nome) ou Google/Discord em duas etapas (`GET /auth/:provedor/vincular`, depois `POST /auth/vincular/confirmar` com o nome). Conflito de e-mail ou de conta do provedor: `conta_ja_vinculada`, nada é mesclado; o jogador escolhe entre entrar na conta existente (perde o convidado) e cancelar.
+- Ranking no vínculo: entrada com o estado atual do jogo, o tempo jogado acumulado e `marcoEm` = agora.
+- Limpeza: convidados sem senha e sem OAuth, sem atividade há 30 dias (`GameState.ultimaAtividadeEm`, ou `criadoEm`), no máximo 500 por execução, na subida do servidor e a cada 24 h; registra a contagem.
+- Verificação da migração: `make conferir-migracao-convidado` (banco descartável, nunca produção).

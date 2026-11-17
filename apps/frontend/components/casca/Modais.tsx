@@ -8,6 +8,7 @@ import type { PesquisaId } from '@cronarca/game-core';
 import { ArrowRight, Hourglass } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import type { CartaPesquisa, CustoModal, DadosObra, dadosAscensao } from '../../lib/casca/modais';
+import { AVISO_CONVIDADO } from '../../lib/convidado';
 import { Icone } from './Icone';
 import { Modal } from './Modal';
 import { SpriteAnimado } from '../anim/SpriteAnimado';
@@ -303,7 +304,9 @@ export interface PropsConfiguracoes {
   salvando: boolean;
   aoSalvar: () => void;
   aoBaixar: () => void;
-  conta: { nome: string; email: string } | null;
+  conta: { nome: string; email: string | null; convidado: boolean } | null;
+  /** Só para convidado: abre o vínculo da conta. */
+  aoVincular?: () => void;
   /** Botão de sair (o mesmo da tela de entrada). */
   sair: ReactNode;
   apagando: boolean;
@@ -365,10 +368,20 @@ export function ModalConfiguracoes(p: PropsConfiguracoes) {
           <h3 id="cfg-conta" className={estilos.nomeCartao}>Conta</h3>
           <div className={estilos.linhaConfig}>
             <span className={estilos.texto}>
-              {p.conta.nome} · {p.conta.email}
+              {p.conta.nome} · {p.conta.email ?? 'convidado'}
             </span>
             <span className={estilos.sair}>{p.sair}</span>
           </div>
+          {p.conta.convidado && p.aoVincular && (
+            <>
+              <p className={estilos.dica}>{AVISO_CONVIDADO}</p>
+              <div className={estilos.acoesLinha}>
+                <button type="button" className={`caixa botao botao-dourado ${estilos.botaoPequeno}`} onClick={p.aoVincular}>
+                  Vincular conta
+                </button>
+              </div>
+            </>
+          )}
         </section>
       )}
 

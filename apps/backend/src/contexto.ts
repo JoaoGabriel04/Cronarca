@@ -13,6 +13,8 @@ export interface ContextoApp {
   provedores: ProvedoresOAuth;
   cloudinary: ConfigCloudinary | null;
   bcryptCusto: number;
+  /** Liga o teto de convidados novos por IP (LIMITE_CONVIDADO_IP). Ausente = desligado. */
+  limiteConvidadoIp?: boolean;
   agora: () => Date;
   /** Semente (uint32) do gerador de sorteios de um estado novo. */
   sortearSemente: () => number;

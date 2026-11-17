@@ -15,12 +15,14 @@ const senhaNova = z
     error: `A senha pode ter no máximo ${CONFIG_AUTH.senhaMaxBytes} caracteres.`,
   });
 
+const nome = z
+  .string({ error: 'Informe o nome.' })
+  .trim()
+  .min(CONFIG_AUTH.nomeMin, `O nome precisa de pelo menos ${CONFIG_AUTH.nomeMin} letras.`)
+  .max(CONFIG_AUTH.nomeMax, `O nome pode ter no máximo ${CONFIG_AUTH.nomeMax} letras.`);
+
 export const esquemaCadastro = z.strictObject({
-  nome: z
-    .string({ error: 'Informe o nome.' })
-    .trim()
-    .min(CONFIG_AUTH.nomeMin, `O nome precisa de pelo menos ${CONFIG_AUTH.nomeMin} letras.`)
-    .max(CONFIG_AUTH.nomeMax, `O nome pode ter no máximo ${CONFIG_AUTH.nomeMax} letras.`),
+  nome,
   email,
   senha: senhaNova,
 });
@@ -29,6 +31,15 @@ export const esquemaLogin = z.strictObject({
   email,
   senha: z.string({ error: 'Informe a senha.' }).min(1, 'Informe a senha.').max(200),
 });
+
+/** Criar convidado: nada a enviar (o servidor decide tudo). */
+export const esquemaConvidado = z.strictObject({});
+
+/** Vincular o convidado por e-mail e senha: os mesmos campos do cadastro. */
+export const esquemaVincularEmail = esquemaCadastro;
+
+/** Confirmar o vínculo por Google ou Discord: só o nome que vai ao ranking. */
+export const esquemaConfirmarVinculo = z.strictObject({ nome });
 
 export const esquemaProvedor = z.enum(['google', 'discord']);
 

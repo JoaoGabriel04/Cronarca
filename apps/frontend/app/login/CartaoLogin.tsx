@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useId, useState, type FormEvent } from 'react';
 import { useSWRConfig } from 'swr';
 import { enviar, ErroApi, mensagemDeErro, type UsuarioPublico } from '../../lib/api';
+import { LEGENDA_CONVIDADO } from '../../lib/convidado';
 import { CHAVE_USUARIO, estadoProvedor, useProvedores, useUsuario, type EstadoProvedor } from '../../lib/usuario';
 import estilos from './login.module.css';
 
@@ -30,6 +31,7 @@ export function CartaoLogin() {
     return erro ? mensagemDeErro(erro) : null;
   });
   const [enviando, setEnviando] = useState(false);
+  const [criandoConvidado, setCriandoConvidado] = useState(false);
   const destino = destinoSeguro(params.get('voltar'));
 
   // Quem já tem sessão não precisa desta tela.
@@ -77,6 +79,20 @@ export function CartaoLogin() {
       setValores((v) => ({ ...v, senha: '', confirmar: '' }));
     } finally {
       setEnviando(false);
+    }
+  }
+
+  /** Conta de convidado: o servidor cria o usuário e abre a sessão (nada é enviado pelo cliente). */
+  async function jogarSemConta() {
+    setAviso(null);
+    setCriandoConvidado(true);
+    try {
+      const res = await enviar<{ usuario: UsuarioPublico }>('/api/auth/convidado', {});
+      await mutate(CHAVE_USUARIO, res?.usuario ?? null, { revalidate: false });
+      router.push(destino);
+    } catch (e) {
+      setAviso(e instanceof ErroApi ? mensagemDeErro(e.codigo) : 'Sem conexão com o servidor. Tente de novo.');
+      setCriandoConvidado(false);
     }
   }
 
@@ -177,6 +193,23 @@ export function CartaoLogin() {
           {cadastro ? 'Entrar' : 'Criar nova conta'}
         </button>
       </p>
+
+      {!cadastro && (
+        <div className={estilos.convidado}>
+          <button
+            type="button"
+            className={`caixa botao ${estilos.botaoConvidado}`}
+            disabled={criandoConvidado || enviando}
+            aria-describedby="legenda-convidado"
+            onClick={() => void jogarSemConta()}
+          >
+            {criandoConvidado ? 'Aguarde…' : 'Jogar sem conta'}
+          </button>
+          <p id="legenda-convidado" className={estilos.legenda}>
+            {LEGENDA_CONVIDADO}
+          </p>
+        </div>
+      )}
     </section>
   );
 }

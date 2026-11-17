@@ -5,10 +5,15 @@ import type { User } from '../generated/prisma/client.ts';
 export interface UsuarioPublico {
   id: string;
   nome: string;
-  email: string;
+  /** Nulo em conta de convidado. */
+  email: string | null;
   avatarUrl: string | null;
   emailVerificado: boolean;
   temSenha: boolean;
+  /** Conta de convidado: sem e-mail e fora do ranking até vincular. */
+  convidado: boolean;
+  /** Convidado que já ligou Google ou Discord e falta confirmar o nome. */
+  vinculoPendente: boolean;
   provedores: ('google' | 'discord')[];
 }
 
@@ -25,6 +30,8 @@ export async function usuarioPublico(prisma: PrismaClient, u: User): Promise<Usu
     avatarUrl: u.avatarUrl,
     emailVerificado: u.emailVerificado,
     temSenha: u.senhaHash !== null,
+    convidado: u.convidado,
+    vinculoPendente: u.convidado && contas.length > 0,
     provedores: contas.map((c) => c.provedor),
   };
 }

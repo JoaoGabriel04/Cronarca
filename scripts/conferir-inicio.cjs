@@ -18,7 +18,7 @@ const path = require('node:path');
 
 const APP = process.env.APP_URL || 'http://localhost:3000';
 const SAIDA = path.resolve(__dirname, '..', 'docs/referencia/cena');
-const TAMANHOS = [['360', 360, 800], ['390', 390, 844], ['430', 430, 932], ['deitado', 844, 390]];
+const TAMANHOS = [['360', 360, 800], ['390', 390, 844], ['430', 430, 932], ['deitado', 844, 390], ['360x740', 360, 740]];
 const falhas = [];
 const falhou = (msg) => {
   falhas.push(msg);
@@ -49,6 +49,18 @@ async function alcancavel(p, locator, nome) {
   if (!r || r.y < -1 || r.y + r.height > vp.height + 1 || r.x < -1 || r.x + r.width > vp.width + 1) falhou(`${nome} fora da tela (${JSON.stringify(r)})`);
 }
 
+/** Login (desktop e celular): "Jogar sem conta" visível e habilitado (conta de convidado), com a legenda; sem "Esqueci a senha". Não clica: criaria um convidado no banco. */
+async function verificarConvidado(p, nome) {
+  const botao = p.getByRole('button', { name: 'Jogar sem conta' });
+  if ((await botao.count()) !== 1) return falhou(`${nome}: botão "Jogar sem conta" ausente`);
+  if (await botao.isDisabled()) falhou(`${nome}: "Jogar sem conta" deveria estar habilitado (conta de convidado)`);
+  const legenda = 'Cria uma conta de convidado. Vincule um e-mail ou o Google depois para não perder o progresso.';
+  const leg = p.getByText(legenda, { exact: true });
+  if ((await leg.count()) !== 1) falhou(`${nome}: legenda do convidado ausente`);
+  if ((await p.getByText(/esqueci a senha/i).count()) > 0) falhou(`${nome}: "Esqueci a senha" não deveria existir`);
+  if ((await p.getByText(/neste navegador/i).count()) > 0) falhou(`${nome}: texto antigo do convidado ainda aparece`);
+}
+
 const celular = (b, w, h) => b.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true });
 
 (async () => {
@@ -71,6 +83,7 @@ const celular = (b, w, h) => b.newContext({ viewport: { width: w, height: h }, i
       } else {
         await alcancavel(p, p.getByRole('button', { name: 'Entrar', exact: true }), `${nome} botão Entrar`);
         await alcancavel(p, p.getByRole('button', { name: 'Criar nova conta' }), `${nome} "Criar nova conta"`);
+        await verificarConvidado(p, nome);
       }
     }
     await ctx.close();
@@ -196,6 +209,39 @@ const celular = (b, w, h) => b.newContext({ viewport: { width: w, height: h }, i
         if (r.sprites !== (rota === '/' ? 15 : 6)) falhou(`desktop ${w}x${h} ${rota}: ${r.sprites} sprites (esperado ${rota === '/' ? 15 : 6})`);
         await p.screenshot({ path: path.join(SAIDA, `depois_fundo_${rota === '/' ? 'inicio' : 'login'}_${w}x${h}.png`) });
       }
+      await ctx.close();
+    }
+  }
+
+  // Folga do castelo (u < 6): do ornamento mais baixo do título (losango/fio) ao PIXEL mais alto das bandeiras
+  // (linha 0 do quadro do castelo, medida nos 8 quadros), no mínimo 8 px do frame = 8 x z na tela (z = u / 6).
+  {
+    for (const [w, h] of [[1024, 768], [1280, 720], [1440, 900], [1920, 1080], [2560, 1080]]) {
+      const ctx = await b.newContext({ viewport: { width: w, height: h } });
+      const p = await ctx.newPage();
+      await p.goto(APP + '/', { timeout: 120_000 });
+      await p.waitForTimeout(1200);
+      const r = await p.evaluate(() => {
+        const raiz = getComputedStyle(document.documentElement);
+        const u = parseFloat(raiz.getPropertyValue('--u'));
+        const z = u / 6;
+        const castelo = [...document.querySelectorAll('.cena-palco > .sprite img')].find((i) => /\/castelo_/.test(i.getAttribute('src')));
+        const topoBandeiras = castelo.getBoundingClientRect().top; // a linha 0 do quadro é a das bandeiras
+        const ornamentos = [...document.querySelectorAll('.cena-palco > span[aria-hidden]:not(.sprite)')].map((e) => e.getBoundingClientRect().bottom);
+        const subtitulo = [...document.querySelectorAll('.cena-palco > p')].find((e) => /Crônicas/.test(e.textContent)).getBoundingClientRect();
+        const logo = document.querySelector('.cena-palco h1 img').getBoundingClientRect();
+        return { u, z, folga: topoBandeiras - Math.max(...ornamentos), minimo: 8 * z, logoTopo: logo.top, subBase: subtitulo.bottom, n: Math.round((4 * u) / 6) };
+      });
+      console.log(`folga    ${String(w).padStart(4)}x${String(h).padEnd(4)} u=${r.u} castelo ${r.n}x: ${r.folga.toFixed(1)} px de tela (mínimo ${r.minimo.toFixed(1)}), topo da logo ${r.logoTopo.toFixed(1)} px`);
+      if (r.folga < r.minimo - 0.01) falhou(`folga do castelo ${w}x${h}: ${r.folga.toFixed(2)} < ${r.minimo.toFixed(2)} px`);
+      if (r.logoTopo < 0) falhou(`${w}x${h}: logo fora do topo da tela (${r.logoTopo})`);
+      await p.screenshot({ path: path.join(SAIDA, `depois_inicio_folga_${w}x${h}.png`) });
+      await p.goto(APP + '/login', { timeout: 120_000 });
+      await p.waitForTimeout(800);
+      await verificarConvidado(p, `desktop ${w}x${h} login`);
+      const cartao = await p.locator('section').first().boundingBox();
+      if (!cartao || cartao.y < -0.5 || cartao.y + cartao.height > h + 0.5) falhou(`desktop ${w}x${h} login: cartão fora da tela (${JSON.stringify(cartao)})`);
+      if (w === 1440) await p.screenshot({ path: path.join(SAIDA, 'depois_login_desktop_1440.png') });
       await ctx.close();
     }
   }
