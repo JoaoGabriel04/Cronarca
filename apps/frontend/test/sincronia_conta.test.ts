@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { ehChaveDaConta, limparCacheDoJogo } from '../lib/jogo/cache';
-import { avisoLimiteCliques, rotuloLimiteCliques } from '../lib/jogo/cliques';
+import { avisoLimiteCliques } from '../lib/jogo/cliques';
 import { SINCRONIA } from '../lib/jogo/config';
 import { apagarComTentativas, RESET, textoDaFalhaDoReset, type RespostaReset } from '../lib/jogo/reset';
 import { Sincronizador, type CorpoEstado, type RespostaHttp, type Transporte } from '../lib/jogo/sincronia';
@@ -192,10 +192,9 @@ describe('troca de conta limpa o cache do jogo', () => {
 });
 
 describe('teto de cliques explicado ao jogador (opção A)', () => {
-  it('o rótulo e o aviso usam o número dos dados do jogo, sem emoji', () => {
-    expect(rotuloLimiteCliques()).toBe(`Máx. ${FORMULAS.clique.porSegundoObjeto}/s`);
+  it('o aviso usa o número dos dados do jogo, sem emoji', () => {
     expect(avisoLimiteCliques()).toContain(`${FORMULAS.clique.porSegundoObjeto} cliques por segundo`);
-    expect(`${rotuloLimiteCliques()}${avisoLimiteCliques()}`).not.toMatch(/\p{Extended_Pictographic}/u);
+    expect(avisoLimiteCliques()).not.toMatch(/\p{Extended_Pictographic}/u);
   });
   it('clicar devolve limite quando bate no teto, e não quando é o armazém cheio', async () => {
     const c = cenario(() => 'pendurar');

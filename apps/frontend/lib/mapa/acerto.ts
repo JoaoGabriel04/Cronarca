@@ -123,6 +123,12 @@ export function spritesDosContornos(m: MapaJogo): string[] {
   return [...new Set(m.clicaveis.map((c) => spriteDoContorno(c.contorno.nome)))].sort();
 }
 
+/** O clicável da imagem (árvore ou pedra) por id: o tipo e o centro da caixa, em mundo, para os efeitos do clique. */
+export function clicavelDaImagem(m: MapaJogo, id: string): { tipo: 'arvore' | 'pedra'; x: number; y: number } | null {
+  const c = porIdDaImagem(m).get(id);
+  return c ? { tipo: c.tipo, x: c.caixa.x + c.caixa.largura / 2, y: c.caixa.y + c.caixa.altura / 2 } : null;
+}
+
 const cachePorId = new WeakMap<MapaJogo, Map<string, MapaJogo['clicaveis'][number]>>();
 function porIdDaImagem(m: MapaJogo) {
   let mapa = cachePorId.get(m);

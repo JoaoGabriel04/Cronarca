@@ -14,11 +14,12 @@ import {
   type MapaJogo, type SlotId, type VisaoCliente,
 } from '@cronarca/game-core';
 import { gsap } from 'gsap';
-import { rotuloLimiteCliques } from '../../lib/jogo/cliques';
+import { MedidorDeCliques, rotuloDaTaxa } from '../../lib/jogo/cliques';
+import { BRILHO_MS, desenharLascas } from './desenharLascas';
 import { Plus } from 'lucide-react';
 import { useEffect, useImperativeHandle, useMemo, useRef, useState, type PointerEvent as EventoPonteiro, type ReactNode, type Ref } from 'react';
 import {
-  acertar, clicaveisDoMapa, contornoDoDestaque, hitboxObjeto, spritesDosContornos, hitboxSlot, iniciarGesto, moverGesto, ponteiroDe, pontoNoCanvas, slotsVazios, soltarGesto,
+  acertar, clicaveisDoMapa, clicavelDaImagem, contornoDoDestaque, hitboxObjeto, spritesDosContornos, hitboxSlot, iniciarGesto, moverGesto, ponteiroDe, pontoNoCanvas, slotsVazios, soltarGesto,
   type Alvo, type Cena, type EventoMapa, type Gesto, type Ponteiro,
 } from '../../lib/mapa/acerto';
 import {
@@ -134,6 +135,8 @@ interface OpcoesDesenho {
   ponteiro: Ponteiro;
   destaque: string | null;
   tremida: { id: string; desde: number } | null;
+  /** Pedra clicada: o contorno acende e as lascas saltam por BRILHO_MS. */
+  brilho: { id: string; desde: number } | null;
 }
 
 function desenhar(ctx: CanvasRenderingContext2D, o: OpcoesDesenho): LayoutL7 | null {
@@ -179,6 +182,14 @@ function desenhar(ctx: CanvasRenderingContext2D, o: OpcoesDesenho): LayoutL7 | n
   const contorno = contornoDoDestaque(mapa, o.destaque, o.ponteiro, tela);
   const imgContorno = contorno && camadas.sprites.get(contorno.sprite);
   if (contorno && imgContorno) ctx.drawImage(imgContorno, contorno.x, contorno.y, imgContorno.naturalWidth * cam.zoom, imgContorno.naturalHeight * cam.zoom);
+  // Clique em pedra: no tempo da tremida, o contorno acende (também no toque) e algumas lascas saltam.
+  if (o.brilho && local - o.brilho.desde < BRILHO_MS) {
+    const b = contornoDoDestaque(mapa, o.brilho.id, 'mouse', tela);
+    const imgB = b && camadas.sprites.get(b.sprite);
+    if (b && imgB) ctx.drawImage(imgB, b.x, b.y, imgB.naturalWidth * cam.zoom, imgB.naturalHeight * cam.zoom);
+    const c = clicavelDaImagem(mapa, o.brilho.id);
+    if (c) desenharLascas(ctx, c.x * cam.zoom + tela.dx, c.y * cam.zoom + tela.dy, (local - o.brilho.desde) / BRILHO_MS, cam.zoom);
+  }
   const cripta = o.nevoas.find((x) => x.n.destino === 'cripta');
   const layout = desenharL7(ctx, mk, camadas.sprites, camadas.fontes, anim, tela, { viewport: VP, caixaAviso: cripta ? caixaDoAviso(cripta.n) : null }); // pins, rótulos e aviso por cima da névoa
 
@@ -340,8 +351,10 @@ export interface CliqueObjeto {
   ganho: number;
   /** Não rendeu porque o recurso está no teto do armazém: mostra "Cheio" no lugar do "+N". */
   cheio: boolean;
-  /** Não rendeu porque bateu no teto de cliques por segundo: mostra "Máx. N/s". */
+  /** Bateu no teto de cliques por segundo (o aviso explicativo sai uma vez; o rótulo "+N/s máx." vem da taxa). */
   limite?: boolean;
+  /** Quanto cada clique rende (micro), com as relíquias: a taxa de coleta é cliques por segundo vezes isto. */
+  ganhoPorCliqueMicro?: number;
   /** false: o servidor recusou (o "+N" some). */
   aceito: Promise<boolean>;
 }
@@ -413,8 +426,6 @@ export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao 
   const canvas = useRef<HTMLCanvasElement>(null);
   const camadaEfeitos = useRef<HTMLDivElement>(null);
   const efeitos = useRef<EfeitosClique | null>(null);
-  /** Última vez que o rótulo do teto de cliques subiu, por objeto. */
-  const ultimoLimite = useRef(new Map<string, number>());
   const gesto = useRef<Gesto | null>(null);
   /** Dedos (ou ponteiros) pressionados no canvas, pelo pointerId: com dois, é pinça. */
   const dedos = useRef(new Map<number, Ponto>());
@@ -447,6 +458,9 @@ export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao 
   const [arrastando, setArrastando] = useState(false);
   const [sobre, setSobre] = useState<Alvo | null>(null);
   const [tremida, setTremida] = useState<{ id: string; desde: number } | null>(null);
+  const [brilho, setBrilho] = useState<{ id: string; desde: number } | null>(null);
+  /** Ritmo de cliques por objeto (a taxa de coleta que sobe do clique). */
+  const medidor = useRef(new MedidorDeCliques());
   const [piscando, setPiscando] = useState<{ slot: SlotId; desde: number } | null>(null);
   /** Câmera indo até um slot (Catálogo); qualquer gesto do jogador corta. */
   const indo = useRef<gsap.core.Tween | null>(null);
@@ -535,8 +549,8 @@ export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao 
   useEffect(() => {
     // Até a imagem e os sprites chegarem, desenha a tela de espera.
     const prontas = camadas?.mapa === mapa ? camadas : null;
-    paraDesenhar.current = { vp: VP, cam, mapa, nevoas, escala, camadas: prontas, itens: todasConstrucoes ? itensTodos : itens, estado, todasConstrucoes, slotSobMouse, piscando, mostrarGrade, mostrarHitboxes, mostrarMascaras, ponteiro, destaque, tremida, relogio: () => relogioRef.current() };
-  }, [VP, cam, mapa, nevoas, escala, camadas, itens, itensTodos, todasConstrucoes, slotSobMouse, piscando, estado, mostrarGrade, mostrarHitboxes, mostrarMascaras, ponteiro, destaque, tremida]);
+    paraDesenhar.current = { vp: VP, cam, mapa, nevoas, escala, camadas: prontas, itens: todasConstrucoes ? itensTodos : itens, estado, todasConstrucoes, slotSobMouse, piscando, mostrarGrade, mostrarHitboxes, mostrarMascaras, ponteiro, destaque, tremida, brilho, relogio: () => relogioRef.current() };
+  }, [VP, cam, mapa, nevoas, escala, camadas, itens, itensTodos, todasConstrucoes, slotSobMouse, piscando, estado, mostrarGrade, mostrarHitboxes, mostrarMascaras, ponteiro, destaque, tremida, brilho]);
 
   // Laço de desenho: um quadro por atualização da tela, para o grupo em marcha
   // andar liso e o contador virar no segundo certo. O quadro da animação de
@@ -662,16 +676,16 @@ export function CanvasMapa({ estado, relogio, clicarObjeto, aoEvento, depuracao 
     // servidor (limite de 5/s por objeto e 10/s no total); se o servidor recusar, o "+N" some.
     const r = clicarObjeto(alvo.id);
     setTremida({ id: alvo.id, desde: Date.now() });
+    // Pedra: não treme (está pintada na imagem), então acende o contorno e solta lascas.
+    if (clicavelDaImagem(mapa, alvo.id)?.tipo === 'pedra') setBrilho({ id: alvo.id, desde: Date.now() });
     setUltimoEvento(`clique em ${alvo.id}`);
-    if (r.ganho > 0) efeitos.current?.mostrar(alvo.id, alvo.recurso, r.ganho, p.x, p.y);
-    else if (r.cheio) efeitos.current?.mostrarCheio(alvo.id, alvo.recurso, p.x, p.y);
-    else if (r.limite) {
-      // No máximo um rótulo a cada 3 s por objeto: o jogador entende o teto sem encher a tela.
+    if (r.cheio) efeitos.current?.mostrarCheio(alvo.id, alvo.recurso, p.x, p.y);
+    else {
+      // O rótulo mostra a TAXA de coleta (recurso por segundo), não a soma: trava no teto e avisa "máx.".
       const agora = Date.now();
-      if (agora - (ultimoLimite.current.get(alvo.id) ?? 0) >= 3_000) {
-        ultimoLimite.current.set(alvo.id, agora);
-        efeitos.current?.mostrarTexto(alvo.id, alvo.recurso, rotuloLimiteCliques(), p.x, p.y);
-      }
+      medidor.current.registrar(alvo.id, agora);
+      const taxa = medidor.current.taxa(alvo.id, agora, r.ganhoPorCliqueMicro ?? 0);
+      if (taxa.microPorSegundo > 0) efeitos.current?.mostrarTexto(alvo.id, alvo.recurso, rotuloDaTaxa(taxa), p.x, p.y);
     }
     void r.aceito.then((ok) => {
       if (!ok) efeitos.current?.cancelar(alvo.id);

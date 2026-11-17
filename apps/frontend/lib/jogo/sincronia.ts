@@ -10,7 +10,7 @@
 // injetados, para os testes controlarem tudo.
 
 import {
-  FORMULAS, precisaDoServidor, preverAcao, preverEstado, recursoDoObjeto, tetos,
+  FORMULAS, ganhoCliqueMicro, nivelReliquia, precisaDoServidor, preverAcao, preverEstado, recursoDoObjeto, tetos,
   type Acao, type ErroAcao, type Recurso, type VisaoCliente,
 } from '@cronarca/game-core';
 import { SINCRONIA } from './config';
@@ -223,11 +223,11 @@ export class Sincronizador {
    * desfecho do lote. `cheio`: não rendeu nada porque o recurso está no teto
    * do armazém (o clique vai ao servidor do mesmo jeito; quem decide é ele).
    */
-  clicar(objeto: string): { ganho: number; cheio: boolean; limite: boolean; desfecho: Promise<Desfecho> } {
+  clicar(objeto: string): { ganho: number; cheio: boolean; limite: boolean; ganhoPorCliqueMicro: number; desfecho: Promise<Desfecho> } {
     const antes = this.estado();
     // Árvores e pedras pelo mapa; construções produtoras (serraria, pedreira...) pelo slot.
     const recurso = antes ? recursoDoObjeto(antes, objeto, { objetosDoMapa: this.amb.objetosDoMapa() }) : null;
-    if (!antes || !recurso) return { ganho: 0, cheio: false, limite: false, desfecho: Promise.resolve({ ok: false, motivo: 'recusada', erro: 'objeto_invalido' }) };
+    if (!antes || !recurso) return { ganho: 0, cheio: false, limite: false, ganhoPorCliqueMicro: 0, desfecho: Promise.resolve({ ok: false, motivo: 'recusada', erro: 'objeto_invalido' }) };
     const local = this.amb.agoraLocal();
     this.ultimoCliquePorRecurso.set(recurso, local);
     const ultimo = this.fila[this.fila.length - 1];
@@ -248,7 +248,7 @@ export class Sincronizador {
     const ganho = Math.max(0, depois.recursos[recurso] - preverEstado(antes, agora).estado.recursos[recurso]);
     const cheio = ganho === 0 && depois.recursos[recurso] >= tetos(depois)[recurso];
     // Não rendeu e o armazém não está cheio: bateu no teto de cliques por segundo (decisão do dono: o jogador é avisado).
-    return { ganho, cheio, limite: ganho === 0 && !cheio, desfecho };
+    return { ganho, cheio, limite: ganho === 0 && !cheio, ganhoPorCliqueMicro: ganhoCliqueMicro(nivelReliquia(depois, 'maos_calejadas')), desfecho };
   }
 
   /**

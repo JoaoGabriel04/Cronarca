@@ -68,7 +68,9 @@ export function desenharObjetos(
     if (c.tipo === 'arvore') {
       const img = sprites.get(c.sprite);
       if (!img) throw new Error(`sprite não carregado: ${c.sprite}`);
-      ctx.drawImage(img, c.ret.x, c.ret.y, c.ret.largura, c.ret.altura);
+      // A árvore clicada treme como as construções (o id do clique é o do clicável, não o da árvore).
+      const tremorArvore = c.arvore.clicavel !== null && realce.tremida?.id === c.arvore.clicavel ? realce.tremida.dx : 0;
+      ctx.drawImage(img, c.ret.x + tremorArvore, c.ret.y, c.ret.largura, c.ret.altura);
       nArvores++;
       continue;
     }

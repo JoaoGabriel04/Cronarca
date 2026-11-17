@@ -5,7 +5,7 @@
 // jogável, núcleo, destinos). Usa o estado de exemplo e não fala com o
 // servidor: o clique roda a mesma previsão do game-core localmente.
 
-import { estadoInicial, objetosDoMapa, preverAcao, preverEstado, recursoDoObjeto, tetos, ZOOM_MAPA, type PesquisaId, type VisaoCliente } from '@cronarca/game-core';
+import { estadoInicial, ganhoCliqueMicro, nivelReliquia, objetosDoMapa, preverAcao, preverEstado, recursoDoObjeto, tetos, ZOOM_MAPA, type PesquisaId, type VisaoCliente } from '@cronarca/game-core';
 import { Grid3x3 } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import type { Camera } from '../../lib/mapa/camera';
@@ -35,7 +35,7 @@ export function MapaDePreview({ pesquisas = [], exemplo = true }: { pesquisas?: 
     if (!r.ok || !recurso) return { ganho: 0, cheio: false, aceito: Promise.resolve(false) };
     setEstado(r.estado);
     const ganho = r.estado.recursos[recurso] - antes.recursos[recurso];
-    return { ganho, cheio: ganho === 0 && r.estado.recursos[recurso] >= tetos(r.estado)[recurso], aceito: Promise.resolve(true) };
+    return { ganho, cheio: ganho === 0 && r.estado.recursos[recurso] >= tetos(r.estado)[recurso], ganhoPorCliqueMicro: ganhoCliqueMicro(nivelReliquia(r.estado, 'maos_calejadas')), aceito: Promise.resolve(true) };
   };
 
   return (

@@ -385,6 +385,7 @@ function Jogo({ depuracao = false, acoesDepuracao }: PropsJogo) {
       ganho: r.ganho,
       cheio: r.cheio,
       limite: r.limite,
+      ganhoPorCliqueMicro: r.ganhoPorCliqueMicro,
       aceito: r.desfecho.then((d) => {
         // Clique recusado (limite, objeto) é silencioso: o "+N" some. Rede e sessão avisam.
         const texto = textoDoDesfecho(d, { silenciarRecusa: true });
