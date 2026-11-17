@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { animacao } from '@cronarca/game-core';
 import { CENA_INICIO, CENA_LOGIN, ESCALAS_DA_CENA, JANELA_NO_FUNDO, SPRITES_DA_CENA, ladoDaArte } from '../components/cena/dados';
@@ -43,6 +43,17 @@ describe('cena: lista fechada e arquivos', () => {
     for (const nome of ['inicio_largo.png']) expect(existsSync(join(PUBLIC, 'cenas', nome))).toBe(true);
     const fontes = ['components/cena/Cena.tsx', 'components/cena/dados.ts', 'app/globals.css'].map((f) => readFileSync(join(__dirname, '..', f), 'utf8')).join('\n');
     expect(fontes).not.toMatch(/cenas\/inicio\.png|FAIXAS_|gradienteDaBorda/);
+  });
+});
+
+describe('cena: sem SVG de sprite nem fundo antigo', () => {
+  it('em public/ só restam os dois ícones em SVG', () => {
+    const svgs = ['sprites', 'cenas'].flatMap((d) => readdirSync(join(PUBLIC, d)).filter((f) => f.endsWith('.svg')).map((f) => `${d}/${f}`));
+    expect(svgs.sort()).toEqual(['sprites/icone-config.svg', 'sprites/icone-saber.svg']);
+  });
+  it('o código da cena não referencia SVG', () => {
+    const fontes = ['components/cena/Cena.tsx', 'components/cena/dados.ts', 'components/cena/escala.ts'].map((f) => readFileSync(join(__dirname, '..', f), 'utf8')).join('\n');
+    expect(fontes).not.toMatch(/\.svg/);
   });
 });
 

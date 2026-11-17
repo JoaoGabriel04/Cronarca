@@ -322,6 +322,46 @@ Era I Aldeia, II Reino, III Arcana, IV Dimensões (só a I está jogável). Obje
 
 Mercador Viajante, Bandidos na Estrada, Tempestade, Festival da Colheita, Incêndio, Cometa. Cada um com efeito curto (ex.: tempestade dá +30 de madeira) e linha na Crônica com horário.
 
+## Tela inicial v2 (Início e Login)
+
+Referência: Figma "Telas v2" (frames "Início - Desktop/Mobile" e "Login - Desktop/Mobile"). Dados em `apps/frontend/components/cena/dados.ts`; escala em `components/cena/escala.ts`; CSS em `app/globals.css`; testes em `apps/frontend/test/cena.test.ts`; conferência no navegador com `make conferir-inicio` (capturas em `docs/referencia/cena/`).
+
+**Lista fechada de sprites** (grupo `cena` do `quadros_cena.json`, única fonte de quadros e durações): `pinho0`, `pinho1` (48), `castelo` (96, 8 quadros), `cavaleiro`, `fogueira`, `placa` (32), `flores`, `cerca` (16). Nenhum outro sprite entra na cena e nenhum sprite é SVG: só restam `icone-config.svg` e `icone-saber.svg` em `public/`. O teste falha se voltar qualquer outro SVG.
+
+**Escala.** Fundo: 1 px de arte = 6 px do palco. Sprites: 1 px de arte = 4 px (castelo, pinhos de perto, cavaleiro, fogueira, placa, flores, cerca) ou 3 px (pinhos médios atrás do castelo). No celular, personagens e objetos a 3x. O palco de 1440 x 900 é escalado por `--z = u/6`, com `u = floor(min(W/240, H/150))` entre 3 e 8. Para o pixel de arte ficar sempre inteiro na tela, cada escala k vale `n = round(k * u / 6)` pixels de tela (`--e3` e `--e4`, gravados no `<head>` por `SCRIPT_ESCALA`). Em 1440 x 900 (u = 6) os tamanhos são exatamente os do Figma. 4x e 3x arredondam para o mesmo `n` em u = 3 e u = 5 (por exemplo 1366 x 768); a proporção 4:3 só se mantém em u = 4, 6, 7 e 8.
+
+**Posições desktop (1440 x 900, canto superior esquerdo).** Camadas, de baixo para cima: fundo, pinhos médios, castelo, pinhos de perto, personagens e objetos, textos, menu. Não há fileira de pinhos ao longe (o fundo já a traz).
+
+| Sprite | Escala | x | y |
+|---|---|---|---|
+| pinho1 (médio) | 3x | 250 | 470 |
+| pinho0 (médio) | 3x | 400 | 455 |
+| pinho0 (médio, direita) | 3x | 980 | 470 |
+| castelo | 4x | 528 | 222 |
+| pinho0 (perto, esquerda) | 4x | -20 | 420 |
+| pinho1 (perto, direita) | 4x | 1230 | 430 |
+| cavaleiro | 4x | 60 | 662 |
+| fogueira | 4x | 230 | 752 |
+| flores | 4x | 1010 e 1300 | 776 e 816 |
+| cerca (4 peças) | 4x | 1130 + 64·i | 776 |
+| placa | 4x | 1280 | 632 |
+
+Login desktop: pinho1 (250,470), pinho0 (400,455), castelo, pinho0 de perto (-20,420), cavaleiro e fogueira; sem o lado direito (o cartão ocupa x de 940 a 1380), sem placa, cerca e flores.
+
+**Celular (390 x 844).** Castelo (3,150) a 4x; pinho0 (-50,420) e pinho1 (296,430) a 3x, atrás do castelo; cavaleiro (10,556); fogueira (118,564); flores (290,604) e (330,620); menu em y = 650. Login: só o castelo, no cabeçalho. Abaixo de 384 px de largura a escala cai um passo (castelo 3x, resto 2x).
+
+**Fundo largo.** `public/cenas/inicio_largo.png`, 420 x 210 de arte (1 px = 6 px do palco): a janela central de 240 x 150 (x 90 a 329, y 30 a 179) é o palco; o resto é sangria (90 de cada lado, 30 em cima e embaixo). Fica dentro do palco escalado, com `left: -540px; top: -180px; width: 2520px; height: 1260px`, e cobre janelas de cerca de 1,15:1 até 2,8:1 (por exemplo 1864 x 935, 2560 x 1080, 1024 x 768). Fora disso aparece o degradê de apoio `#05071a` a `#0a1a12` do `.cena` (3440 x 1440 perde 40 px de cada lado). O palco é centralizado com origem em pixel inteiro (`round(down, ...)`). No celular o mesmo arquivo entra com deslocamento (540, 180). Gerador: `scripts/arte/gen_cena_largo.py` (só para regenerar o PNG; o jogo não o usa). O `inicio.png` antigo saiu de uso.
+
+**Diferenças conhecidas em relação ao Figma.**
+- A logo é o PNG em pixel art aprovado (selo + nome), e não o texto serifado dourado do frame.
+- Menu do desktop: 460 x 256 com botões de 360 de largura (Figma: 456 x 254, botões de 400).
+- Menu do celular: 188 de altura, botões de 44 px (Figma: 174, 42 px).
+- A fogueira (230,752) encosta na borda esquerda da estrada, como na tabela do Figma.
+- Em u = 4 (1024 x 768, 1280 x 720) o castelo vale 3 px por pixel de arte (12,5% maior que o nominal) e as bandeiras encostam no subtítulo. Limitação aceita da regra de escala inteira.
+- Login no celular: o frame do Figma tem o formulário em largura total, sem selo nem subtítulo no cartão, com "Esqueci a senha" e "Jogar sem conta"; o projeto mantém o cartão com selo e sem esses dois itens. Fora do escopo da cena (só o castelo e o fundo seguem o Figma).
+- Cartão do Login com 773 de altura (Figma: 756) por causa da linha do Google e do Discord.
+- Se a vinheta de dithering do rodapé do fundo incomodar, a correção é regenerar o PNG, não cobrir em CSS.
+
 ## Marca (portão Logo e ícone)
 
 Selo do relógio (selo redondo de pedra, C dourado, ponteiros no vazio da letra) e o nome "CRONARCA" em pixel art dourado. **O nome é imagem, nunca texto.** Toda ampliação é por múltiplo inteiro, com `image-rendering: pixelated` (o 16 px tem arquivo próprio, desenhado à mão). Constantes em `apps/frontend/lib/marca.ts`; arquivos em `apps/frontend/public/marca/`; fontes vetoriais em `docs/referencia/marca/`.
@@ -330,7 +370,7 @@ Selo do relógio (selo redondo de pedra, C dourado, ponteiros no vazio da letra)
 |---|---|
 | Aba do navegador | `icone-16.png` e `icone-32.png` declarados com o tamanho real; `/favicon.ico` (16 + 32) para quem pede direto |
 | iPhone / Android | `apple-touch-180.png` (opaco); manifest (`app/manifest.ts`) com `android-192.png` (opaco) e `icone-512.png`; `theme-color` `#14201c` |
-| Início e Login | `logo-completa.png` (546 x 192, a 6x) no palco 1440 x 900: 6 px do palco por pixel da arte = `--u` px de tela. Início: logo em `top: 24`, subtítulo e ornamentos 32 px abaixo de antes. Login: logo em (48, 24), lema em `top: 228` |
+| Início e Login | `logo-completa.png` (arte de 91 x 32) a 4x no palco 1440 x 900 (364 x 128, pixel inteiro de tela). Início: logo em `top: 24`, subtítulo em 154, ornamentos em 188. Login: logo em (48, 24), lema em `top: 160` |
 | Carregamento | selo `icone-128.png` (4x) no lugar da fogueira e `nome-cronarca.png` a 4x (224 x 40) |
 | HUD | selo `icone-64.png`: 64 px no desktop, 32 no topo compacto e no celular |
 | Compartilhamento | título "%s · Cronarca", descrição curta, Open Graph/Twitter `summary` com o selo 512 |
