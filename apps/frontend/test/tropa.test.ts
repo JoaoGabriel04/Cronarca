@@ -1,7 +1,7 @@
 // Portão 22: dados da tela Tropa (Alojamento, contratar com classe) e o texto para cliente antigo.
 import { CLASSES, estadoInicial, TEXTOS_QG, visaoDoCliente, type VisaoCliente } from '@cronarca/game-core';
 import { describe, expect, it } from 'vitest';
-import { alojamento, cartasHerois, cliqueDoQg, dadosContratar, guilda, vantagemDaClasse } from '../lib/casca/telas';
+import { alojamento, cartasHerois, cliqueDoQg, dadosContratar, guilda, textoDaSubaba, vantagemDaClasse } from '../lib/casca/telas';
 import { textoDaRecusa } from '../lib/jogo/recusas';
 
 const T0 = Date.UTC(2026, 5, 1, 12, 0, 0);
@@ -72,5 +72,19 @@ describe('botão do Quartel General no HUD', () => {
     e.qg = { estado: 'ruinas', desde: T0, nivel: 0 };
     expect(cliqueDoQg(e)).toEqual({ tipo: 'reerguer' });
     expect(cliqueDoQg(visao(1, [1]))).toEqual({ tipo: 'tropa' });
+  });
+});
+
+describe('subabas Mesa de Guerra e Enfermaria conforme o QG', () => {
+  const casos = [
+    ['oculto', 0, 'Bloqueada', TEXTOS_QG.bloqueado, TEXTOS_QG.bloqueado],
+    ['ruinas', 0, 'Bloqueada', 'Reerga o Quartel General para liberar a Mesa de Guerra.', 'Reerga o Quartel General para liberar a Enfermaria.'],
+    ['reerguido', 1, 'Em breve', TEXTOS_QG.mesaDeGuerraEmBreve, TEXTOS_QG.enfermariaEmBreve],
+  ] as const;
+  it.each(casos)('QG %s', (estado, nivel, subtitulo, mesa, enfermaria) => {
+    const e = visao(0, [1]);
+    e.qg = { estado, desde: T0, nivel };
+    expect(textoDaSubaba(e, 'mesa')).toEqual({ subtitulo, texto: mesa });
+    expect(textoDaSubaba(e, 'enfermaria')).toEqual({ subtitulo, texto: enfermaria });
   });
 });

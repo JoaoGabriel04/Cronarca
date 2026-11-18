@@ -126,6 +126,16 @@ export function cliqueDoQg(e: VisaoCliente): CliqueQg {
   return { tipo: 'tropa' };
 }
 
+export type SubabaQg = 'mesa' | 'enfermaria';
+
+/** Texto e subtítulo das subabas que dependem do QG: Bloqueada até reerguer; "Em breve" só depois (a tela chega no Portão 23/24). */
+export function textoDaSubaba(e: VisaoCliente, subaba: SubabaQg): { subtitulo: string; texto: string } {
+  const mesa = subaba === 'mesa';
+  if (e.qg.estado === 'oculto') return { subtitulo: 'Bloqueada', texto: TEXTOS_QG.bloqueado };
+  if (e.qg.estado === 'ruinas') return { subtitulo: 'Bloqueada', texto: mesa ? TEXTOS_QG.mesaDeGuerraReerga : TEXTOS_QG.enfermariaReerga };
+  return { subtitulo: 'Em breve', texto: mesa ? TEXTOS_QG.mesaDeGuerraEmBreve : TEXTOS_QG.enfermariaEmBreve };
+}
+
 export interface Alojamento {
   /** QG reerguido: o Alojamento existe. */
   disponivel: boolean;

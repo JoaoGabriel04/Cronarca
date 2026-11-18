@@ -50,5 +50,8 @@ export const TEXTOS_QG = {
   saiuDaGuilda: (nome: string) => `${nome} deixou a guilda: faltou vaga no Alojamento.`,
   mesaDeGuerraEmBreve: 'A Mesa de Guerra chega em breve.',
   enfermariaEmBreve: 'A Enfermaria chega em breve.',
+  /** QG já descoberto (ruínas), mas ainda não reerguido. */
+  mesaDeGuerraReerga: 'Reerga o Quartel General para liberar a Mesa de Guerra.',
+  enfermariaReerga: 'Reerga o Quartel General para liberar a Enfermaria.',
   atualizePagina: 'O jogo foi atualizado. Atualize a página e tente de novo.',
 } as const;

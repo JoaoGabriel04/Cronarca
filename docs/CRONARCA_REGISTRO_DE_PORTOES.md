@@ -268,3 +268,8 @@ Regra daqui em diante: a cada portão, antes de encerrar a conversa, atualizo as
 - Correção: `executarAcao` e `apagarProgresso` tomam `pg_advisory_xact_lock` por jogador no início da transação; ações e reset da mesma conta passam em fila.
 - Resultado: teste isolado "a mesma chave enviada em paralelo" falhava em 8 de 25 rodadas; depois da correção, 0 em 30. Suíte completa: 747 testes verdes, typecheck limpo.
 - Limite dos testes novos (rodadas repetidas e reset junto): não reproduzem a corrida quando o arquivo roda quente (15 de 15 passaram sem o lock). Quem pega a regressão é o teste isolado, rodado a frio.
+
+## 18/11 - Portão 22: Mesa de Guerra e Enfermaria conforme o QG (fix separado)
+- Bug: as duas subabas mostravam sempre "chega em breve" (`Telas.tsx`), sem olhar `qg.estado`.
+- Correção: `textoDaSubaba` em `lib/casca/telas.ts`. Oculto: "Explore as Ruínas do Quartel General, ao norte da vila." e subtítulo "Bloqueada"; ruínas: "Reerga o Quartel General para liberar a Mesa de Guerra." (ou "...a Enfermaria.") e "Bloqueada"; reerguido: "em breve" de cada subaba e subtítulo "Em breve". Textos novos em `data/qg.ts`.
+- Teste de front para os três estados nas duas subabas; conferido no navegador com convidado nos três estados.

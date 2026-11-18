@@ -10,7 +10,7 @@ import { Hourglass } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { linhasCronica } from '../../lib/casca/dados';
 import {
-  avisoExpedicao, caminhoDoTempo, cartasHerois, dadosContratar, chipsGrupo, emAndamento, eraAtual, guilda, linhasDestinos, relatorios, reliquias,
+  avisoExpedicao, caminhoDoTempo, cartasHerois, dadosContratar, textoDaSubaba, chipsGrupo, emAndamento, eraAtual, guilda, linhasDestinos, relatorios, reliquias,
   type CartaHeroi, type Peca,
 } from '../../lib/casca/telas';
 import { AJUDA } from '../../lib/casca/ajuda';
@@ -212,13 +212,13 @@ export function TelaHerois({ estado, agora, acoes }: { estado: VisaoCliente; ago
           </Painel>
         )}
         {sub === 'mesa' && (
-          <Painel titulo="Mesa de Guerra" subtitulo="Em breve">
-            <p className={estilos.cartaoTexto}>{TEXTOS_QG.mesaDeGuerraEmBreve}</p>
+          <Painel titulo="Mesa de Guerra" subtitulo={textoDaSubaba(estado, 'mesa').subtitulo}>
+            <p className={estilos.cartaoTexto}>{textoDaSubaba(estado, 'mesa').texto}</p>
           </Painel>
         )}
         {sub === 'enfermaria' && (
-          <Painel titulo="Enfermaria" subtitulo="Em breve">
-            <p className={estilos.cartaoTexto}>{TEXTOS_QG.enfermariaEmBreve}</p>
+          <Painel titulo="Enfermaria" subtitulo={textoDaSubaba(estado, 'enfermaria').subtitulo}>
+            <p className={estilos.cartaoTexto}>{textoDaSubaba(estado, 'enfermaria').texto}</p>
           </Painel>
         )}
         </div>
