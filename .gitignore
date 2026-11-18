@@ -20,3 +20,14 @@ dumps/
 saves_*.sql
 saves_*.json
 backups/
+
+# Música: arquivos de áudio ficam fora do Git (a faixa de teste do plano grátis do Suno não tem direito comercial).
+apps/frontend/public/musica/*.mp3
+apps/frontend/public/musica/*.ogg
+apps/frontend/public/musica/*.m4a
+apps/frontend/public/musica/*.wav
+apps/frontend/public/musica/*.flac
+
+# Arquivos compactados e marcas de download do Windows ficam fora do Git.
+*.zip
+*:Zone.Identifier

@@ -256,7 +256,7 @@ O dono não tem fórmulas prontas. Estas valem até a primeira rodada de testes 
 | Custo de contratar | `40 × 1,58^(aventureiros contratados)` de ouro e `20` de comida (era 1,6: a 14ª contratação passava do Armazém 10) |
 | Relíquias na ascensão | `3 + 2 × (ciclo − 1)` |
 | Custo de relíquia (nível n) | `custoBase × (n + 1)` |
-| Clique | `1 × (1 + 0,25 × nível de Mãos Calejadas)` do recurso do objeto, limitado por taxa |
+| Clique | madeira e pedra: `1 + melhorias de pesquisa + 0,25 × nível de Mãos Calejadas` (soma; o teto de GPC 3 da Era I vale só para `1 + pesquisas`, antes das relíquias, máximo 5,5); ferro e ouro: sempre 1. Limitado por taxa |
 
 ## Dados do jogo
 

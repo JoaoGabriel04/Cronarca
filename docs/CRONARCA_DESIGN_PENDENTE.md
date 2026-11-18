@@ -208,3 +208,8 @@ Pendente: a placa ainda é o sprite antigo (6 px por pixel), Login desktop escon
 
 ## Celular deitado (844x390): layout de duas colunas
 - Hoje usa o layout mobile com rolagem (aceito por ora). Layout dedicado seria um portão à parte; prioridade baixa, decidir depois do Portão 21.
+
+## 18/11: atualização
+- Arqueiro: sprite já existia (32 px, 6 quadros); eco_arqueiro entregue. Figma do Portão 21 feito (modal Reerguer D 208:46936 / M 208:47641, estados do mapa 208:52223, cartão 178:42460).
+- Arte do Portão 23: ver CRONARCA_ARTE_PORTAO_23.md (lista, tamanhos e estado de cada entrega).
+- Pendentes de design: cartão de Expedições mobile para Ruínas do QG; botão do QG no HUD (Figma); Login mobile com cenas do castelo; duas colunas no celular deitado (baixa prioridade).

@@ -6,6 +6,14 @@ Figma: arquivo "Cronarca - Telas", fileKey `e6AYbKy8d1uUd5gIYC857u`. Páginas: T
 
 ---
 
+## 0. Atualização de 18/11/2026 (leia primeiro)
+- **Feito e em produção:** Portão 21 (descoberta do QG, esquema 10), Portão 22 (QG e aventureiros: Alojamento, contratação com escolha de classe, comida curva C, esquema 11) e correção B (fila por jogador, commit 459c304). Ascensão testada com heróis alojados.
+- **Em andamento / a rodar no Claude Code, nesta ordem:** (1) auditoria dos bugs de clique, HUD e reset (PROMPT_BUGS_PRODUCAO_CLIQUE_HUD_RESET.md; auditoria rodada, falta o relatório ser conferido); (2) progressão do clique GPC (PROMPT_PROGRESSAO_DO_CLIQUE.md); (3) Portão 23; (4) Portão 24; (5) Economia unificada, Mercado e Vila em grade (CRONARCA_BACKLOG_IDEIAS.md); áudio em paralelo (PROMPT_AUDIO_TRILHA.md, a faixa do plano grátis NÃO vai para o repo).
+- **Decisão que bloqueia o Portão 23:** teto de poder (seção 8.1), ainda não decidida.
+- **Decisões novas (resumo):** contratação com escolha de classe; Alojamento só entra em ação na ascensão (escolha manual só no 25); capacidade [0,3,4,5,6,7]; arma e armadura atravessam; comida 0,03 + 0,006 por herói extra; progressão de clique (GPC) em vez de subir tetos; vila em grade (toque longo no celular); Mercado com base econômica única.
+- **Arte do Portão 23 (comigo):** ver CRONARCA_ARTE_PORTAO_23.md. O Arqueiro já existia (32 px); `eco_*` das 4 classes prontos.
+- As seções abaixo refletem o estado de 16/11; onde divergirem desta seção, vale esta.
+
 ## 1. Estado do código (Claude Code)
 
 | Portão | Status |
@@ -111,8 +119,8 @@ Na página **Sprites** do Figma: seção "Sprites existentes do projeto" (278 PN
 |---|---|---|
 | 19 | Construção com consequência | não |
 | 20 | Núcleo de combate (20a, 20b, 20c): **feito** | sim |
-| 21 | Descoberta do QG (Ruínas do QG, pontos de interesse): **aplicado (Gate 2), aguardando Gate 3 e deploy**; esquema 10 | sim |
-| 22 | QG e aventureiros unificados, Alojamento, contratação com classe: **aplicado (Gate 2), aguardando Gate 3 e deploy**; esquema 11 (ver `CHECKLIST_DEPLOY_ESQUEMA_11.md`) | sim |
+| 21 | Descoberta do QG (Ruínas do QG, pontos de interesse) | sim |
+| 22 | QG e aventureiros unificados, Alojamento, contratação com classe | sim (falta Arqueiro) |
 | 23 | Mesa de Guerra e Ecos | telas sim; arte de batalha e cenários não |
 | 24 | Enfermaria e derrota | tela sim; sprite do prédio não |
 | 25 | Ascensão com Bônus, avançar de era, perigo da Cripta, relíquias | telas sim (mobile parcial); relíquias não |

@@ -188,10 +188,10 @@ Medido sobre tropas plausíveis com poder igual a E(n). Quem investe acima do es
 Isso vira um script de balanceamento no repositório, não só um número no código.
 
 ### 1.7 Guerreiros (aventureiros): progressão e consequências
-- **Contratação** na Taverna, como hoje (ouro 40 × 1,58^n mais 20 de comida). O QG não a substitui. **Hoje a classe do contratado é sorteada** entre as cinco. Com classes que têm vantagem entre si, sorteio atrapalha o planejamento de tropa. **A CONFIRMAR, recomendação:** o jogador **escolhe a classe** ao contratar, sem custo extra no começo.
+- **Contratação** na Taverna, como hoje (ouro 40 × 1,58^n mais 20 de comida). O QG não a substitui. **Hoje a classe do contratado é sorteada** entre as cinco. Com classes que têm vantagem entre si, sorteio atrapalha o planejamento de tropa. **DECIDIDO (Portão 22):** o jogador **escolhe a classe** ao contratar, sem custo extra.
 - **Já existem:** nível 1 a 20, XP (vitória +2, recuo +1, subir pede 4 × nível), arma e armadura de 0 a 6, estados (na vila, em expedição, ferido), poder `5 + 4×nível + 3×arma + 2×armadura`, vagas da guilda `4 + 1 por nível de Taverna`. A função de Poder do combate parte dessa, com os atributos de combate acrescentados (portão 20).
 - **O que o QG acrescenta:** Mesa de Guerra, limite da tropa enviada, Alojamento persistente e, depois, treino de especialização.
-- **Alojamento:** durante o ciclo, as vagas da Taverna continuam valendo. Quem atravessa o reset passa a morar no QG (capacidade sobe com o nível dele), fora da população. Como Taverna e QG se dividem exatamente fica para o plano do portão 22.
+- **Alojamento:** durante o ciclo, as vagas da Taverna continuam valendo. Quem atravessa o reset passa a morar no QG (capacidade sobe com o nível dele), fora da população. **DECIDIDO (Portão 22):** o Alojamento só entra em ação na ascensão: os mais fortes, até a capacidade do QG ([0,3,4,5,6,7] por nível), atravessam com arma e armadura; o resto sai da guilda. Escolha manual de quem atravessa é do Portão 25. Manutenção de comida: 0,03 + 0,006 por herói extra, por segundo.
 - **Manutenção de comida:** pequena e simbólica desde o começo e crescente com o número de aventureiros (hoje 0,08/s cada).
 - **XP** por batalha vencida (e um pouco menos por derrota). Nível sobe atributos e libera especialização.
 - **Equipamento** da Forja liga economia e combate.
