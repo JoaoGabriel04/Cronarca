@@ -1,7 +1,7 @@
 // Pesquisas da Era I (handoff, "Economia v0"). Uma por vez. Tempo em segundos.
 import type { Recurso } from './recursos.ts';
 
-export const PESQUISAS_IDS = ['hospitalidade', 'cartografia', 'colheita_farta', 'estradas_reais', 'carta_real'] as const;
+export const PESQUISAS_IDS = ['hospitalidade', 'cartografia', 'colheita_farta', 'estradas_reais', 'carta_real', 'coletor_1', 'coletor_2'] as const;
 export type PesquisaId = (typeof PESQUISAS_IDS)[number];
 
 export interface DadosPesquisa {
@@ -12,6 +12,8 @@ export interface DadosPesquisa {
   custo: Partial<Record<Recurso, number>>;
   segundos: number;
   requer: PesquisaId[];
+  /** Ganho por clique que esta pesquisa soma (Portão GPC): só madeira e pedra; ver ganhoCliqueMicro. */
+  gpc?: number;
 }
 
 export const PESQUISAS: Record<PesquisaId, DadosPesquisa> = {
@@ -39,5 +41,17 @@ export const PESQUISAS: Record<PesquisaId, DadosPesquisa> = {
     nome: 'Carta Real', efeito: 'objetivo da Era I',
     descricao: 'Objetivo da Era I: o rei aceita ouvir a guilda.',
     custo: { saber: 300, ouro: 80 }, segundos: 180, requer: ['estradas_reais'],
+  },
+  // Ofício do coletor (progressão do clique, esquema 12): cada nível soma +1 ao ganho por clique de madeira e pedra.
+  // Valores iniciais aprovados em 18/11, a calibrar. O teto da Era I (GPC 3) vale por FORMULAS.clique.tetoGpcPorEra.
+  coletor_1: {
+    nome: 'Ofício do coletor I', efeito: '+1 por clique (madeira e pedra)',
+    descricao: 'Mãos treinadas rendem mais por clique em árvores, pedras, Serraria e Pedreira.',
+    custo: { saber: 80 }, segundos: 90, requer: [], gpc: 1,
+  },
+  coletor_2: {
+    nome: 'Ofício do coletor II', efeito: '+1 por clique (madeira e pedra)',
+    descricao: 'O ofício vira costume: mais um ponto por clique em madeira e pedra.',
+    custo: { saber: 250, ouro: 40 }, segundos: 150, requer: ['coletor_1'], gpc: 1,
   },
 };

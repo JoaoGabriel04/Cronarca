@@ -321,7 +321,7 @@ function aplicador(acao: Acao, agora: number, opcoes: OpcoesAcao): Aplicador {
             delete e.cliques.objetos[id];
           }
         }
-        receber(e, { [recurso]: aceitos * ganhoCliqueMicro(nivelReliquia(e, 'maos_calejadas')) });
+        receber(e, { [recurso]: aceitos * ganhoCliqueMicro(e, recurso) });
         return { cliquesAceitos: aceitos };
       };
   }

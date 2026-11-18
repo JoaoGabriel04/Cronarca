@@ -76,8 +76,20 @@ export const FORMULAS = {
 
   pesquisas: { colheitaFarta: 0.1 },
 
-  /** Clique: ganho = base × (1 + Mãos Calejadas); baldes de fichas com capacidade de 1 s. */
-  clique: { ganhoBase: 1, porSegundoUsuario: 10, porSegundoObjeto: 5, maximoPorLote: 100 },
+  /**
+   * Clique: baldes de fichas com capacidade de 1 s. Ganho de madeira e pedra (esquema 12) = ganhoBase + melhorias de
+   * pesquisa (limitadas pelo teto da era: GPC antes das relíquias) + Mãos Calejadas aditiva (0,25 por nível); os
+   * demais recursos (ferro, ouro) ficam em ganhoBase, sem melhorias nem relíquia.
+   */
+  clique: {
+    ganhoBase: 1,
+    porSegundoUsuario: 10,
+    porSegundoObjeto: 5,
+    maximoPorLote: 100,
+    recursosComMelhoria: ['madeira', 'pedra'] as readonly string[],
+    /** Teto de GPC (1 + melhorias) por era. Eras sem entrada usam a última definida. */
+    tetoGpcPorEra: { 1: 3 } as Readonly<Record<number, number>>,
+  },
 
   cronica: { maximoDeLinhas: 50 },
   /** Relatórios de expedição guardados (os mais recentes). */

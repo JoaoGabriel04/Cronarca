@@ -14,7 +14,7 @@ export interface DadosReliquia {
 }
 
 export const RELIQUIAS: Record<ReliquiaId, DadosReliquia> = {
-  maos_calejadas: { nome: 'Mãos Calejadas', efeito: '+25% de força por clique', nivelMaximo: 10, custoBase: 3 },
+  maos_calejadas: { nome: 'Mãos Calejadas', efeito: '+0,25 por clique em madeira e pedra', nivelMaximo: 10, custoBase: 3 },
   bencao_colheita: { nome: 'Bênção da Colheita', efeito: '+10% de toda a produção', nivelMaximo: 10, custoBase: 5 },
   legado: { nome: 'Legado', efeito: 'cada ciclo começa com 60 madeira, 30 pedra, 40 comida', nivelMaximo: 8, custoBase: 3 },
   caminhos_eternos: { nome: 'Caminhos Eternos', efeito: 'expedições 6% mais rápidas', nivelMaximo: 5, custoBase: 6 },

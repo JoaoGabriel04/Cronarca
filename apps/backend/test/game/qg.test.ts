@@ -30,7 +30,7 @@ describe('descoberta do Quartel General pelo servidor', () => {
     const r = await a.get('/game/state');
     expect(r.body.estado.qg).toMatchObject({ estado: 'oculto' });
     expect(Object.keys(r.body.estado.qg).sort()).toEqual(['desde', 'estado', 'nivel']);
-    expect(r.body.estado.versao).toBe(11);
+    expect(r.body.estado.versao).toBe(12);
   });
 
   it('a expedição conclui e revela as Ruínas, vitória ou recuo; o sorteio segue escondido', async () => {

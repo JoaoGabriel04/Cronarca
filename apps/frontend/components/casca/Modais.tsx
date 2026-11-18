@@ -255,7 +255,7 @@ function CartaoPesquisa({ c, aoPesquisar }: { c: CartaPesquisa; aoPesquisar: (id
 
 export function ModalPesquisa({
   dados, aoPesquisar, aoFechar,
-}: { dados: { saber: string; subtitulo: string; cartas: CartaPesquisa[] }; aoPesquisar: (id: PesquisaId) => void; aoFechar: () => void }) {
+}: { dados: { saber: string; subtitulo: string; porClique?: string; cartas: CartaPesquisa[] }; aoPesquisar: (id: PesquisaId) => void; aoFechar: () => void }) {
   return (
     <Modal
       titulo="Pesquisa"
@@ -266,6 +266,7 @@ export function ModalPesquisa({
         <p className={estilos.saber}>
           <Icone nome="icone-saber" />
           {dados.saber}
+          {dados.porClique && <span className={estilos.porClique}> · {dados.porClique}</span>}
         </p>
       }
     >

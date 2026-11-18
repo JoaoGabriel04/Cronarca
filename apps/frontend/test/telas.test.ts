@@ -134,7 +134,7 @@ describe('telas: Eras', () => {
     e.reliquias = { total: 7, gastas: 0, niveis: { maos_calejadas: 1, linhagem_heroica: 5 } };
     const r = reliquias(e);
     expect(r.titulo).toBe('7 disponíveis · 7 no total');
-    expect(r.cartas.find((c) => c.id === 'maos_calejadas')).toMatchObject({ nivel: '1 / 10', custo: '6 relíquias', pode: true, efeito: '+25% de força por clique, por nível.' });
+    expect(r.cartas.find((c) => c.id === 'maos_calejadas')).toMatchObject({ nivel: '1 / 10', custo: '6 relíquias', pode: true, efeito: '+0,25 por clique em madeira e pedra, por nível.' });
     expect(r.cartas.find((c) => c.id === 'linhagem_heroica')).toMatchObject({ pode: false, motivo: 'Nível máximo' });
     e.reliquias.gastas = 7;
     expect(reliquias(e).cartas.every((c) => !c.pode)).toBe(true);

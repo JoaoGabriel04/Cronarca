@@ -66,7 +66,8 @@ describe('fórmulas v0', () => {
     expect(reliquiasNaAscensao(4)).toBe(9);
     expect(custoReliquia('linhagem_heroica', 0)).toBe(8);
     expect(custoReliquia('maos_calejadas', 2)).toBe(9);
-    expect(ganhoCliqueMicro(0)).toBe(u(1));
-    expect(ganhoCliqueMicro(2)).toBe(u(1.5));
+    const e = (maos: number) => ({ era: 1, pesquisas: { concluidas: [], atual: null }, reliquias: { total: 0, gastas: 0, niveis: { maos_calejadas: maos } } });
+    expect(ganhoCliqueMicro(e(0), 'madeira')).toBe(u(1));
+    expect(ganhoCliqueMicro(e(2), 'madeira')).toBe(u(1.5));
   });
 });

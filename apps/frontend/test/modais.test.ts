@@ -227,3 +227,22 @@ describe('catálogo: linha de construção já feita', () => {
     expect(casa).toMatchObject({ acao: null, pode: false, nivel: 'Nível 10 · máximo', efeito: null, tempo: null, custo: [] });
   });
 });
+
+describe('modais: Pesquisa mostra o ganho por clique (esquema 12)', () => {
+  it('"+N por clique" acompanha as pesquisas e as relíquias, com o teto da era', () => {
+    const e = novo();
+    expect(dadosPesquisa(e, T0).porClique).toBe('+1 por clique em madeira e pedra (pesquisas até 3)');
+    e.pesquisas.concluidas = ['coletor_1'];
+    expect(dadosPesquisa(e, T0).porClique).toContain('+2 por clique');
+    e.pesquisas.concluidas = ['coletor_1', 'coletor_2'];
+    e.reliquias.niveis.maos_calejadas = 2;
+    expect(dadosPesquisa(e, T0).porClique).toContain('+3,5 por clique');
+  });
+
+  it('as duas pesquisas do coletor aparecem; a II fica bloqueada até concluir a I', () => {
+    const e = rico(novo());
+    const porId = Object.fromEntries(dadosPesquisa(e, T0).cartas.map((c) => [c.id, c]));
+    expect(porId.coletor_1).toMatchObject({ estado: 'disponivel', tempo: formatarDuracao(90_000) });
+    expect(porId.coletor_2).toMatchObject({ estado: 'bloqueada', requer: 'Requer Ofício do coletor I' });
+  });
+});

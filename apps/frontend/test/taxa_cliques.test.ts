@@ -1,11 +1,16 @@
 // Rótulo de taxa do clique (recurso por segundo, no máximo o teto), tremida nas árvores e lascas das pedras.
-import { FORMULAS, ganhoCliqueMicro } from '@cronarca/game-core';
+import { FORMULAS, ganhoCliqueMicro, type PesquisaId } from '@cronarca/game-core';
 import { describe, expect, it } from 'vitest';
 import { desenharObjetos } from '../components/mapa/desenharObjetos';
 import { BRILHO_MS, posicoesDasLascas } from '../components/mapa/desenharLascas';
 import { JANELA_TAXA_MS, MedidorDeCliques, rotuloDaTaxa } from '../lib/jogo/cliques';
 
-const GANHO = ganhoCliqueMicro(0); // 1 por clique, sem relíquias
+const estadoCom = (maos: number, concluidas: PesquisaId[] = []) => ({
+  era: 1,
+  pesquisas: { concluidas, atual: null },
+  reliquias: { total: 0, gastas: 0, niveis: maos ? { maos_calejadas: maos } : {} },
+});
+const GANHO = ganhoCliqueMicro(estadoCom(0), 'madeira'); // 1 por clique, sem relíquias
 const CAP = FORMULAS.clique.porSegundoObjeto;
 const TOTAL = FORMULAS.clique.porSegundoUsuario;
 
@@ -56,7 +61,7 @@ describe('taxa de coleta: recurso por segundo, nunca acima do teto', () => {
   });
 
   it('as relíquias entram: com mais ganho por clique, o teto em recurso sobe (ex.: Mãos Calejadas)', () => {
-    const g = ganhoCliqueMicro(1);
+    const g = ganhoCliqueMicro(estadoCom(1), 'madeira');
     const m = new MedidorDeCliques();
     cliquesA(m, 'a0001', 10, 3);
     const t = m.taxa('a0001', 2_999, g);

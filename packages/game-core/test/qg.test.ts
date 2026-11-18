@@ -161,8 +161,8 @@ describe('reerguer o Quartel General', () => {
 });
 
 describe('estado persistente (esquema 10)', () => {
-  it('versão 11 e o campo qg é estrito (estado, desde e nível dentro da tabela do Alojamento)', () => {
-    expect(VERSAO_ESQUEMA).toBe(11);
+  it('versão 12 e o campo qg é estrito (estado, desde e nível dentro da tabela do Alojamento)', () => {
+    expect(VERSAO_ESQUEMA).toBe(12);
     const e = novo();
     expect(() => validarEstado({ ...e, qg: { estado: 'oculto', desde: T0, nivel: 0, extra: 1 } })).toThrow();
     expect(() => validarEstado({ ...e, qg: { estado: 'destruido', desde: T0, nivel: 0 } })).toThrow();
@@ -172,22 +172,22 @@ describe('estado persistente (esquema 10)', () => {
     expect(() => validarEstado(sem)).toThrow();
   });
 
-  it('migração 9 para 11: o save antigo ganha qg oculto (nível 0), desde o instante do save, e nada mais muda', () => {
+  it('migração 9 para 12: o save antigo ganha qg oculto (nível 0), desde o instante do save, e nada mais muda', () => {
     const atual = liquidar(novo(), T0 + 5 * MIN);
     const { qg: _qg, ...v9 } = { ...atual, versao: 9, aventureiros: atual.aventureiros.map(({ alojado: _a, ...r }) => r) };
     const m = migrarEstado(JSON.parse(JSON.stringify(v9)), 9);
-    expect(m.versao).toBe(11);
+    expect(m.versao).toBe(12);
     const c = carregarEstado(JSON.parse(JSON.stringify(v9)), 9);
-    expect(c).toEqual({ ...atual, versao: 11, qg: { estado: 'oculto', desde: atual.t, nivel: 0 } });
-    // Idempotente: ler o que já está no 11 não muda nada.
-    expect(carregarEstado(JSON.parse(JSON.stringify(c)), 11)).toEqual(c);
+    expect(c).toEqual({ ...atual, versao: 12, qg: { estado: 'oculto', desde: atual.t, nivel: 0 } });
+    // Idempotente: ler o que já está no 12 não muda nada.
+    expect(carregarEstado(JSON.parse(JSON.stringify(c)), 12)).toEqual(c);
   });
 
-  it('um save de qualquer esquema antigo chega ao 11 com o QG oculto', () => {
+  it('um save de qualquer esquema antigo chega ao 12 com o QG oculto', () => {
     const atual = novo();
     const { qg: _q, diario: _d, prologoVisto: _p, falha: _f, ...v6 } = { ...atual, versao: 6, aventureiros: atual.aventureiros.map(({ alojado: _a, ...r }) => r) };
     const c = carregarEstado(JSON.parse(JSON.stringify(v6)), 6);
-    expect(c.versao).toBe(11);
+    expect(c.versao).toBe(12);
     expect(c.qg.estado).toBe('oculto');
   });
 

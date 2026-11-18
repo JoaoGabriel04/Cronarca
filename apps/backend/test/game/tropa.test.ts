@@ -133,7 +133,7 @@ describe('Alojamento atravessa a ascensão (servidor)', () => {
 });
 
 describe('save do esquema 10 no banco', () => {
-  it('é lido e migrado (alojado false, QG com nível) e a próxima ação grava no esquema 11', async () => {
+  it('é lido e migrado (alojado false, QG com nível) e a próxima ação grava no esquema 12', async () => {
     const j = await jogador();
     await j.a.get('/game/state');
     const base = await j.doBanco();
@@ -152,7 +152,7 @@ describe('save do esquema 10 no banco', () => {
     const r = await j.acao('fechar_prologo', {}, base.rev);
     expect(r.status).toBe(200);
     const linha = await prisma.gameState.findUniqueOrThrow({ where: { userId: j.userId } });
-    expect(linha.versaoEsquema).toBe(11);
+    expect(linha.versaoEsquema).toBe(12);
     expect((linha.estado as any).aventureiros[0].alojado).toBe(false);
   });
 });

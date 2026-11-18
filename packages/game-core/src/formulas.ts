@@ -6,6 +6,7 @@ import { FORMULAS } from '../data/formulas.ts';
 import { PESQUISAS, type PesquisaId } from '../data/pesquisas.ts';
 import type { Recurso } from '../data/recursos.ts';
 import { RELIQUIAS, type ReliquiaId } from '../data/reliquias.ts';
+import type { VisaoCliente } from './estado.ts';
 import { aplicarBonus, arredondar, BP, bp, limitar, MICRO, micro, multiplicar, potencia, racional } from './inteiros.ts';
 
 export type Custo = Partial<Record<Recurso, number>>;
@@ -125,8 +126,29 @@ export function custoReliquia(id: ReliquiaId, nivelAtual: number): number {
   return RELIQUIAS[id].custoBase * (nivelAtual + 1);
 }
 
-/** Ganho de um clique, em micro-unidades. */
-export function ganhoCliqueMicro(nivelMaosCalejadas: number): number {
-  const bonus = bp(F.reliquias.maosCalejadasPorNivel) * nivelMaosCalejadas;
-  return arredondar(BigInt(micro(F.clique.ganhoBase)) * BigInt(BP + bonus), BigInt(BP));
+/** Teto de GPC (1 + melhorias, antes das relíquias) da era; sem entrada, o da última era definida. */
+export function tetoGpc(era: number): number {
+  const tetos = F.clique.tetoGpcPorEra;
+  const eras = Object.keys(tetos).map(Number).sort((a, b) => a - b);
+  const alvo = [...eras].reverse().find((n) => n <= era) ?? eras[0]!;
+  return tetos[alvo]!;
+}
+
+/** Soma de ganho por clique das pesquisas concluídas (em unidades de GPC), já limitada pelo teto da era. */
+export function melhoriasDeGpc(e: Pick<VisaoCliente, 'pesquisas' | 'era'>): number {
+  let soma = 0;
+  for (const id of e.pesquisas.concluidas) soma += PESQUISAS[id].gpc ?? 0;
+  return Math.min(soma, tetoGpc(e.era) - F.clique.ganhoBase);
+}
+
+/**
+ * Ganho de um clique em `recurso`, em micro-unidades (esquema 12): madeira e pedra rendem
+ * ganhoBase + melhorias + 0,25 × nível de Mãos Calejadas (aditivo); ferro e ouro, ganhoBase.
+ */
+export function ganhoCliqueMicro(e: Pick<VisaoCliente, 'pesquisas' | 'era' | 'reliquias'>, recurso: Recurso): number {
+  const base = micro(F.clique.ganhoBase);
+  if (!F.clique.recursosComMelhoria.includes(recurso)) return base;
+  const melhorias = micro(melhoriasDeGpc(e));
+  const maos = bp(F.reliquias.maosCalejadasPorNivel) * (e.reliquias.niveis.maos_calejadas ?? 0);
+  return base + melhorias + arredondar(BigInt(base) * BigInt(maos), BigInt(BP));
 }

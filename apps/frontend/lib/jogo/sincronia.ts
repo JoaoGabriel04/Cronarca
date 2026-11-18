@@ -248,7 +248,7 @@ export class Sincronizador {
     const ganho = Math.max(0, depois.recursos[recurso] - preverEstado(antes, agora).estado.recursos[recurso]);
     const cheio = ganho === 0 && depois.recursos[recurso] >= tetos(depois)[recurso];
     // Não rendeu e o armazém não está cheio: bateu no teto de cliques por segundo (decisão do dono: o jogador é avisado).
-    return { ganho, cheio, limite: ganho === 0 && !cheio, ganhoPorCliqueMicro: ganhoCliqueMicro(nivelReliquia(depois, 'maos_calejadas')), desfecho };
+    return { ganho, cheio, limite: ganho === 0 && !cheio, ganhoPorCliqueMicro: ganhoCliqueMicro(depois, recurso), desfecho };
   }
 
   /**

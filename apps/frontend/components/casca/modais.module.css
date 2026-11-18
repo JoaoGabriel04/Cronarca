@@ -1296,3 +1296,8 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.porClique {
+  font-size: 14px;
+  opacity: 0.85;
+}

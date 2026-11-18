@@ -1,7 +1,7 @@
 // Bug 2 (HUD oscilando): cliques rápidos com latência e jitter contra um servidor falso que usa o aplicarAcao REAL.
 // A madeira exibida (previsão liquidada até o relógio estimado) nunca pode diminuir por causa dos cliques já
 // mostrados e deve convergir ao valor do servidor quando a fila esvazia.
-import { aplicarAcao, estadoInicial, visaoDoCliente, type Acao, type EstadoJogo } from '@cronarca/game-core';
+import { aplicarAcao, estadoInicial, visaoDoCliente, type Acao, type EstadoJogo, type PesquisaId } from '@cronarca/game-core';
 import { describe, expect, it } from 'vitest';
 import { Sincronizador, type CorpoEstado, type Transporte } from '../lib/jogo/sincronia';
 
@@ -16,6 +16,9 @@ interface Opcoes {
   jitter?: number;
   semente?: number;
   objetos?: string[];
+  /** Pesquisas concluídas e Mãos Calejadas do servidor (GPC maior que 1) e Armazém alto para o teto não mascarar. */
+  concluidas?: PesquisaId[];
+  maos?: number;
 }
 
 async function simular(op: Opcoes) {
@@ -28,6 +31,11 @@ async function simular(op: Opcoes) {
   let id = 1;
   const servidor: { e: EstadoJogo; rev: number } = { e: estadoInicial({ semente: 42, agora: T0 }), rev: 1 };
   servidor.e.segredo.proximoEventoEm = T0 + 10 ** 9;
+  if (op.concluidas || op.maos) {
+    servidor.e.pesquisas.concluidas = op.concluidas ?? [];
+    if (op.maos) servidor.e.reliquias.niveis.maos_calejadas = op.maos;
+    servidor.e.slots.armazem_1.nivel = 6;
+  }
   let aceitos = 0;
   const corpo = (): CorpoEstado => ({ estado: visaoDoCliente(servidor.e), rev: servidor.rev, agora: local });
   const agendar = (fn: () => void, ms: number) => {
@@ -131,11 +139,25 @@ describe('HUD: a madeira exibida não recua com cliques rápidos', () => {
         expect(r.quedas, `${latenciaMs} ms, semente ${semente}: ${JSON.stringify(r)}`).toBe(0);
       }
     }
-  });
+    // 8 simulações de 15 s: ~75% do tempo é o `await micro()` do próprio teste (setTimeout real, ~1,2 ms cada, ~8 mil
+    // vezes); o código medido gasta ~0,25 ms por exibir() e ~1 ms por clicar(). 15 s era folga curta demais.
+  }, 30_000);
 
   it('o teto de 5 cliques/s por objeto vale: ~55 de 101 em 10 s', async () => {
     const r = await simular({ latenciaMs: 60, cliquesPorS: 10, duracaoS: 10 });
     expect(r.aceitos).toBeGreaterThanOrEqual(54);
     expect(r.aceitos).toBeLessThanOrEqual(56);
   });
+
+  // GPC maior que 1 (esquema 12): o cliente prevê o mesmo ganho do servidor (madeira rende 3 por clique aceito).
+  for (const latenciaMs of [60, 250, 600]) {
+    it(`GPC 3 (coletor I e II) e Mãos Calejadas 4, latência de ${latenciaMs} ms: sem queda e converge ao servidor`, async () => {
+      const r = await simular({ latenciaMs, cliquesPorS: 10, duracaoS: 10, concluidas: ['coletor_1', 'coletor_2'], maos: 4 });
+      expect(r.quedas, JSON.stringify(r)).toBe(0);
+      expect(r.pendentes).toBe(0);
+      expect(Math.abs(r.exibida - r.servidor)).toBeLessThan(0.5e6);
+      // 4 por clique aceito (3 das pesquisas + 1 das relíquias, aditivas): o servidor ganhou bem mais que sem pesquisa.
+      expect(r.servidor).toBeGreaterThan(r.aceitos * 4e6 * 0.99);
+    });
+  }
 });

@@ -35,7 +35,7 @@ export function MapaDePreview({ pesquisas = [], exemplo = true }: { pesquisas?: 
     if (!r.ok || !recurso) return { ganho: 0, cheio: false, aceito: Promise.resolve(false) };
     setEstado(r.estado);
     const ganho = r.estado.recursos[recurso] - antes.recursos[recurso];
-    return { ganho, cheio: ganho === 0 && r.estado.recursos[recurso] >= tetos(r.estado)[recurso], ganhoPorCliqueMicro: ganhoCliqueMicro(nivelReliquia(r.estado, 'maos_calejadas')), aceito: Promise.resolve(true) };
+    return { ganho, cheio: ganho === 0 && r.estado.recursos[recurso] >= tetos(r.estado)[recurso], ganhoPorCliqueMicro: ganhoCliqueMicro(r.estado, recurso), aceito: Promise.resolve(true) };
   };
 
   return (

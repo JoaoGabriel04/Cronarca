@@ -312,7 +312,7 @@ Era I Aldeia, II Reino, III Arcana, IV Dimensões (só a I está jogável). Obje
 
 | Nome | Nível máx. | Efeito por nível | Custo (relíquias) |
 |---|---|---|---|
-| Mãos Calejadas | 10 | +25% de força por clique | 3 |
+| Mãos Calejadas | 10 | +0,25 por clique em madeira e pedra (por nível; ferro e ouro não) | 3 |
 | Bênção da Colheita | 10 | +10% de toda a produção | 5 |
 | Legado | 8 | cada ciclo começa com 60 madeira, 30 pedra, 40 comida | 3 |
 | Caminhos Eternos | 5 | expedições 6% mais rápidas | 6 |

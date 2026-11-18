@@ -17,7 +17,7 @@ import { FORMULAS } from '../data/formulas.ts';
 import { VERSOES_MAPA } from '../data/mapa.ts';
 import { termosDoMercador } from './mercador.ts';
 
-export const VERSAO_ESQUEMA = 11;
+export const VERSAO_ESQUEMA = 12;
 
 const inteiro = z.number().int();
 const naoNegativo = inteiro.min(0);
@@ -238,6 +238,11 @@ export function migrarEstado(bruto: unknown, versaoEsquema: number): { estado: u
     const aventureiros = (estado.aventureiros as Record<string, unknown>[]).map((a) => ({ ...a, alojado: false }));
     estado = { ...estado, versao: 11, aventureiros, qg: { ...qg, nivel: qg.estado === 'reerguido' ? QG.nivelAoReerguer : 0 } };
     versao = 11;
+  }
+  if (versao === 11) {
+    // Progressão do clique (esquema 12): só entram os ids coletor_1 e coletor_2 no enum das pesquisas; nenhum dado muda.
+    estado = { ...estado, versao: 12 };
+    versao = 12;
   }
   return { estado, versao };
 }

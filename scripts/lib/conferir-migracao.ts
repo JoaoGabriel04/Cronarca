@@ -138,7 +138,11 @@ export function conferirSave(save: SaveBruto, migrar: Migrador = migrarEstado): 
   } else if (save.versao_esquema === 10) {
     const q = origem.qg as { estado: string; desde: number };
     if (!igual(valido.qg, { ...q, nivel: q.estado === 'reerguido' ? 1 : 0 })) v(`qg depois da migração do esquema 10: esperado ${JSON.stringify({ ...q, nivel: q.estado === 'reerguido' ? 1 : 0 })}, veio ${JSON.stringify(valido.qg)}`);
+  } else if (save.versao_esquema >= 11 && !igual(valido.qg, origem.qg)) {
+    v('qg mudou na migração a partir do esquema 11');
   }
+  // 11 para 12 (progressão do clique): só a versão muda; os ids novos de pesquisa só entram quando o jogador pesquisa.
+  if (save.versao_esquema === 11 && !igual(valido.pesquisas, origem.pesquisas)) v('pesquisas mudaram na migração 11 para 12');
 
   // 5. Expedições em andamento: o relatório que sai é o sorteado antes da migração, e a classe não influi nele.
   r.expedicoes = valido.expedicoes.length;

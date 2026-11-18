@@ -145,6 +145,15 @@ describe('a verificação pega uma migração defeituosa', () => {
     expect(conferirSave(monta('reerguido'), defeituoso((e) => { e.qg.nivel = 0; })).violacoes.join('\n')).toMatch(/qg depois da migração do esquema 10/);
   });
 
+  it('save do esquema 11 (progressão do clique): só a versão muda; pesquisas e QG ficam, e um migrador que mexe é pego', () => {
+    const atual = carregarEstado(JSON.parse(JSON.stringify(porId('sint-05-pos-ascensao').estado)), porId('sint-05-pos-ascensao').versao_esquema);
+    const v11: SaveBruto = { id: 'sint-v11', versao_esquema: 11, estado: JSON.parse(JSON.stringify({ ...atual, versao: 11, pesquisas: { concluidas: ['hospitalidade'], atual: null } })) };
+    expect(conferirSave(v11).violacoes).toEqual([]);
+    expect((migrarEstado(JSON.parse(JSON.stringify(v11.estado)), 11).estado as { versao: number }).versao).toBe(12);
+    expect(conferirSave(v11, defeituoso((e) => { e.pesquisas.concluidas.push('coletor_1'); })).violacoes.join('\n')).toMatch(/pesquisas/);
+    expect(conferirSave(v11, defeituoso((e) => { e.qg.nivel = 1; })).violacoes.join('\n')).toMatch(/qg mudou/);
+  });
+
   it('expedição em andamento que perde o resultado sorteado', () => {
     const r = conferirSave(porId('sint-03-expedicoes-em-andamento'), defeituoso((e) => { delete e.segredo.resultados[e.expedicoes[0].id]; }));
     expect(r.violacoes.join('\n')).toMatch(/sem resultado sorteado/);

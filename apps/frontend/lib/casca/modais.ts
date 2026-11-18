@@ -4,7 +4,7 @@
 
 import {
   construiveis, CONSTRUCOES, custoConstrucao, EVENTO_PARAMETROS, linhaCatalogo, linhasCatalogo, NOMES_RECURSOS, TEXTOS_CATALOGO, FORMULAS, NIVEL_MAXIMO_CONSTRUCAO, objetivosEra, PESQUISAS, PESQUISAS_IDS,
-  custoPesquisa, duracaoPesquisaMs, micro, QG, reliquiasNaAscensao, SLOTS, somaNiveis, tempoObraMs, TEXTOS_QG,
+  custoPesquisa, duracaoPesquisaMs, ganhoCliqueMicro, MICRO, micro, QG, tetoGpc, reliquiasNaAscensao, SLOTS, somaNiveis, tempoObraMs, TEXTOS_QG,
   type Custo, type EstadoLinhaCatalogo, type LinhaCatalogo, type PesquisaId, type Recurso, type RefSprite, type SlotId, type TipoConstrucao, type VisaoCliente,
 } from '@cronarca/game-core';
 import { excecoesDoPiso, formatarInteiro, formatarRestante, textoEra, textoGuarda } from './dados';
@@ -233,6 +233,12 @@ export interface CartaPesquisa {
   motivo: string | null;
 }
 
+/** "+N por clique": o ganho real de madeira e pedra (pesquisas e relíquias) e o teto da era sem relíquias. */
+export function textoPorClique(e: Pick<VisaoCliente, 'pesquisas' | 'era' | 'reliquias'>): string {
+  const n = (micro: number) => new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 }).format(micro / MICRO);
+  return `+${n(ganhoCliqueMicro(e, 'madeira'))} por clique em madeira e pedra (pesquisas até ${n(tetoGpc(e.era) * MICRO)})`;
+}
+
 export function dadosPesquisa(e: VisaoCliente, agora: number) {
   const atual = e.pesquisas.atual;
   const cartas = PESQUISAS_IDS.map((id): CartaPesquisa => {
@@ -256,6 +262,7 @@ export function dadosPesquisa(e: VisaoCliente, agora: number) {
   return {
     saber: `${formatarInteiro(e.recursos.saber)} de saber`,
     subtitulo: `Scriptorium nível ${nivel} · uma pesquisa por vez`,
+    porClique: textoPorClique(e),
     cartas,
   };
 }
