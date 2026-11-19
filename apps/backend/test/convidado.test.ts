@@ -55,6 +55,44 @@ describe('POST /auth/convidado: criação', () => {
   });
 });
 
+// "Convidado mostra progresso antigo": com uma sessão de verdade e progresso na conta, tocar em "Jogar sem conta"
+// cria um usuário NOVO (nunca reaproveita a conta da sessão) e o jogo dele nasce do zero. A conta antiga fica intacta.
+// (O cache do navegador, que era a outra metade do problema, é do cliente: o SWR só roda no contêiner do frontend.)
+describe('POST /auth/convidado: com sessão ativa', () => {
+  it('cria um convidado novo com o jogo do zero e não mexe na conta que estava logada', async () => {
+    const relogio = criarRelogio();
+    const a = agente(criarAppTeste({ agora: relogio.agora }));
+    const cadastro = await a.post('/auth/cadastro').send({ nome: 'Aldric', email: 'aldric@teste.local', senha: 'fogueira123' });
+    const antigo = cadastro.body.usuario.id as string;
+    expect((await a.get('/game/state')).status).toBe(200);
+    relogio.avancar(5 * MIN);
+    const contratou = await a.post('/game/actions').send({ tipo: 'contratar', dados: { classe: 'lanceiro' }, idempotencyKey: randomUUID(), revEsperada: 0 });
+    expect(contratou.status).toBe(200);
+    const antes = await prisma.gameState.findUniqueOrThrow({ where: { userId: antigo } });
+    expect(antes.rev).toBe(1);
+
+    // O mesmo agente (o jar de cookies) ainda tem a sessão do Aldric quando pede o convidado.
+    expect((await a.get('/auth/me')).body.usuario.id).toBe(antigo);
+    const convidado = await a.post('/auth/convidado').send({});
+    expect(convidado.status).toBe(201);
+    const novo = convidado.body.usuario.id as string;
+    expect(novo).not.toBe(antigo);
+    expect((await a.get('/auth/me')).body.usuario).toMatchObject({ id: novo, convidado: true });
+
+    const estado = await a.get('/game/state');
+    expect(estado.status).toBe(200);
+    expect(estado.body.rev).toBe(0);
+    expect(estado.body.estado.aventureiros).toHaveLength(1);
+    expect(estado.body.estado.slots.pedreira_1.nivel).toBe(0);
+    expect(estado.body.estado.reliquias).toEqual({ total: 0, gastas: 0, niveis: {} });
+
+    const depois = await prisma.gameState.findUniqueOrThrow({ where: { userId: antigo } });
+    expect(depois.rev).toBe(antes.rev);
+    expect(JSON.stringify(depois.estado)).toBe(JSON.stringify(antes.estado));
+    expect(await prisma.user.count()).toBe(2);
+  });
+});
+
 describe('POST /auth/convidado: tetos', () => {
   async function semear(n: number, criadoEm: Date) {
     await prisma.user.createMany({ data: Array.from({ length: n }, (_, i) => ({ nome: `Convidado ${i}`, convidado: true, criadoEm })) });

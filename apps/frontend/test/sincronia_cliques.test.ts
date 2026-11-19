@@ -1,12 +1,12 @@
 // Bug 2 (HUD oscilando): cliques rápidos com latência e jitter contra um servidor falso que usa o aplicarAcao REAL.
 // A madeira exibida (previsão liquidada até o relógio estimado) nunca pode diminuir por causa dos cliques já
 // mostrados e deve convergir ao valor do servidor quando a fila esvazia.
-import { aplicarAcao, estadoInicial, visaoDoCliente, type Acao, type EstadoJogo, type PesquisaId } from '@cronarca/game-core';
+import { aplicarAcao, estadoInicial, FORMULAS, preverAcao, visaoDoCliente, type Acao, type EstadoJogo, type PesquisaId } from '@cronarca/game-core';
 import { describe, expect, it } from 'vitest';
 import { Sincronizador, type CorpoEstado, type Transporte } from '../lib/jogo/sincronia';
 
 const T0 = Date.UTC(2026, 5, 1, 12, 0, 0);
-const OBJ = { arvore_1: 'madeira', arvore_2: 'madeira' } as const;
+const OBJ = { arvore_1: 'madeira', arvore_2: 'madeira', arvore_3: 'madeira' } as const;
 const micro = () => new Promise((r) => setTimeout(r, 0));
 
 interface Opcoes {
@@ -118,7 +118,7 @@ async function simular(op: Opcoes) {
   const noMesmoInstante = (e: EstadoJogo | { t: number }) => e;
   void noMesmoInstante;
   const servidorAgora = aplicarAcao(servidor.e, { tipo: 'clicar', objeto: 'arvore_1', quantidade: 0 } as Acao, local, { objetosDoMapa: OBJ });
-  return { quedas, maiorQueda, enviados, aceitos, pendentes: sinc.sincronia().pendentes, exibida: exibida(), servidor: servidorAgora.estado.recursos.madeira };
+  return { quedas, maiorQueda, enviados, aceitos, fimS: (local - T0) / 1000, pendentes: sinc.sincronia().pendentes, exibida: exibida(), servidor: servidorAgora.estado.recursos.madeira };
 }
 
 describe('HUD: a madeira exibida não recua com cliques rápidos', () => {
@@ -148,6 +148,58 @@ describe('HUD: a madeira exibida não recua com cliques rápidos', () => {
     expect(r.aceitos).toBeGreaterThanOrEqual(54);
     expect(r.aceitos).toBeLessThanOrEqual(56);
   });
+
+  // Balde do USUÁRIO (10/s no total) com vários objetos clicando juntos. Com 3 árvores a capacidade por objeto é
+  // 3 × 5 = 15/s, acima dos 10/s do usuário: quem manda é o teto do usuário, e a previsão do cliente precisa aceitar
+  // o mesmo que o servidor (senão o número recua ou o "+N" promete o que o servidor recusa).
+  it('previsão e servidor aceitam o mesmo no balde do usuário: 3 objetos no mesmo instante e depois de meio segundo', () => {
+    let servidor = estadoInicial({ semente: 42, agora: T0 });
+    let cliente = visaoDoCliente(servidor);
+    const passo = (objeto: string, quantidade: number, agora: number) => {
+      const acao = { tipo: 'clicar', objeto, quantidade } as const;
+      const s = aplicarAcao(servidor, acao, agora, { objetosDoMapa: OBJ });
+      const c = preverAcao(cliente, acao, agora, { objetosDoMapa: OBJ });
+      expect(c.ok, `${objeto} em +${agora - T0} ms`).toBe(s.ok);
+      if (s.ok && c.ok) {
+        expect(c.cliquesAceitos).toBe(s.cliquesAceitos);
+        servidor = s.estado;
+        cliente = c.estado;
+        return s.cliquesAceitos;
+      }
+      if (!s.ok && !c.ok) expect(c.erro).toBe(s.erro);
+      return 0;
+    };
+    const U = FORMULAS.clique.porSegundoUsuario;
+    const O = FORMULAS.clique.porSegundoObjeto;
+    expect(O * 3).toBeGreaterThan(U); // o cenário só vale se o balde do usuário for o primeiro a esgotar
+    expect(passo('arvore_1', 20, T0)).toBe(O);
+    expect(passo('arvore_2', 20, T0)).toBe(O);
+    expect(passo('arvore_3', 20, T0)).toBe(0); // usuário esgotado (U = 2 × O): recusa igual nos dois lados
+    // Meio segundo depois o usuário recuperou U / 2 fichas; o objeto 3 está cheio (O), então rende U / 2.
+    expect(passo('arvore_3', 20, T0 + 500)).toBe(U / 2);
+    expect(cliente.recursos.madeira).toBe(servidor.recursos.madeira);
+  });
+
+  for (const latenciaMs of [60, 250]) {
+    it(`10/s por usuário com 3 objetos a 10 cliques/s cada, latência de ${latenciaMs} ms: aceita só o balde, sem queda, converge`, async () => {
+      const duracaoS = 4;
+      const r = await simular({ latenciaMs, cliquesPorS: 30, duracaoS, objetos: ['arvore_1', 'arvore_2', 'arvore_3'] });
+      const U = FORMULAS.clique.porSegundoUsuario;
+      // Com as árvores alternando, cada clique vira um pedido e a fila escoa DEPOIS dos cliques (fimS > duracaoS): o balde
+      // do usuário recarrega U por segundo durante todo esse tempo. Teto = balde cheio no início (U) + U × fimS.
+      expect(r.fimS).toBeGreaterThan(duracaoS);
+      const maximo = U + U * r.fimS;
+      expect(r.enviados).toBeGreaterThan(duracaoS * 25); // o jogador clicou muito mais do que o balde permite
+      expect(r.aceitos).toBeLessThanOrEqual(maximo);
+      // Com latência baixa a fila escoa logo e o balde recusa parte dos cliques. Com latência alta (250 ms) a fila leva
+      // ~30 s para escoar, o balde recarrega nesse tempo e o servidor aceita tudo: o teto é de TEMPO, não de clique.
+      if (latenciaMs <= 60) expect(r.aceitos).toBeLessThan(r.enviados);
+      expect(r.aceitos).toBeGreaterThanOrEqual(U * duracaoS); // e o balde foi aproveitado (não recusou à toa)
+      expect(r.quedas, JSON.stringify(r)).toBe(0);
+      expect(r.pendentes).toBe(0);
+      expect(Math.abs(r.exibida - r.servidor)).toBeLessThan(0.5e6);
+    }, 30_000);
+  }
 
   // GPC maior que 1 (esquema 12): o cliente prevê o mesmo ganho do servidor (madeira rende 3 por clique aceito).
   for (const latenciaMs of [60, 250, 600]) {

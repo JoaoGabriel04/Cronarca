@@ -177,7 +177,8 @@ describe('expedições', () => {
     }
     const esperado = chanceExitoBp(9, 9) / 10_000; // 41%
     expect(Math.abs(vitorias / n - esperado)).toBeLessThan(0.04);
-  });
+    // 2000 sorteios: sob carga (suíte inteira em paralelo) passou dos 5 s padrão uma vez; a lógica é a mesma.
+  }, 30_000);
 
   it('saque na faixa do destino, com +10% por aventureiro extra', () => {
     for (let semente = 1; semente <= 200; semente++) {
