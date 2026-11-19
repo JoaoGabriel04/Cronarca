@@ -1,0 +1,18 @@
+# Graphify: o que NÃO entra no grafo (sintaxe do .gitignore; o .gitignore já vale também).
+# Imagens de pixel art e capturas de tela: custam tokens de visão e quase não ajudam a entender o código.
+apps/frontend/public/sprites/
+apps/frontend/public/mapa/
+apps/frontend/public/icones/
+apps/frontend/public/marca/
+apps/frontend/public/musica/
+docs/referencia/
+*.png
+*.jpg
+*.webp
+*.gif
+
+# Dependências, builds e saída do próprio Graphify.
+node_modules/
+.next/
+dist/
+graphify-out/

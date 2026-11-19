@@ -31,3 +31,6 @@ apps/frontend/public/musica/*.flac
 # Arquivos compactados e marcas de download do Windows ficam fora do Git.
 *.zip
 *:Zone.Identifier
+
+# Graphify: grafo de conhecimento gerado localmente (refaz com /graphify . --update).
+graphify-out/
