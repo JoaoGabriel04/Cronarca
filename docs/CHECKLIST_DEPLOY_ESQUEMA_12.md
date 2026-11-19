@@ -56,3 +56,33 @@ Faça **um** dos dois:
 
 ## 5. Limpeza
 Apague `backups/*.dump` e o branch `antes-do-esquema-12` quando o esquema 12 estiver estável (nada disso entra no Git).
+
+## 6. Acréscimos de 19/11 (ordem do deploy, foto do banco e commits esperados)
+**Este bloco também só descreve. Nada dele foi executado.**
+
+### 6.1 Ordem do deploy
+1. **Render (back) primeiro, Vercel (front) depois.** O servidor novo precisa estar no ar antes do cliente novo: o servidor lê saves em 11 e em 12, e o cliente antigo continua funcionando contra ele (o servidor vence na previsão). O inverso deixaria o cliente novo falando com um servidor que ainda não lê o esquema 12.
+2. Espere o Render responder `GET /health` 200 antes de iniciar o deploy da Vercel.
+
+### 6.2 Foto do banco, ANTES do deploy (só leitura)
+1. Rode e **anote o resultado e o horário** (para comparar depois):
+   ```sql
+   select versao_esquema, count(*) from game_states group by 1;
+   ```
+   Antes do deploy o esperado é todos os saves em 11 (e nenhuma linha em 12).
+2. Rode a mesma consulta depois do deploy e compare: o total de saves (soma da coluna `count`) tem de ser o mesmo; só o número de linhas em 11 cai e o de 12 sobe, conforme os jogadores agem. Se o total mudou, pare e investigue antes de seguir.
+
+### 6.3 Commits esperados no push
+O push da `main` leva TODOS os commits locais ainda não publicados, em ordem. Antes do `git push`, rode `git log origin/main..HEAD --oneline` e confira. A lista esperada (do mais antigo ao mais novo) é:
+
+| # | Commit | O que é |
+|---|---|---|
+| 1 | `20cb3d5` | fix: Mesa de Guerra e Enfermaria respeitam o estado do QG |
+| 2 | `2e2dd0e` | GPC: progressão do clique (esquema 12), o código deste deploy |
+| 3 | `20446a6` | docs: registro, handoff, checklist do esquema 12, backlog e `.gitignore` |
+| 4 | `ba1c5bc` | docs: prompts de áudio, bugs de produção e progressão do clique; arte do Portão 23 |
+| 5 | `d40aa7e` | chore: integra o Graphify (`CLAUDE.md`, `.claude/settings.json`, `.graphifyignore`, `.gitattributes`) |
+| 6 | (hash do commit dos testes) | test: balde do usuário, trava do reset e convidado com sessão |
+| 7 | (hash do commit de docs) | docs: registro e este checklist |
+
+**Se aparecer qualquer outro commit além destes sete, PARE e não faça o push.** Os commits 3, 4, 5 e 7 só mexem em documentos e configuração do Claude Code (nenhum muda o código do jogo); o código que vai para produção são os commits 1, 2 e 6 (este só testes). O áudio não tem commit e não deve aparecer.
