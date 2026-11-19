@@ -86,3 +86,6 @@ O push da `main` leva TODOS os commits locais ainda não publicados, em ordem. A
 | 7 | (hash do commit de docs) | docs: registro e este checklist |
 
 **Se aparecer qualquer outro commit além destes sete, PARE e não faça o push.** Os commits 3, 4, 5 e 7 só mexem em documentos e configuração do Claude Code (nenhum muda o código do jogo); o código que vai para produção são os commits 1, 2 e 6 (este só testes). O áudio não tem commit e não deve aparecer.
+
+### 6.4 Atualização de 19/11: a lista passa a ter OITO commits
+Os hooks do Graphify no `.claude/settings.json` usavam o caminho absoluto da máquina do Gabriel (`/home/gabriel/.local/bin/graphify`), que quebraria em qualquer clone. Foi trocado por `graphify` simples em um commit novo, o **8º**, o último da lista. **Vale esta lista no lugar da 6.3: oito commits, os sete da tabela mais o commit "chore: hooks do Graphify sem caminho absoluto" (hash a conferir com `git log -1`). Se aparecer qualquer outro, PARE.** Observação: `graphify` precisa estar no PATH de quem abre o Claude Code (aqui, `~/.local/bin`, via `~/.profile` ou `pipx ensurepath`); sem isso o hook falha ao ser chamado, sem afetar o jogo nem o deploy.
